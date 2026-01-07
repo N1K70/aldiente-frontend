@@ -1,0 +1,50 @@
+.appointment-chat-card {
+  margin-top: 16px;
+}
+
+.chat-message-list {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.chat-message {
+  --inner-padding-end: 12px;
+  --inner-padding-start: 12px;
+  align-items: flex-start;
+}
+
+.chat-message--own {
+  justify-content: flex-end;
+}
+
+.chat-message__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.chat-message__content {
+  margin: 0;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.chat-connection-state {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.chat-input-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.chat-error-note {
+  display: block;
+  margin: 12px 0;
+}

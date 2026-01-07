@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Favicon Generator</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: white;
+        }
+        #favicon-canvas {
+            border: 1px solid #ccc;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Generador de Favicon ALDIENTE</h1>
+        <canvas id="favicon-canvas" width="512" height="512"></canvas>
+        <button onclick="downloadFavicon()">Descargar Favicon</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('favicon-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Cargar la imagen
+        const img = new Image();
+        img.onload = function() {
+            // Limpiar canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Hacer zoom y centrar en el logo
+            // La imagen original tiene mucho espacio, así que recortamos y hacemos zoom
+            const sourceX = img.width * 0.20; // Empezar desde el 20% del ancho
+            const sourceY = img.height * 0.15; // Empezar desde el 15% de la altura
+            const sourceWidth = img.width * 0.60; // Usar el 60% del ancho central
+            const sourceHeight = img.height * 0.70; // Usar el 70% de la altura central
+            
+            // Dibujar en el canvas con zoom
+            ctx.drawImage(
+                img,
+                sourceX, sourceY, sourceWidth, sourceHeight, // Área de origen (recortada)
+                0, 0, canvas.width, canvas.height // Destino (canvas completo)
+            );
+        };
+        img.src = './assets/images/LOGO_ALDIENTE_SINFONDO.png';
+        
+        function downloadFavicon() {
+            // Crear versiones de diferentes tamaños
+            const sizes = [16, 32, 48, 96, 192, 512];
+            
+            sizes.forEach(size => {
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = size;
+                tempCanvas.height = size;
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                // Copiar contenido redimensionado
+                tempCtx.drawImage(canvas, 0, 0, size, size);
+                
+                // Descargar
+                tempCanvas.toBlob(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `favicon-${size}x${size}.png`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                });
+            });
+            
+            // También descargar como favicon.png principal (32x32 es estándar)
+            const faviconCanvas = document.createElement('canvas');
+            faviconCanvas.width = 32;
+            faviconCanvas.height = 32;
+            const faviconCtx = faviconCanvas.getContext('2d');
+            faviconCtx.drawImage(canvas, 0, 0, 32, 32);
+            
+            faviconCanvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'favicon.png';
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+    </script>
+</body>
+</html>

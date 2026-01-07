@@ -1,0 +1,374 @@
+/* Estilos generales para la página de citas */
+.appointments-container {
+  padding: 0 16px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Estilos para el formulario de nueva cita */
+.new-appointment-card {
+  margin-bottom: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: white;
+}
+
+.new-appointment-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.new-appointment-card ion-card-header {
+  background: var(--ion-color-primary);
+  color: white;
+  padding: 16px;
+}
+
+.new-appointment-card ion-card-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+}
+
+.new-appointment-card ion-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  --background: transparent;
+  margin-bottom: 16px;
+  --min-height: 60px;
+}
+
+.new-appointment-card ion-label {
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: var(--ion-color-medium);
+  font-size: 0.9rem;
+}
+
+/* Estilos para los selectores de fecha y hora */
+ion-datetime-button {
+  --padding-start: 0;
+  --padding-end: 0;
+  --background: var(--ion-color-light);
+  --border-radius: 8px;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  width: 100%;
+}
+
+/* Estilos para las tarjetas de citas */
+.appointment-card {
+  margin-bottom: 16px;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-left: 4px solid var(--ion-color-primary);
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.appointment-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.appointment-card.past-appointment {
+  opacity: 0.7;
+  border-left-color: var(--ion-color-medium);
+}
+
+.appointment-card ion-card-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--ion-color-light);
+  background: #f8f9fa;
+}
+
+.appointment-card ion-card-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--ion-color-dark);
+}
+
+.appointment-card ion-card-subtitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+/* Estilos para los badges de estado */
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status-confirmed {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-cancelled {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status-completed {
+  background-color: #e2e3e5;
+  color: #383d41;
+}
+
+/* Estilos para los detalles de la cita */
+.detail-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  --background: transparent;
+  margin-bottom: 12px;
+  --min-height: 40px;
+}
+
+.detail-item:last-child {
+  margin-bottom: 0;
+}
+
+.detail-item ion-icon {
+  color: var(--ion-color-primary);
+  margin-right: 12px;
+  font-size: 1.2rem;
+  min-width: 24px;
+}
+
+.detail-item h3 {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ion-color-medium);
+  margin: 0 0 2px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-item p {
+  font-size: 0.95rem;
+  margin: 0;
+  color: var(--ion-color-dark);
+  font-weight: 500;
+}
+
+/* Estilos para los botones de acción */
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ion-color-light);
+}
+
+/* Estilos para mensajes de estado */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  background: white;
+  border-radius: 12px;
+  margin: 20px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.empty-state ion-icon {
+  font-size: 3rem;
+  color: var(--ion-color-medium);
+  margin-bottom: 16px;
+  opacity: 0.7;
+}
+
+.empty-state h3 {
+  color: var(--ion-color-medium);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.empty-state p {
+  color: var(--ion-color-medium);
+  margin-bottom: 16px;
+  font-size: 0.95rem;
+}
+
+/* Estilos para el selector de estado */
+ion-segment {
+  --background: var(--ion-color-light);
+  border-radius: 12px;
+  padding: 4px;
+  margin: 12px 0;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+ion-segment-button {
+  --color: var(--ion-color-medium);
+  --color-checked: var(--ion-color-primary);
+  --indicator-color: white;
+  --indicator-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  --border-radius: 8px;
+  --padding-top: 8px;
+  --padding-bottom: 8px;
+  font-weight: 500;
+  text-transform: capitalize;
+  font-size: 0.85rem;
+  --transition: all 0.2s ease;
+}
+
+/* Estilos para la barra de búsqueda */
+ion-searchbar {
+  --background: white;
+  --border-radius: 12px;
+  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --placeholder-color: var(--ion-color-medium);
+  --color: var(--ion-color-dark);
+  padding: 8px 0;
+  --icon-color: var(--ion-color-primary);
+}
+
+/* Estilos para dispositivos más grandes */
+@media (min-width: 768px) {
+  .appointment-card {
+    margin-bottom: 20px;
+  }
+  
+  .new-appointment-card {
+    margin-bottom: 32px;
+  }
+  
+  .appointments-container {
+    padding: 0 24px;
+  }
+  
+  .action-buttons {
+    justify-content: flex-start;
+  }
+}
+
+/* Efecto de carga */
+.loading-spinner {
+  --color: var(--ion-color-primary);
+  margin: 32px auto;
+  display: block;
+}
+
+/* Estilos para los botones de acción */
+ion-button {
+  --border-radius: 8px;
+  font-weight: 500;
+  text-transform: none;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  height: auto;
+  margin: 0;
+  font-size: 0.9rem;
+  --box-shadow: none;
+}
+
+ion-button[color="danger"] {
+  --background: #ffebee;
+  --color: #c62828;
+  --background-hover: #ffcdd2;
+}
+
+ion-button[color="primary"] {
+  --box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.2);
+  --background-hover: var(--ion-color-primary-shade);
+}
+
+/* Mejoras de accesibilidad */
+:focus-visible {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Estilos para el modal de fecha/hora */
+ion-modal {
+  --width: fit-content;
+  --min-width: 300px;
+  --height: fit-content;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+ion-modal ion-datetime {
+  margin: 0 auto;
+  padding: 16px;
+}
+
+/* Estilos para el botón de añadir */
+.add-button {
+  --border-radius: 50%;
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  width: 48px;
+  height: 48px;
+  margin: 0;
+  --box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.3);
+}
+
+/* Estilos para el contenedor del selector de dentista */
+.dentist-select {
+  --padding-start: 0;
+  --padding-end: 0;
+  --inner-padding-end: 0;
+}
+
+/* Estilos para el contenedor de fecha y hora */
+.datetime-container {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.datetime-container ion-item {
+  flex: 1;
+  --padding-start: 0;
+  --inner-padding-end: 0;
+}
+
+/* Estilos para el contenedor de búsqueda y filtros */
+.search-container {
+  background: white;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Estilos para el contenedor de la lista de citas */
+.appointments-list {
+  padding-bottom: 24px;
+}
+
+/* Estilos para el botón de cancelar en el modal */
+.cancel-button {
+  --color: var(--ion-color-medium);
+  --background: transparent;
+  --box-shadow: none;
+  --background-hover: rgba(var(--ion-color-medium-rgb), 0.1);
+}
+
+/* Estilos para el botón de confirmar en el modal */
+.confirm-button {
+  --background: var(--ion-color-primary);
+  --color: white;
+  --background-hover: var(--ion-color-primary-shade);
+}

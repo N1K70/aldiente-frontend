@@ -1,0 +1,154 @@
+/* For information on how to create your own theme, please see:
+http://ionicframework.com/docs/theming/ */
+
+:root {
+  /* Colores principales (paleta moderna cian/índigo) */
+  --ion-color-primary: #06b6d4; /* Cyan 500 */
+  --ion-color-primary-rgb: 6, 182, 212;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #05a3bf;
+  --ion-color-primary-tint: #2ecbe0;
+
+  --ion-color-secondary: #e0f7f9; /* Cyan 50-ish */
+  --ion-color-secondary-rgb: 224, 247, 249;
+  --ion-color-secondary-contrast: #0f172a;
+  --ion-color-secondary-contrast-rgb: 15, 23, 42;
+  --ion-color-secondary-shade: #c7dde0;
+  --ion-color-secondary-tint: #e6fafb;
+
+  --ion-color-tertiary: #EDEDED;
+  --ion-color-tertiary-rgb: 237, 237, 237;
+  --ion-color-tertiary-contrast: #000000;
+  --ion-color-tertiary-contrast-rgb: 0, 0, 0;
+  --ion-color-tertiary-shade: #d1d1d1;
+  --ion-color-tertiary-tint: #efefef;
+
+  --ion-color-success: #34c759;
+  --ion-color-success-rgb: 52, 199, 89;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-contrast-rgb: 255, 255, 255;
+  --ion-color-success-shade: #2eaf4f;
+  --ion-color-success-tint: #48cd69;
+
+  --ion-color-warning: #ffcc00;
+  --ion-color-warning-rgb: 255, 204, 0;
+  --ion-color-warning-contrast: #000000;
+  --ion-color-warning-contrast-rgb: 0, 0, 0;
+  --ion-color-warning-shade: #e0b300;
+  --ion-color-warning-tint: #ffd119;
+
+  --ion-color-danger: #D40710;
+  --ion-color-danger-rgb: 212, 7, 16;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade: #bb0610;
+  --ion-color-danger-tint: #d81f27;
+
+  --ion-color-medium: #999999;
+  --ion-color-medium-rgb: 153, 153, 153;
+  --ion-color-medium-contrast: #ffffff;
+  --ion-color-medium-contrast-rgb: 255, 255, 255;
+  --ion-color-medium-shade: #868686;
+  --ion-color-medium-tint: #a3a3a3;
+
+  --ion-color-light: #FFFFFF;
+  --ion-color-light-rgb: 255, 255, 255;
+  --ion-color-light-contrast: #000000;
+  --ion-color-light-contrast-rgb: 0, 0, 0;
+  --ion-color-light-shade: #e6e6e6;
+  --ion-color-light-tint: #ffffff;
+
+  --ion-background-color: #f4f5f8;
+  --ion-text-color: #000000;
+}
+
+/* Estilos para el tema oscuro */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ion-background-color: #1a1a1a;
+    --ion-text-color: #ffffff;
+    --ion-item-background: #2a2a2a;
+    --ion-toolbar-background: #1f1f1f;
+    --ion-tab-bar-background: transparent;
+  }
+}
+
+/* Estilos generales */
+body {
+  background-color: var(--ion-background-color, #ffffff);
+  color: var(--ion-text-color);
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Contenedor principal */
+ion-app {
+  background-color: var(--ion-background-color, #ffffff);
+}
+
+/* Barra de herramientas */
+ion-toolbar {
+  --background: var(--ion-color-primary);
+  --color: var(--ion-color-primary-contrast);
+}
+
+/* Tarjetas */
+ion-card {
+  margin: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Botones */
+ion-button {
+  --border-radius: 8px;
+  text-transform: none;
+  font-weight: 500;
+}
+
+/* Campos de formulario */
+ion-item {
+  --border-color: var(--ion-color-medium);
+  --highlight-color-focused: var(--ion-color-primary);
+  --highlight-color-valid: var(--ion-color-success);
+  --highlight-color-invalid: var(--ion-color-danger);
+}
+
+/* Estilos para la página de bienvenida */
+.welcome-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  text-align: center;
+}
+
+/* Estilos para los mensajes de error */
+.error-message {
+  color: var(--ion-color-danger);
+  font-size: 0.8em;
+  margin-top: 4px;
+}
+
+/* Clases de utilidad */
+.text-center {
+  text-align: center;
+}
+
+.mt-2 {
+  margin-top: 8px;
+}
+
+.mb-2 {
+  margin-bottom: 8px;
+}
+
+.p-2 {
+  padding: 8px;
+}

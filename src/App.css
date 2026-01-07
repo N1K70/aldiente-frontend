@@ -1,0 +1,655 @@
+/* Forzar tema claro y corregir pantalla negra */
+:root {
+  /* Variables de tema claro forzadas */
+  --ion-background-color: #ffffff;
+  --ion-text-color: #000000;
+  --ion-border-color: #e0e0e0;
+  --ion-item-background: #ffffff;
+  --ion-card-background: #ffffff;
+  --ion-toolbar-background: #ffffff;
+  --ion-tab-bar-background: transparent;
+  
+  /* Colores aldiente */
+  --ion-color-primary: #06b6d4; /* Cyan 500 */
+  --ion-color-secondary: #e0f7f9; /* Cyan 50-ish */
+  --ion-color-danger: #ef4444; /* Red 500 (para errores) */
+}
+
+/* Forzar tema claro en todo el documento */
+body {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+/* Asegurar que todos los elementos usen tema claro */
+ion-app {
+  --ion-background-color: #ffffff;
+  --ion-text-color: #000000;
+}
+
+ion-content {
+  --background: #ffffff;
+  --color: #000000;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+/* Padding solo para páginas internas de la app (no landing/login) */
+ion-content.ion-padding {
+  --padding-top: 20px;
+  --padding-bottom: 20px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+}
+
+ion-toolbar {
+  --background: #ffffff;
+  --color: #000000;
+  --border-style: none;
+}
+
+ion-tab-bar {
+  --background: transparent !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+ion-item {
+  --background: #ffffff;
+  --border-radius: 8px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  margin-bottom: 16px;
+  --min-height: 56px;
+}
+
+ion-card {
+  background: #ffffff;
+  margin: 16px 0;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+ion-button {
+  --border-radius: 8px;
+  --box-shadow: none;
+  text-transform: none;
+  font-weight: 500;
+  margin: 8px 0;
+}
+
+/* Asegurar visibilidad de texto */
+ion-label {
+  color: #000000;
+}
+
+/* Estilos para inputs */
+ion-input {
+  --background: transparent;
+  --color: #000000;
+  border: none !important; /* sin bordes en este nivel */
+}
+
+/* Contenedor principal */
+.profile-container {
+  background: #ffffff;
+  color: #000000;
+}
+
+.profile-header {
+  background: linear-gradient(135deg, #D40710, #F2CED0);
+  color: white;
+}
+
+.profile-name,
+.profile-email,
+.profile-info-value,
+.profile-stat-value,
+.profile-stat-label {
+  color: #000000;
+}
+
+.profile-action-button {
+  --background: #ffffff;
+  --color: #000000;
+}
+
+/* Estilos para los encabezados */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--ion-text-color);
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+/* Estilos para los mensajes de error */
+.error-message {
+  color: var(--ion-color-danger);
+  font-size: 0.875rem;
+  margin: 4px 0 0 0;
+  padding: 0 16px;
+}
+
+/* Estilos para los mensajes de éxito */
+.success-message {
+  color: var(--ion-color-success);
+  font-size: 0.875rem;
+  margin: 4px 0 0 0;
+  padding: 0 16px;
+}
+
+/* Estilos para la página de bienvenida */
+.welcome-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.welcome-container ion-img {
+  max-width: 200px;
+  margin: 0 auto 32px;
+}
+
+/* Estilos para los formularios */
+.form-container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+/* Estilos para los enlaces */
+a {
+  color: var(--ion-color-primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Estilos para dispositivos pequeños */
+@media (max-width: 576px) {
+  .form-container {
+    padding: 16px;
+  }
+  
+  ion-button {
+    margin: 16px 0;
+  }
+}
+
+/* ============ Auth Modern Styles ============ */
+.auth-content {
+  --background: transparent;
+  padding: 0;
+}
+
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(1200px 600px at -10% -20%, #e0f7f9 0%, transparent 60%),
+              radial-gradient(1000px 500px at 110% 120%, #e0e7ff 0%, transparent 60%),
+              linear-gradient(135deg, #ffffff 0%, #f8fbff 40%, #ffffff 100%);
+  padding: 24px;
+}
+
+.auth-blob {
+  position: absolute;
+  width: 360px;
+  height: 360px;
+  border-radius: 9999px;
+  filter: blur(80px);
+  opacity: 0.6;
+}
+
+.auth-blob.blob-1 {
+  top: -80px;
+  left: -80px;
+  background: radial-gradient(closest-side, #a5f3fc, transparent);
+  animation: float 12s ease-in-out infinite;
+}
+
+.auth-blob.blob-2 {
+  bottom: -100px;
+  right: -100px;
+  background: radial-gradient(closest-side, #c7d2fe, transparent);
+  animation: float 12s ease-in-out infinite;
+  animation-delay: -4s;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+.glass-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 28px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(231, 245, 255, 0.8);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  animation: fadeUp .5s ease both;
+}
+
+@keyframes fadeUp {
+  0% { opacity: 0; transform: translateY(8px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.auth-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.auth-header h1 {
+  margin: 0;
+  font-size: 24px;
+  color: #111827;
+}
+
+.auth-header p {
+  margin: 0;
+  color: #6b7280;
+  text-align: center;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;                      /* menos separación interna */
+  border: 1px solid #e5e7eb;          /* borde suave visible */
+  border-radius: 12px;                 /* esquinas suaves */
+  padding: 8px 12px;                   /* menos alto */
+  background: #ffffff;                 /* fondo blanco del grupo */
+  box-shadow: none;                    /* sin sombra */
+}
+
+.input-group:focus-within {
+  border-color: #e5e7eb;  /* no cambia al enfocar */
+  box-shadow: none;       /* sin glow */
+}
+
+.input-group ion-input {
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+ion-button.primary-gradient-btn {
+  --background: linear-gradient(90deg, var(--ion-color-primary) 0%, #2563eb 100%);
+  --box-shadow: 0 12px 24px rgba(6, 182, 212, 0.25);
+  --border-radius: 12px;
+  height: 48px;
+  --background-activated: linear-gradient(90deg, #0891b2 0%, #1e40af 100%);
+}
+
+.auth-links {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.auth-links a {
+  color: var(--ion-color-primary);
+  text-decoration: none;
+}
+
+.auth-role-section {
+  margin-top: 16px; /* más separación del primer toggle */
+  margin-bottom: 12px;
+}
+
+.auth-role-section .role-title {
+  display: block;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 10px; /* separa del toggle */
+}
+
+/* Segment compacto solo para selector de rol en registro */
+.seg-compact {
+  --background: #ffffff;
+  --indicator-color: var(--ion-color-primary);
+  --ripple-color: rgba(6, 182, 212, 0.2);
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 2px;
+  background: #ffffff;
+}
+
+.seg-compact ion-segment-button {
+  min-height: 36px;
+  height: 36px;
+  min-width: 110px; /* evita cortar texto */
+  font-size: 13px;
+  font-weight: 600;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --color: #0f172a;           /* texto normal visible */
+  --color-checked: #0f172a;   /* texto cuando está seleccionado */
+  --indicator-color: var(--ion-color-primary);
+}
+
+/* Centrar contenido interno del botón del segmento */
+.seg-compact ion-segment-button::part(native) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Fuerza color de texto del label dentro del segment */
+.seg-compact ion-segment-button ion-label {
+  color: #0f172a !important;
+  font-size: 13px;
+  text-align: center;
+  width: 100%;
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+/* Estado seleccionado: resalta botón y mantiene texto legible */
+.seg-compact ion-segment-button.segment-button-checked {
+  background: #ecfeff; /* leve fondo celeste */
+  border-radius: 8px;
+}
+.seg-compact ion-segment-button.segment-button-checked ion-label {
+  color: #0e7490 !important; /* texto azul petróleo al seleccionar */
+}
+
+.security-note {
+  margin-top: 18px;
+  background: #ecfeff;
+  border: 1px solid #cffafe;
+  padding: 12px;
+  border-radius: 12px;
+  color: #0e7490;
+}
+
+/* ===================== */
+/* Home styles */
+/* ===================== */
+.home-hero {
+  background: linear-gradient(180deg, #ffffff, #ecfeff 100%);
+  border: 1px solid #cffafe;
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.06);
+}
+
+.hero-title {
+  margin: 0 0 4px 0;
+  font-size: 22px;
+  color: #0f172a;
+}
+
+.hero-sub {
+  margin: 0;
+  color: #6b7280;
+}
+
+.home-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.home-card {
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.home-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(0,0,0,0.08);
+}
+
+.category-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #ecfeff;
+  color: #0e7490;
+  border: 1px solid #cffafe;
+}
+
+/* ===================== */
+/* Profile styles */
+/* ===================== */
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(180deg, #ffffff, #ecfeff 100%);
+  border: 1px solid #cffafe;
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.06);
+}
+
+.profile-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid #cffafe;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+
+.profile-avatar ion-icon {
+  position: absolute;
+  font-size: 56px;
+  color: var(--ion-color-primary);
+  opacity: 0.18;
+}
+
+.profile-initials {
+  position: relative;
+  z-index: 1;
+  font-weight: 800;
+  color: #0e7490;
+}
+
+.profile-id h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #111827;
+}
+
+.profile-id .muted {
+  margin: 0;
+  color: #6b7280;
+}
+
+.profile-card {
+  margin-top: 16px;
+  background: rgba(255,255,255,0.9);
+  border: 1px solid #f3f4f6;
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.06);
+}
+
+.profile-actions {
+  margin-top: 16px;
+  display: grid;
+  gap: 10px;
+}
+
+/* -------- Servicios (Explorar) ------- */
+.category-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 9999px;
+  background: #f0f9ff;
+  color: #0ea5e9;
+  border: 1px solid #e0f2fe;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.service-card {
+  border: 1px solid #f3f4f6;
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.06);
+}
+
+.price-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: var(--ion-color-primary);
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.service-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 400px) {
+  .service-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #475569;
+  font-size: 13px;
+}
+
+/* -------- Profesionales (Explorar) ------- */
+.professional-card {
+  border: 1px solid #f3f4f6;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.06);
+  cursor: pointer;
+}
+
+.pro-img-wrap {
+  width: 100%;
+  height: 140px;
+  overflow: hidden;
+}
+
+.pro-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pro-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.pro-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pro-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 9999px;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid #e5e7eb;
+}
+
+.pro-chip.muted {
+  opacity: .85;
+}
+
+.pro-specialty {
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+/* Cabecera del detalle de profesional */
+.pro-header-card {
+  border: 1px solid #f3f4f6;
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.06);
+}
+
+.pro-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.pro-header-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pro-header-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pro-header-placeholder {
+  color: #94a3b8;
+  font-size: 24px;
+}
+
+.pro-header-info h3 {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+}

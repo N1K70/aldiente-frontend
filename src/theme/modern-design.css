@@ -1,0 +1,863 @@
+/* 🎨 Sistema de Diseño Moderno - ALDIENTE */
+/* Inspirado en Didactate - Paleta Cyan/Blue Profesional */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+/* ============================================ */
+/* 1. VARIABLES DE COLORES MODERNOS */
+/* ============================================ */
+:root {
+  /* Colores base - Cyan/Blue profesional */
+  --color-primary-50: #ecfeff;
+  --color-primary-100: #cffafe;
+  --color-primary-200: #a5f3fc;
+  --color-primary-300: #67e8f9;
+  --color-primary-400: #22d3ee;
+  --color-primary-500: #06b6d4;
+  --color-primary-600: #0891b2;
+  --color-primary-700: #0e7490;
+  --color-primary-800: #155e75;
+  --color-primary-900: #164e63;
+  
+  /* Colores neutros modernos */
+  --color-gray-50: #f8fafc;
+  --color-gray-100: #f1f5f9;
+  --color-gray-200: #e2e8f0;
+  --color-gray-300: #cbd5e1;
+  --color-gray-400: #94a3b8;
+  --color-gray-500: #64748b;
+  --color-gray-600: #475569;
+  --color-gray-700: #334155;
+  --color-gray-800: #1e293b;
+  --color-gray-900: #0f172a;
+  
+  /* Colores de acento */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+  
+  /* Fondos y superficies */
+  --bg-primary: #ffffff;
+  --bg-secondary: var(--color-gray-50);
+  --bg-tertiary: var(--color-gray-100);
+  --bg-elevated: #ffffff;
+  
+  /* Texto */
+  --text-primary: var(--color-gray-900);
+  --text-secondary: var(--color-gray-600);
+  --text-tertiary: var(--color-gray-400);
+  --text-on-primary: #ffffff;
+  
+  /* Fuentes */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  
+  /* Espaciado base 4px */
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  
+  /* Sombras */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-base: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.06);
+  --shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.15);
+  --shadow-primary: 0 8px 24px rgba(6, 182, 212, 0.25);
+  --shadow-primary-lg: 0 12px 32px rgba(6, 182, 212, 0.3);
+  
+  /* Gradientes */
+  --gradient-primary: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  --gradient-primary-soft: linear-gradient(135deg, #e0f7f9 0%, #cffafe 100%);
+  --gradient-success: linear-gradient(135deg, #34c759 0%, #2eaf4f 100%);
+  --gradient-warning: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+}
+
+/* ============================================ */
+/* 2. TIPOGRAFÍA MODERNA */
+/* ============================================ */
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.display-1 {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.display-2 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.heading-xl {
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.heading-lg {
+  font-size: clamp(1.5rem, 2.5vw, 1.875rem);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.heading-md {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.body-lg {
+  font-size: 1.125rem;
+  font-weight: 400;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.body-md {
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.body-sm {
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.caption {
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--text-tertiary);
+}
+
+/* ============================================ */
+/* 3. TARJETAS MODERNAS (GLASSMORPHISM) */
+/* ============================================ */
+.floating-card {
+  background: var(--bg-elevated);
+  border-radius: 24px;
+  padding: var(--space-6);
+  box-shadow: 
+    0 0 0 1px rgba(0, 0, 0, 0.03),
+    0 2px 4px rgba(0, 0, 0, 0.05),
+    0 12px 24px rgba(0, 0, 0, 0.08);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.floating-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 
+    0 0 0 1px rgba(0, 0, 0, 0.03),
+    0 4px 8px rgba(0, 0, 0, 0.06),
+    0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.service-card-modern {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-elevated);
+  border-radius: 20px;
+  border: 1px solid var(--color-gray-200);
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.service-card-modern::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--gradient-primary);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.service-card-modern:hover {
+  transform: translateY(-6px);
+  border-color: var(--color-primary-200);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.05),
+    0 16px 48px rgba(6, 182, 212, 0.15);
+}
+
+.service-card-modern:hover::before {
+  transform: scaleX(1);
+}
+
+.service-card-header {
+  padding: var(--space-6);
+  background: linear-gradient(135deg, var(--color-gray-50) 0%, white 100%);
+}
+
+.service-card-content {
+  padding: var(--space-6);
+  flex: 1;
+}
+
+.service-card-footer {
+  padding: var(--space-5) var(--space-6);
+  background: var(--color-gray-50);
+  border-top: 1px solid var(--color-gray-200);
+}
+
+/* ============================================ */
+/* 4. BOTONES MODERNOS */
+/* ============================================ */
+.btn-modern-primary {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 14px 28px;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: white;
+  background: var(--gradient-primary);
+  border: none;
+  border-radius: 14px;
+  box-shadow: var(--shadow-primary);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.btn-modern-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.btn-modern-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-primary-lg);
+  color: white !important;
+}
+
+.btn-modern-primary:hover::before {
+  opacity: 1;
+}
+
+.btn-modern-primary:hover > *,
+.btn-modern-primary:hover ion-icon {
+  color: white !important;
+}
+
+.btn-modern-primary:active {
+  transform: translateY(0);
+}
+
+.btn-modern-primary > * {
+  position: relative;
+  z-index: 1;
+}
+
+.btn-modern-primary ion-icon {
+  color: white !important;
+  font-size: 20px;
+}
+
+.btn-modern-primary span,
+.btn-modern-primary {
+  color: white !important;
+}
+
+.calendar-view-toggle-group {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.calendar-view-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 2px solid rgba(6, 182, 212, 0.25);
+  background: transparent;
+  color: var(--color-primary-600);
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.calendar-view-toggle:hover {
+  border-color: var(--color-primary-500);
+  background: rgba(6, 182, 212, 0.08);
+  color: var(--color-primary-700);
+}
+
+.calendar-view-toggle.active {
+  background: var(--gradient-primary);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 10px 24px rgba(8, 145, 178, 0.25);
+}
+
+.calendar-view-toggle:focus-visible {
+  outline: 2px solid rgba(6, 182, 212, 0.45);
+  outline-offset: 3px;
+}
+
+.btn-modern-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 14px 28px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-primary-600);
+  background: transparent;
+  border: 2px solid var(--color-primary-500);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-modern-secondary:hover {
+  background: var(--color-primary-50);
+  border-color: var(--color-primary-600);
+  color: var(--color-primary-600);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.15);
+}
+
+.btn-modern-secondary:active {
+  transform: translateY(0);
+  color: var(--color-primary-600);
+}
+
+.btn-modern-secondary ion-icon {
+  color: var(--color-primary-600) !important;
+}
+
+.btn-modern-secondary:hover ion-icon {
+  color: var(--color-primary-600) !important;
+}
+
+.btn-modern-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-primary-600);
+  background: transparent;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-modern-ghost:hover {
+  background: var(--color-primary-50);
+  color: var(--color-primary-700);
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 16px;
+  background: var(--color-primary-500);
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.btn-icon:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+}
+
+.btn-icon:active {
+  transform: translateY(0);
+  filter: brightness(0.95);
+}
+
+.btn-icon ion-icon {
+  color: white !important;
+  font-size: 20px;
+}
+
+/* ============================================ */
+/* 5. BADGES Y CHIPS */
+/* ============================================ */
+.badge-modern {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 10px 20px;
+  border-radius: 9999px !important;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1;
+  box-shadow: var(--shadow-sm);
+  border: none;
+  white-space: nowrap;
+}
+
+.badge-primary {
+  background: var(--gradient-primary);
+  color: white;
+  border-radius: 9999px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.badge-primary ion-icon {
+  color: white !important;
+}
+
+.badge-success {
+  background: var(--gradient-success);
+  color: white;
+  border-radius: 9999px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.badge-success ion-icon {
+  color: white !important;
+}
+
+.badge-warning {
+  background: var(--gradient-warning);
+  color: white;
+  border-radius: 9999px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.badge-warning ion-icon {
+  color: white !important;
+}
+
+.badge-pending {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: white;
+  border-radius: 9999px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.badge-pending ion-icon {
+  color: white !important;
+}
+
+.badge-confirmed {
+  background: var(--gradient-primary);
+  color: white;
+  border-radius: 9999px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.badge-confirmed ion-icon {
+  color: white !important;
+}
+
+.badge-completed {
+  background: var(--gradient-success);
+  color: white;
+  border-radius: 9999px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.badge-completed ion-icon {
+  color: white !important;
+}
+
+.badge-cancelled {
+  background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+  color: white;
+  border-radius: 9999px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.badge-cancelled ion-icon {
+  color: white !important;
+}
+
+/* ============================================ */
+/* 6. ESTADOS INTERACTIVOS */
+/* ============================================ */
+.hover-lift {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+}
+
+.hover-scale {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+}
+
+/* ============================================ */
+/* 7. ANIMACIONES */
+/* ============================================ */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0%,
+    #e0e0e0 20%,
+    #f0f0f0 40%,
+    #f0f0f0 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+  border-radius: 8px;
+}
+
+/* ============================================ */
+/* 8. LAYOUT MODERNO */
+/* ============================================ */
+.container-modern {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+.section-modern {
+  padding: var(--space-12) 0;
+}
+
+.grid-modern {
+  display: grid;
+  gap: var(--space-6);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .grid-modern {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-modern {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-8);
+  }
+}
+
+.stack-modern {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* ============================================ */
+/* 9. META ITEMS */
+/* ============================================ */
+.meta-item-modern {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.meta-item-modern ion-icon {
+  font-size: 18px;
+  color: var(--color-primary-500);
+}
+
+/* ============================================ */
+/* 10. HERO SECTION */
+/* ============================================ */
+.hero-modern {
+  padding: var(--space-8) 0;
+  background: linear-gradient(
+    135deg,
+    rgba(236, 254, 255, 0.4) 0%,
+    rgba(207, 250, 254, 0.4) 100%
+  );
+  border-radius: 24px;
+  margin-bottom: var(--space-8);
+}
+
+.hero-title-modern {
+  font-size: clamp(2rem, 4vw, 2.5rem);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-3);
+}
+
+.hero-subtitle-modern {
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+}
+
+/* ============================================ */
+/* 11. SEARCH BAR MODERNO */
+/* ============================================ */
+.searchbar-modern {
+  --background: var(--bg-elevated);
+  --border-radius: 16px;
+  --box-shadow: var(--shadow-md);
+  --icon-color: var(--color-primary-500);
+  transition: all 0.3s ease;
+}
+
+.searchbar-modern:focus-within {
+  --box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.1), var(--shadow-md);
+}
+
+/* ============================================ */
+/* 12. EMPTY STATES */
+/* ============================================ */
+.empty-state-modern {
+  text-align: center;
+  padding: var(--space-12) var(--space-6);
+}
+
+.empty-state-icon {
+  font-size: 64px;
+  color: var(--color-gray-300);
+  margin-bottom: var(--space-4);
+}
+
+.empty-state-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.empty-state-description {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  max-width: 400px;
+  margin: 0 auto var(--space-6);
+}
+
+/* ============================================ */
+/* 13. OVERRIDES IONIC */
+/* ============================================ */
+ion-content {
+  --background: var(--bg-secondary);
+  --padding-bottom: calc(110px + env(safe-area-inset-bottom));
+}
+
+/* Asegurar espacio inferior en el contenido interno */
+ion-content::part(scroll) {
+  padding-bottom: calc(110px + env(safe-area-inset-bottom)) !important;
+}
+
+/* Margen inferior adicional para el último elemento */
+ion-content > *:last-child {
+  margin-bottom: calc(20px) !important;
+}
+
+/* Popover de notificaciones sin fondo */
+.notification-popover-clean {
+  --background: transparent !important;
+  --box-shadow: none !important;
+  --width: auto !important;
+  --overflow: visible !important;
+}
+
+.notification-popover-clean::part(content) {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  overflow: visible !important;
+  border-radius: 24px !important;
+}
+
+.notification-popover-clean::part(backdrop) {
+  background: rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Asegurar que el wrapper del popover también sea transparente */
+.notification-popover-clean .popover-wrapper {
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+ion-toolbar {
+  --background: var(--bg-primary);
+  --border-width: 0;
+  --padding-top: var(--space-2);
+  --padding-bottom: var(--space-2);
+}
+
+ion-searchbar {
+  --background: var(--bg-elevated);
+  --border-radius: 12px;
+}
+
+/* ============================================ */
+/* 13.2 ANIMACIONES GLOBALES */
+/* ============================================ */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+/* ============================================ */
+/* 13.3 NOTIFICATION POPOVER */
+/* ============================================ */
+.notification-popover {
+  --width: 360px;
+  --max-height: 500px;
+  --border-radius: 20px;
+  --box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.notification-popover::part(content) {
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+/* ============================================ */
+/* 14. FAB MODERNO */
+/* ============================================ */
+.fab-modern {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-primary);
+  border: none;
+  border-radius: 20px;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.1),
+    0 8px 24px rgba(6, 182, 212, 0.3);
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+}
+
+.fab-modern:hover {
+  transform: scale(1.08) translateY(-4px);
+  box-shadow: 
+    0 8px 20px rgba(0, 0, 0, 0.12),
+    0 12px 32px rgba(6, 182, 212, 0.4);
+}
+
+.fab-modern:active {
+  transform: scale(1.02);
+}
+
+/* ============================================ */
+/* FIX: Z-INDEX PARA POPOVERS Y ALERTS DE IONIC */
+/* ============================================ */
+/* Asegurar que los popovers y alerts de Ionic siempre aparezcan por encima de modales */
+ion-popover,
+ion-alert {
+  z-index: 20000 !important;
+}

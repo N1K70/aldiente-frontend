@@ -1,0 +1,172 @@
+.central-modal-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.central-modal-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1;
+}
+
+.central-modal-content {
+  position: relative;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 2;
+}
+
+/* Tamaños del modal */
+.central-modal-small {
+  width: 100%;
+  max-width: 400px;
+}
+
+.central-modal-medium {
+  width: 100%;
+  max-width: 600px;
+}
+
+.central-modal-large {
+  width: 100%;
+  max-width: 900px;
+}
+
+.central-modal-full {
+  width: 95vw;
+  max-width: 1200px;
+  max-height: 95vh;
+}
+
+/* Header */
+.central-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.central-modal-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  flex: 1;
+}
+
+.central-modal-close-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: white;
+  font-size: 24px;
+  padding: 0;
+  margin-left: 12px;
+}
+
+.central-modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.central-modal-close-btn:active {
+  transform: scale(0.95);
+}
+
+/* Body */
+.central-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 24px;
+  background: white;
+}
+
+/* Scrollbar personalizado */
+.central-modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.central-modal-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.central-modal-body::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.central-modal-body::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .central-modal-container {
+    padding: 10px;
+  }
+
+  .central-modal-content {
+    max-height: 95vh;
+  }
+
+  .central-modal-small,
+  .central-modal-medium,
+  .central-modal-large {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .central-modal-header {
+    padding: 16px 20px;
+  }
+
+  .central-modal-title {
+    font-size: 18px;
+  }
+
+  .central-modal-body {
+    padding: 20px;
+  }
+}
+
+/* Animación de entrada suave */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

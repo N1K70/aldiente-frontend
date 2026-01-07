@@ -1,0 +1,15 @@
+.dev-dashboard-content {
+    --background: #f4f5f8;
+}
+
+.dev-dashboard-content ion-item {
+    --background: transparent;
+    --inner-border-width: 0;
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    margin-bottom: 8px;
+}
+
+.dev-dashboard-content ion-button {
+    --box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}

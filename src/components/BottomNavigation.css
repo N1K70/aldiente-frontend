@@ -1,0 +1,97 @@
+/* Estilos para Bottom Navigation */
+.bottom-nav {
+  --background: #ffffff;
+  --border: 1px solid #e0e0e0;
+  --color: #a0a0a0;
+  --color-selected: #D40710;
+  --background-selected: rgba(212, 7, 16, 0.1);
+  height: 60px;
+  border-top: 1px solid #e0e0e0;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.bottom-nav ion-tab-button {
+  --color: #a0a0a0;
+  --color-selected: #D40710;
+  --background-focused: rgba(212, 7, 16, 0.1);
+  --background-hover: rgba(212, 7, 16, 0.05);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.bottom-nav ion-tab-button:hover {
+  --background: rgba(212, 7, 16, 0.05);
+}
+
+.bottom-nav ion-tab-button.active-tab {
+  --color: #D40710;
+  --background: rgba(212, 7, 16, 0.1);
+}
+
+.bottom-nav ion-tab-button ion-icon {
+  font-size: 24px;
+  margin-bottom: 2px;
+  transition: all 0.3s ease;
+}
+
+.bottom-nav ion-tab-button.active-tab ion-icon {
+  transform: scale(1.1);
+}
+
+.bottom-nav ion-tab-button ion-label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.bottom-nav ion-tab-button.active-tab ion-label {
+  font-weight: 600;
+}
+
+/* Indicador activo */
+.bottom-nav ion-tab-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background: #D40710;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.bottom-nav ion-tab-button.active-tab::after {
+  opacity: 1;
+}
+
+/* Responsive para tablets */
+@media (min-width: 768px) {
+  .bottom-nav {
+    max-width: 768px;
+    margin: 0 auto;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 0 0 20px 20px;
+  }
+}
+
+/* Animación de entrada */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.bottom-nav {
+  animation: slideUp 0.3s ease-out;
+}

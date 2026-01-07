@@ -1,0 +1,153 @@
+/* Tab Bar con LiquidGlass */
+
+.tab-bar-wrapper {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding: 8px;
+  padding-bottom: calc(8px + env(safe-area-inset-bottom));
+  z-index: 1000;
+  pointer-events: none;
+}
+
+/* Centrar el contenedor de LiquidGlass */
+.tab-bar-glass {
+  pointer-events: none;
+  width: clamp(220px, 60vw, 320px);
+  display: flex;
+  justify-content: center;
+}
+
+.tab-bar-glass > * {
+  pointer-events: auto;
+  width: 100%;
+}
+
+.tab-bar-glass .glass {
+  width: 100% !important;
+  padding: 8px 12px !important;
+  gap: 12px !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  box-shadow: rgba(0, 0, 0, 0.18) 0px 8px 24px !important;
+}
+
+.tab-bar-glass .relative {
+  transform: none !important;
+  top: auto !important;
+  left: auto !important;
+  display: flex !important;
+  justify-content: center !important;
+  width: 100% !important;
+}
+
+.tab-bar-glass .glass > div {
+  width: 100% !important;
+}
+
+.tab-bar-content {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 8px;
+  width: 100%;
+  height: 48px;
+  padding: 6px;
+  margin: 0;
+}
+
+
+/* Botones */
+.tab-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  flex: 0 1 auto;
+}
+
+/* Tab activo se expande */
+.tab-button.active {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 8px 14px;
+}
+
+/* Iconos */
+.tab-icon {
+  font-size: 22px;
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.3s ease;
+}
+
+.tab-button.active .tab-icon {
+  color: rgba(255, 255, 255, 1);
+}
+
+/* Labels - solo en tab activo */
+.tab-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 1);
+  white-space: nowrap;
+}
+
+/* Responsivo */
+@media (max-width: 390px) {
+  .tab-bar-glass {
+    width: clamp(200px, 80vw, 280px);
+  }
+
+  .tab-bar-content {
+    height: 46px;
+    padding: 6px;
+  }
+  
+  .tab-button {
+    padding: 8px 10px;
+  }
+  
+  .tab-button.active {
+    padding: 8px 14px;
+  }
+  
+  .tab-icon {
+    font-size: 22px;
+  }
+  
+  .tab-label {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 768px) {
+  .tab-bar-glass {
+    width: 320px;
+  }
+
+  .tab-bar-content {
+    height: 52px;
+  }
+  
+  .tab-icon {
+    font-size: 26px;
+  }
+  
+  .tab-label {
+    font-size: 15px;
+  }
+}

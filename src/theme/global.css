@@ -1,0 +1,564 @@
+/* Global/* Estilos globales para forzar tema claro en aldiente */
+
+/* Forzar tema claro en todo el documento */
+body, html {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Variables para personalizar autofill (por defecto transparente) */
+:root {
+  --sl-autofill-bg: transparent;     /* Cambia aquí si quieres un color específico p.ej. #f0f9ff */
+  --sl-autofill-text: #0b2a4a;       /* Color del texto cuando hay autofill */
+}
+
+/* Refuerzo: todo dentro de ion-input debe ser transparente y sin bordes */
+ion-input *,
+.custom-input * {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Inputs generados por Ionic con ids ion-input-* */
+input[id^="ion-input-"] {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Asegurar que todos los elementos usen tema claro */
+ion-app {
+  --ion-background-color: #ffffff;
+  --ion-text-color: #000000;
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+ion-content {
+  --background: #f8f9fa;
+  --color: #000000;
+  background-color: #f8f9fa !important;
+  color: #000000 !important;
+}
+
+/* Fix para el inner-scroll de IonContent - eliminar padding blanco */
+ion-content::part(scroll) {
+  background: transparent !important;
+  padding-bottom: 0 !important;
+}
+
+ion-content .inner-scroll {
+  background: transparent !important;
+  padding-bottom: env(safe-area-inset-bottom, 0) !important;
+}
+
+/* Asegurar que el fondo del scroll sea consistente */
+ion-content::part(background) {
+  background: #f8f9fa !important;
+}
+
+/* Forzar colores claros en toolbar */
+ion-toolbar {
+  --background: #ffffff;
+  --color: #000000;
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* Forzar colores claros en elementos */
+ion-item {
+  --background: #ffffff;
+  --color: #000000;
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+ion-card {
+  --background: #ffffff;
+  --color: #000000;
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* Asegurar visibilidad de texto */
+ion-label {
+  color: #0b2a4a !important; /* azul oscuro */
+}
+
+/* Estilos para inputs */
+ion-input {
+  --background: transparent; /* sin fondo */
+  --color: #0b2a4a; /* texto */
+  --highlight-color-focused: transparent; /* sin resalte */
+  background-color: transparent !important;
+  color: #0b2a4a !important;
+}
+
+/* Estilo minimalista global de campos (IonItem+IonInput) */
+ion-item {
+  --background: transparent;
+  --color: #0b2a4a;
+  --border-color: transparent;
+  --border-width: 0;
+  --border-style: none;
+  --highlight-color-focused: transparent;
+  border: none !important;
+  border-radius: 0;
+  box-shadow: none !important;
+}
+
+/* Eliminar bordes usando shadow parts de Ionic */
+ion-item::part(native),
+ion-item::part(container) {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+ion-input::part(native),
+ion-input::part(container),
+ion-textarea::part(native),
+ion-textarea::part(container),
+ion-select::part(native),
+ion-select::part(container),
+ion-searchbar::part(container) {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Compatibilidad con elementos internos */
+ion-item .item-native, 
+ion-item .item-inner {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Abarcar otros componentes de entrada comunes */
+ion-textarea, ion-select, ion-searchbar {
+  --background: transparent !important;
+  --color: #0b2a4a;
+  --highlight-color-focused: transparent !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Sin cambios visuales por hover o focus */
+ion-item:hover,
+.item-has-focus,
+.item-interactive.ion-focusable:focus,
+ion-input:focus,
+ion-input:focus-within {
+  border-color: transparent !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+/* Colocar labels por encima (stacked-like) y sin animaciones */
+ion-item .label-stacked, 
+ion-item .label-floating, 
+ion-item ion-label {
+  position: static !important;
+  transform: none !important;
+  margin-bottom: 6px !important;
+}
+
+/* Inputs internos sin bordes extra ni sombras */
+ion-item input, 
+ion-item textarea {
+  box-shadow: none !important;
+  border: none !important;
+  background: transparent !important;
+  outline: none !important;
+}
+
+/* Input nativo de Ionic (md) - dejar solo texto */
+input.native-input.sc-ion-input-md {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  color: #0b2a4a !important;
+  padding: 0 !important;
+}
+
+/* iOS theme */
+input.native-input.sc-ion-input-ios {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  color: #0b2a4a !important;
+  padding: 0 !important;
+}
+
+/* Genérico por si la clase de tema cambia */
+input.native-input,
+.native-input {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Refuerzo genérico para cualquier input HTML dentro de Ionic */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input,
+textarea {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  caret-color: #0b2a4a;
+}
+
+/* Evitar colores de relleno del navegador */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px var(--sl-autofill-bg) inset !important;
+  box-shadow: 0 0 0px 1000px var(--sl-autofill-bg) inset !important;
+  background: var(--sl-autofill-bg) !important;
+  -webkit-text-fill-color: var(--sl-autofill-text) !important;
+}
+
+/* Firefox */
+input:-moz-autofill {
+  box-shadow: 0 0 0px 1000px var(--sl-autofill-bg) inset !important;
+  background-color: var(--sl-autofill-bg) !important;
+  -moz-text-fill-color: var(--sl-autofill-text) !important;
+}
+
+/* Placeholders mínimos y sin fondos raros */
+::placeholder {
+  color: #7b8a9a !important;
+  opacity: 1 !important;
+}
+
+/* Host y wrappers de IonInput en MD */
+ion-input.sc-ion-input-md-h,
+.sc-ion-input-md-h,
+.sc-ion-input-md {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Wrapper interno que a veces pinta fondo */
+.input-wrapper.sc-ion-input-md,
+.input-cover.sc-ion-input-md,
+.cloned-input.sc-ion-input-md {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Quitar color de autocompletado (Chrome) */
+input.native-input.sc-ion-input-md:-webkit-autofill,
+input.native-input.sc-ion-input-md:-webkit-autofill:hover,
+input.native-input.sc-ion-input-md:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
+  box-shadow: 0 0 0px 1000px transparent inset !important;
+  background: transparent !important;
+  -webkit-text-fill-color: #0b2a4a !important;
+}
+
+/* Contenedor principal */
+.profile-container,
+.login-container,
+.register-container,
+.home-container {
+  background: #ffffff;
+  color: #000000;
+}
+
+/* Asegurar que los gradientes y colores de fondo sean visibles */
+.profile-header {
+  background: linear-gradient(135deg, #D40710, #F2CED0) !important;
+  color: white !important;
+}
+
+/* Forzar visibilidad de texto */
+.profile-name,
+.profile-email,
+.profile-info-value,
+.profile-stat-value,
+.profile-stat-label,
+h1, h2, h3, h4, h5, h6,
+p, span, div {
+  color: #000000 !important;
+}
+
+/* Botones de acción visibles */
+.profile-action-button {
+  --background: #ffffff;
+  --color: #000000;
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+.profile-action-button.primary {
+  --background: #D40710 !important;
+  --color: white !important;
+  background-color: #D40710 !important;
+  color: white !important;
+}
+
+/* Desactivar cualquier tema oscuro */
+body.dark {
+  --ion-background-color: #ffffff !important;
+  --ion-text-color: #000000 !important;
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* Asegurar que los iconos sean visibles */
+ion-icon {
+  color: var(--ion-color-primary) !important;
+}
+
+/* Forzar visibilidad en todos los elementos */
+/* Nota: Se elimina el reset global que forzaba color y fondo en TODOS los elementos,
+   ya que rompía estilos de botones (clear, outline) y FABs. Nos apoyamos en reglas
+   específicas arriba (ion-app, ion-content, etc.) para mantener tema claro. */
+
+/* Utilidad opcional para forzar botón primario cuando se requiera explícitamente */
+ion-button.sl-primary {
+  color: var(--ion-color-primary-contrast) !important;
+  background-color: var(--ion-color-primary) !important;
+}
+
+/* Botón de icono en toolbars (debe permanecer transparente) */
+.toolbar-icon-button {
+  --background: transparent !important;
+  background: transparent !important;
+  color: var(--ion-color-primary) !important;
+}
+
+/* Asegurar que los enlaces sean visibles */
+a {
+  color: #D40710 !important;
+}
+
+/* Forzar visibilidad en formularios */
+form {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* Asegurar visibilidad en listas */
+ion-list {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* Forzar visibilidad en cards */
+ion-card-content {
+  color: #000000 !important;
+}
+
+/* Asegurar visibilidad en headers */
+ion-header {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* Forzar visibilidad en footers */
+ion-footer {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* Reset and base styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography styles */
+.aldiente-heading {
+  font-weight: 700;
+  color: var(--ion-color-primary);
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.aldiente-subheading {
+  font-weight: 600;
+  color: var(--aldiente-text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.aldiente-body {
+  color: var(--aldiente-text-secondary);
+  line-height: 1.5;
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+/* Button styles */
+.aldiente-button {
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  padding: var(--spacing-md) var(--spacing-lg);
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: 0.5px;
+}
+
+.aldiente-button-primary {
+  background-color: var(--ion-color-primary);
+  color: var(--ion-color-primary-contrast);
+}
+
+.aldiente-button-primary:hover {
+  background-color: var(--ion-color-primary-shade);
+  transform: translateY(-1px);
+}
+
+.aldiente-button-secondary {
+  background-color: var(--ion-color-secondary);
+  color: var(--ion-color-secondary-contrast);
+}
+
+.aldiente-button-secondary:hover {
+  background-color: var(--ion-color-secondary-shade);
+  transform: translateY(-1px);
+}
+
+/* Input styles */
+.aldiente-input {
+  border: 1px solid var(--aldiente-border);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+  background-color: var(--aldiente-background);
+}
+
+.aldiente-input:focus {
+  outline: none;
+  border-color: var(--ion-color-primary);
+  box-shadow: 0 0 0 2px rgba(212, 7, 16, 0.1);
+}
+
+/* Card styles */
+.aldiente-card {
+  background-color: var(--aldiente-background);
+  border-radius: var(--border-radius-large);
+  box-shadow: 0 2px 8px var(--aldiente-shadow);
+  padding: var(--spacing-lg);
+  margin: var(--spacing-md) 0;
+  border: 1px solid var(--aldiente-border);
+}
+
+.aldiente-card:hover {
+  box-shadow: 0 4px 12px var(--aldiente-shadow);
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+}
+
+/* Navigation styles */
+.aldiente-nav {
+  background-color: var(--aldiente-background);
+  border-top: 1px solid var(--aldiente-border);
+  box-shadow: 0 -2px 10px var(--aldiente-shadow-light);
+}
+
+.aldiente-nav-item {
+  color: var(--aldiente-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.aldiente-nav-item.active {
+  color: var(--ion-color-primary);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .aldiente-card {
+    margin: var(--spacing-sm) 0;
+    padding: var(--spacing-md);
+  }
+  
+  .aldiente-button {
+    width: 100%;
+    margin: var(--spacing-sm) 0;
+  }
+}
+
+/* Loading states */
+.aldiente-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.aldiente-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--aldiente-border);
+  border-top: 3px solid var(--ion-color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Utility classes */
+.aldiente-center {
+  text-align: center;
+}
+
+.aldiente-flex {
+  display: flex;
+}
+
+.aldiente-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.aldiente-space-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.aldiente-margin-bottom {
+  margin-bottom: var(--spacing-md);
+}
+
+.aldiente-margin-top {
+  margin-top: var(--spacing-md);
+}
+
+/* Form label utilities */
+.aldiente-label-stacked {
+  margin-bottom: 6px;
+}

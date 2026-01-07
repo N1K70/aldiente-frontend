@@ -1,0 +1,130 @@
+/* Definición de la animación para el degradado */
+@keyframes animatedWelcomeGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.welcome-page {
+  /* Eliminar los intentos anteriores de aplicar el fondo directamente al host .welcome-page */
+  /* --background: linear-gradient(...); */
+  /* background-size: 400% 400%; */
+  /* animation: animatedWelcomeGradient 15s ease infinite; */
+  text-align: center;
+}
+
+/* Aplicar estilos directamente a la parte ::part(background) de ion-content */
+.welcome-page::part(background) {
+  background: linear-gradient(
+    -45deg, 
+    #ffffff, /* Blanco */
+    #a0d2eb, /* Celeste más notable */
+    #e0f7fa, /* Un blanco azulado */
+    #89cff0  /* Azul bebé, más vibrante */
+  );
+  background-size: 300% 300%;
+  animation: animatedWelcomeGradient 10s ease infinite;
+}
+
+/* Estilo para el logo principal en la página Welcome */
+.welcome-logo-main {
+  width: 220px; /* Tamaño aumentado del logo */
+  max-width: 90%;
+  height: auto;
+  margin-bottom: 1rem; /* Espacio entre el logo y el título */
+}
+
+.welcome-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 1rem;
+}
+
+.welcome-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 0;
+  color: #333;
+}
+
+.welcome-subtitle {
+  font-size: 1rem;
+  color: #666;
+  margin-top: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.welcome-image-container {
+  width: 80%;
+  margin: 1.5rem auto;
+}
+
+.welcome-image {
+  width: 100%;
+}
+
+.welcome-buttons {
+  width: 100%;
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.welcome-button {
+  --background: #4dabf7;
+  --border-radius: 25px;
+  width: 80%;
+  max-width: 300px; /* Mantenemos un max-width para los botones para que no sean excesivamente anchos en pantallas grandes */
+  margin: 0.5rem auto;
+  font-weight: bold;
+  /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); Sombra inicial */
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1)); /* Nueva sombra con filter */
+  transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out; /* Transición suave, ahora para filter */
+}
+
+.welcome-button:hover {
+  transform: translateY(-2px); /* Elevar ligeramente el botón */
+  /* box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); Sombra más pronunciada en hover */
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.15)); /* Sombra más pronunciada en hover con filter */
+}
+
+/* Ajuste para el botón de paciente si quieres un color diferente al primario */
+.patient-button {
+  --background: #7c6fe3; /* Un morado, por ejemplo, si color="secondary" no da el tono deseado */
+}
+
+.login-prompt {
+  display: flex; /* Usar Flexbox */
+  flex-direction: row; /* Alinear elementos en una fila */
+  justify-content: center; /* Centrar contenido horizontalmente */
+  align-items: center; /* Centrar contenido verticalmente */
+  margin-top: 1.5rem; 
+  font-size: 0.9rem;
+  width: 100%; /* Asegurar que el contenedor ocupe el ancho para centrar bien */
+}
+
+.login-link-button {
+  --padding-start: 4px; 
+  --padding-end: 4px;
+  font-weight: bold;
+  text-transform: none; 
+  font-size: 0.9rem; 
+  vertical-align: baseline; 
+  height: auto; 
+  margin-left: 4px; /* Añadir un pequeño margen a la izquierda en lugar de negativo */
+}
+
+.smile-icon {
+  font-size: 2rem;
+  margin-top: 1.5rem; /* Ajustar margen superior */
+}

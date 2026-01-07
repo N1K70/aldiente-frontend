@@ -1,0 +1,21 @@
+{
+  "short_name": "ALDIENTE",
+  "name": "ALDIENTE - Plataforma Odontológica",
+  "icons": [
+    {
+      "src": "assets/images/LOGO_ALDIENTE_SINFONDO.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/images/LOGO_ALDIENTE_SINFONDO.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#3880ff",
+  "background_color": "#ffffff"
+}
