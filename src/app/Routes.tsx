@@ -12,7 +12,7 @@ import { isLandingDomain, getAppUrl, getLandingUrl } from '../shared/utils/domai
 import LoginPage from '../modules/auth/LoginPage';
 import HomePage from '../modules/home/HomePage';
 import LandingPage from '../pages/LandingPage';
-import Welcome from '../pages/Welcome';
+import WelcomePage from '../pages/WelcomePage';
 
 // Lazy loading de páginas no críticas
 const MyServicesPage = lazy(() => import('../modules/services/MyServicesPage'));
@@ -169,15 +169,15 @@ const Routes: React.FC = () => {
         exact
         component={LoginPage}
       />
-      <Route path="/welcome" exact component={Welcome} />
+      <Route path="/welcome" exact component={WelcomePage} />
       <Route path="/forgot-password" exact component={ForgotPassword} />
       <Route path="/reset-password" exact component={ResetPassword} />
       <Route path="/email-verification" exact component={EmailVerification} />
       <Route path="/webpay/return" exact component={WebpayReturnPage} />
       {/* Guest Checkout - Reserva sin login */}
       <Route path="/reservar" exact component={GuestCheckoutPage} />
-      {/* En el dominio principal, "/" va directo a login o home */}
-      <Route path="/" exact render={() => (user ? <Redirect to={startPath} /> : <Redirect to="/login" />)} />
+      {/* En el dominio principal, "/" va directo a welcome o home */}
+      <Route path="/" exact render={() => (user ? <Redirect to={startPath} /> : <Redirect to="/welcome" />)} />
       <Route path="/tabs">
         <>
           <IonRouterOutlet>

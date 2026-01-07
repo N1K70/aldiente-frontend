@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { IonContent, IonPage, IonButton, IonImg, IonText, IonGrid, IonRow, IonCol } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
-import './Welcome.css';
+import './WelcomePage.css';
 
-const Welcome: React.FC = () => {
+const WelcomePage: React.FC = () => {
   const history = useHistory();
   const [language, setLanguage] = useState<'es' | 'en'>('es');
 
@@ -97,4 +97,4 @@ const Welcome: React.FC = () => {
   );
 };
 
-export default Welcome;
+export default WelcomePage;
