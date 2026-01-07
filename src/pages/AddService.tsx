@@ -84,8 +84,7 @@ const AddService: React.FC = () => {
       description: '',
       category: '',
       price: undefined,
-      duration: '',
-      availability: ''
+      duration: ''
     },
   });
 

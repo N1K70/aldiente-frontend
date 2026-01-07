@@ -22,7 +22,12 @@
   "exclude": [
     "node_modules",
     "dist",
-    "src_legacy"
+    "src_legacy",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/__tests__/*",
+    "src/setupTests.ts",
+    "src/App.test.tsx"
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
