@@ -12,6 +12,7 @@ import { isLandingDomain, getAppUrl, getLandingUrl } from '../shared/utils/domai
 import LoginPage from '../modules/auth/LoginPage';
 import HomePage from '../modules/home/HomePage';
 import LandingPage from '../pages/LandingPage';
+import Welcome from '../pages/Welcome';
 
 // Lazy loading de páginas no críticas
 const MyServicesPage = lazy(() => import('../modules/services/MyServicesPage'));
@@ -168,6 +169,7 @@ const Routes: React.FC = () => {
         exact
         component={LoginPage}
       />
+      <Route path="/welcome" exact component={Welcome} />
       <Route path="/forgot-password" exact component={ForgotPassword} />
       <Route path="/reset-password" exact component={ResetPassword} />
       <Route path="/email-verification" exact component={EmailVerification} />
