@@ -449,7 +449,7 @@ const LandingPage: React.FC = () => {
                   className="cta-btn-primary"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={goToLogin}
+                  onClick={() => history.push('/login')}
                 >
                   Crear cuenta gratis
                   <IonIcon icon={arrowForwardOutline} />

@@ -39,7 +39,7 @@ const AuthRedirectController: React.FC<AuthRedirectControllerProps> = ({ setUser
       setUser(null);
       setLoading(false);
       // Redirigir a welcome si no está autenticado
-      const allowedPublicPaths = ['/welcome', '/login', '/register', '/register-student', '/register-patient'];
+      const allowedPublicPaths = ['/', '/welcome', '/login', '/forgot-password', '/reset-password', '/email-verification', '/reservar'];
       if (!allowedPublicPaths.includes(window.location.pathname)) {
         history.push('/welcome');
       }

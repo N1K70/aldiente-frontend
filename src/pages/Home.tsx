@@ -623,7 +623,7 @@ const Home: React.FC = () => {
                     fontWeight: '600',
                     fontSize: '1rem'
                   }}
-                  onClick={() => history.push('/register')}
+                  onClick={() => history.push('/login')}
                 >
                   <IonIcon slot="start" icon={personAddOutline} />
                   Crear Cuenta

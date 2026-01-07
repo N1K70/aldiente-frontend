@@ -33,7 +33,7 @@ const WelcomePage: React.FC = () => {
   };
 
   const goToRegister = () => {
-    history.push('/register');
+    history.push('/login');
   };
 
   const goToLogin = () => {

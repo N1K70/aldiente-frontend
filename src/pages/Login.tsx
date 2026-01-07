@@ -292,7 +292,7 @@ const Login: React.FC = () => {
               <div className="auth-links">
                 <p className="signup-text">
                   ¿No tienes una cuenta?{' '}
-                  <a href="/register" className="signup-link">Regístrate</a>
+                  <a href="/login" className="signup-link">Regístrate</a>
                 </p>
                 <p className="forgot-password-text">
                   <a href="/forgot-password" className="forgot-password-link">

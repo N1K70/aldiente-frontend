@@ -176,8 +176,8 @@ const Routes: React.FC = () => {
       <Route path="/webpay/return" exact component={WebpayReturnPage} />
       {/* Guest Checkout - Reserva sin login */}
       <Route path="/reservar" exact component={GuestCheckoutPage} />
-      {/* En el dominio principal, "/" va directo a welcome o home */}
-      <Route path="/" exact render={() => (user ? <Redirect to={startPath} /> : <Redirect to="/welcome" />)} />
+      {/* En el dominio principal, "/" va directo a landing o home */}
+      <Route path="/" exact render={() => (user ? <Redirect to={startPath} /> : <LandingPage />)} />
       <Route path="/tabs">
         <>
           <IonRouterOutlet>
