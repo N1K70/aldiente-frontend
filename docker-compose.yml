@@ -80,6 +80,7 @@ services:
       DB_PORT: ${DB_PORT:-5432}
       PORT: 3000
       JWT_SECRET: ${JWT_SECRET:-aldiente_secret_key_for_jwt}
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-aldiente}?sslmode=disable
       FILESVC_URL: http://filesvc:3000
       CHAT_SERVICE_URL: http://chatsvc:3000
     depends_on:
