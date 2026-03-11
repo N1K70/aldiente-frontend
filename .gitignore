@@ -38,9 +38,7 @@ yarn-error.log*
 *.tsbuildinfo
 
 # Docker
-Dockerfile
-.dockerignore
-docker-compose.yml
+# (Dockerfile y docker-compose.yml se versionan intencionalmente)
 
 # nginx
 nginx.conf
