@@ -34,6 +34,12 @@
   -webkit-font-smoothing: antialiased;
 }
 
+#features,
+#how-it-works,
+#testimonials {
+  scroll-margin-top: 96px;
+}
+
 /* Fix inner-scroll padding blanco inferior */
 .landing-content::part(scroll) {
   padding-bottom: 0 !important;
@@ -101,13 +107,21 @@
 .navbar-links a {
   font-size: 0.95rem;
   font-weight: 500;
-  color: var(--landing-gray-600);
+  color: var(--landing-gray-700) !important;
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
+.navbar-links a:visited {
+  color: var(--landing-gray-700) !important;
+}
+
 .navbar-links a:hover {
-  color: var(--landing-primary);
+  color: var(--landing-gray-900) !important;
+}
+
+.navbar-links a:active {
+  color: var(--landing-gray-900) !important;
 }
 
 .navbar-cta {

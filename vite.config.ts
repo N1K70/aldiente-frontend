@@ -23,13 +23,13 @@ export default defineConfig(({ command, mode }) => {
     },
     // Servidor de desarrollo
     server: {
-      host: true, // 0.0.0.0 para exponer en LAN
+      host: '0.0.0.0', // Exponer en todas las interfaces
       port: 3000,
-      open: true,
-      // Importante: solo indicamos clientPort para que el navegador use el puerto mapeado del host
-      // y evitamos que el servidor HMR intente bindearse a la IP del host dentro del contenedor (EADDRNOTAVAIL)
-      hmr: {
-        clientPort: env.VITE_HMR_PORT ? Number(env.VITE_HMR_PORT) : 3002
+      open: false,
+      strictPort: true,
+      hmr: true,
+      watch: {
+        usePolling: true
       }
     },
     build: {

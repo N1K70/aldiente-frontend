@@ -138,6 +138,18 @@ const LoginPage: React.FC = () => {
     }
   }, [email, password, confirmPassword, role, name, birthDate, gender, location, fullName, university, careerYear, rut, acceptTerms, login]);
 
+  const onFormSubmit = useCallback(
+    async (e?: React.FormEvent) => {
+      if (e) e.preventDefault();
+      if (mode === 'login') {
+        await onSubmit();
+      } else {
+        await onRegister();
+      }
+    },
+    [mode, onRegister, onSubmit]
+  );
+
   const features = [
     { icon: checkmarkCircleOutline, text: 'Tratamientos supervisados por profesionales' },
     { icon: peopleOutline, text: 'Estudiantes certificados y capacitados' },
@@ -207,9 +219,11 @@ const LoginPage: React.FC = () => {
               <div className="auth-form-card">
                 {/* Header */}
                 <div className="auth-form-header">
-                  <div className="auth-form-logo">
-                    <IonImg src="/assets/images/LOGO_ALDIENTE_SINFONDO.png" alt="ALDIENTE" />
-                  </div>
+                  {mode === 'login' && (
+                    <div className="auth-form-logo">
+                      <IonImg src="/assets/images/LOGO_ALDIENTE_SINFONDO.png" alt="ALDIENTE" />
+                    </div>
+                  )}
                   <h1 className="auth-form-title">
                     {mode === 'login' ? 'Bienvenido de vuelta' : 'Crea tu cuenta'}
                   </h1>
@@ -224,12 +238,14 @@ const LoginPage: React.FC = () => {
                 <div className="auth-tabs">
                   <button 
                     className={`auth-tab ${mode === 'login' ? 'active' : ''}`}
+                    type="button"
                     onClick={() => setMode('login')}
                   >
                     Iniciar sesión
                   </button>
                   <button 
                     className={`auth-tab ${mode === 'register' ? 'active' : ''}`}
+                    type="button"
                     onClick={() => setMode('register')}
                   >
                     Crear cuenta
@@ -259,38 +275,49 @@ const LoginPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Form Fields */}
-                <div className="auth-form-fields">
-                  {/* Email */}
-                  <div className="auth-input-group">
-                    <div className="auth-input-wrapper">
-                      <IonIcon icon={mailOutline} />
-                      <IonInput
-                        type="email"
-                        value={email}
-                        placeholder={mode === 'login' ? 'Correo electrónico' : (role === 'student' ? 'Correo institucional' : 'Correo electrónico')}
-                        onIonInput={(e: any) => setEmail(e.detail.value)}
-                        onKeyDown={(e: any) => { if (e.key === 'Enter' && mode === 'login') onSubmit(); }}
-                      />
+                <form onSubmit={onFormSubmit}>
+                  {/* Form Fields */}
+                  <div className="auth-form-fields">
+                    {/* Email */}
+                    <div className="auth-input-group">
+                      <div className="auth-input-wrapper">
+                        <IonIcon icon={mailOutline} />
+                        <IonInput
+                          type="email"
+                          name="email"
+                          autocomplete="email"
+                          inputMode="email"
+                          aria-label="Correo electrónico"
+                          value={email}
+                          placeholder={mode === 'login' ? 'Correo electrónico' : (role === 'student' ? 'Correo institucional' : 'Correo electrónico')}
+                          onIonInput={(e: any) => setEmail(e.detail.value)}
+                        />
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Password */}
-                  <div className="auth-input-group">
-                    <div className="auth-input-wrapper">
-                      <IonIcon icon={lockClosedOutline} />
-                      <IonInput
-                        type={showPassword ? 'text' : 'password'}
-                        value={password}
-                        placeholder="Contraseña"
-                        onIonInput={(e: any) => setPassword(e.detail.value)}
-                        onKeyDown={(e: any) => { if (e.key === 'Enter') { mode === 'login' ? onSubmit() : onRegister(); } }}
-                      />
-                      <button className="auth-password-toggle" onClick={() => setShowPassword(v => !v)}>
-                        <IonIcon icon={showPassword ? eyeOffOutline : eyeOutline} />
-                      </button>
+                    {/* Password */}
+                    <div className="auth-input-group">
+                      <div className="auth-input-wrapper">
+                        <IonIcon icon={lockClosedOutline} />
+                        <IonInput
+                          type={showPassword ? 'text' : 'password'}
+                          name="password"
+                          autocomplete={mode === 'login' ? 'current-password' : 'new-password'}
+                          aria-label="Contraseña"
+                          value={password}
+                          placeholder="Contraseña"
+                          onIonInput={(e: any) => setPassword(e.detail.value)}
+                        />
+                        <button
+                          type="button"
+                          className="auth-password-toggle"
+                          onClick={() => setShowPassword(v => !v)}
+                          aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                        >
+                          <IonIcon icon={showPassword ? eyeOffOutline : eyeOutline} />
+                        </button>
+                      </div>
                     </div>
-                  </div>
 
                   {/* Register Fields */}
                   {mode === 'register' && (
@@ -441,7 +468,7 @@ const LoginPage: React.FC = () => {
                   {/* Submit Button */}
                   <motion.button
                     className="auth-submit-btn"
-                    onClick={mode === 'login' ? onSubmit : onRegister}
+                    type="submit"
                     disabled={loading || regLoading || (mode === 'register' && !acceptTerms)}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
@@ -457,26 +484,27 @@ const LoginPage: React.FC = () => {
                         <a href="/forgot-password" className="auth-footer-link">
                           ¿Olvidaste tu contraseña?
                         </a>
-                        <a href="#" className="auth-footer-link" onClick={(e) => { e.preventDefault(); setMode('register'); }}>
-                          Crear cuenta
-                        </a>
+                        <span></span>
                       </>
                     ) : (
                       <>
                         <span></span>
-                        <a href="#" className="auth-footer-link" onClick={(e) => { e.preventDefault(); setMode('login'); }}>
+                        <button type="button" className="auth-footer-link" onClick={() => setMode('login')}>
                           Ya tengo cuenta
-                        </a>
+                        </button>
                       </>
                     )}
                   </div>
                 </div>
+                </form>
 
-                {/* Security Note */}
-                <div className="auth-security-note">
-                  <IonIcon icon={shieldCheckmarkOutline} />
-                  <span>Tus datos están protegidos con los más altos estándares de seguridad.</span>
-                </div>
+                {/* Security Note - only show in login mode */}
+                {mode === 'login' && (
+                  <div className="auth-security-note">
+                    <IonIcon icon={shieldCheckmarkOutline} />
+                    <span>Tus datos están protegidos con los más altos estándares de seguridad.</span>
+                  </div>
+                )}
               </div>
             </motion.div>
           </div>

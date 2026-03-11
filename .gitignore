@@ -36,3 +36,14 @@ yarn-error.log*
 
 # TypeScript
 *.tsbuildinfo
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# nginx
+nginx.conf
+
+# Vite
+vite.config.ts

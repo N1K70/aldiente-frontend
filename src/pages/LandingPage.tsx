@@ -29,6 +29,7 @@ const LandingPage: React.FC = () => {
   const { user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   // Función para navegar al login (redirige al dominio correcto si es necesario)
   const goToLogin = () => {
@@ -59,6 +60,19 @@ const LandingPage: React.FC = () => {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 768px)');
+    const update = () => {
+      setIsMobile(mediaQuery.matches);
+      if (!mediaQuery.matches) {
+        setMobileMenuOpen(false);
+      }
+    };
+    update();
+    mediaQuery.addEventListener('change', update);
+    return () => mediaQuery.removeEventListener('change', update);
   }, []);
 
   const features = [
@@ -160,14 +174,43 @@ const LandingPage: React.FC = () => {
               <span className="navbar-brand">ALDIENTE</span>
             </div>
 
-            <div className={`navbar-links ${mobileMenuOpen ? 'open' : ''}`}>
-              <a href="#features" onClick={(e) => { e.preventDefault(); setMobileMenuOpen(false); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); }}>Características</a>
-              <a href="#how-it-works" onClick={(e) => { e.preventDefault(); setMobileMenuOpen(false); document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' }); }}>Cómo funciona</a>
-              <a href="#testimonials" onClick={(e) => { e.preventDefault(); setMobileMenuOpen(false); document.getElementById('testimonials')?.scrollIntoView({ behavior: 'smooth' }); }}>Testimonios</a>
-              <button className="navbar-cta" onClick={goToLogin}>
-                Comenzar
-              </button>
-            </div>
+            {(!isMobile || mobileMenuOpen) && (
+              <div className={`navbar-links ${mobileMenuOpen ? 'open' : ''}`}>
+                <a
+                  href="#features"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setMobileMenuOpen(false);
+                    document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  Características
+                </a>
+                <a
+                  href="#how-it-works"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setMobileMenuOpen(false);
+                    document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  Cómo funciona
+                </a>
+                <a
+                  href="#testimonials"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setMobileMenuOpen(false);
+                    document.getElementById('testimonials')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  Testimonios
+                </a>
+                <button className="navbar-cta" onClick={goToLogin}>
+                  Crear cuenta gratis
+                </button>
+              </div>
+            )}
 
             <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               <IonIcon icon={mobileMenuOpen ? closeOutline : menuOutline} />
@@ -196,15 +239,20 @@ const LandingPage: React.FC = () => {
               </div>
 
               <h1 className="hero-title">
-                Servicios odontológicos
-                <span className="hero-title-highlight"> de calidad</span>
-                <br />a tu alcance
+                Atención dental
+                <span className="hero-title-highlight"> supervisada</span>
+                <br />a precio accesible
               </h1>
 
               <p className="hero-subtitle">
-                Conectamos pacientes con estudiantes de odontología certificados.
-                Tratamientos profesionales, supervisados y a precios accesibles.
+                Agenda con estudiantes de odontología certificados y supervisión docente. Reserva en minutos y paga de forma segura.
               </p>
+
+              <div className="hero-trust">
+                <p>
+                  <strong>Supervisión docente</strong> · <strong>Pagos seguros</strong> · <strong>Calificaciones reales</strong>
+                </p>
+              </div>
 
               <div className="hero-cta-group">
                 <motion.button
@@ -213,7 +261,7 @@ const LandingPage: React.FC = () => {
                   whileTap={{ scale: 0.98 }}
                   onClick={goToLogin}
                 >
-                  Comenzar ahora
+                  Crear cuenta gratis
                   <IonIcon icon={arrowForwardOutline} />
                 </motion.button>
 
@@ -449,7 +497,7 @@ const LandingPage: React.FC = () => {
                   className="cta-btn-primary"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => history.push('/login')}
+                  onClick={goToLogin}
                 >
                   Crear cuenta gratis
                   <IonIcon icon={arrowForwardOutline} />
@@ -504,14 +552,12 @@ const LandingPage: React.FC = () => {
                 </div>
                 <div className="footer-links-col">
                   <h4>Legal</h4>
-                  <a href="#">Términos de uso</a>
-                  <a href="#">Privacidad</a>
-                  <a href="#">Cookies</a>
+                  <a href="mailto:contacto@aldiente.cl">Consultas legales</a>
                 </div>
                 <div className="footer-links-col">
                   <h4>Contacto</h4>
                   <a href="mailto:contacto@aldiente.cl">contacto@aldiente.cl</a>
-                  <a href="#">Soporte</a>
+                  <a href="mailto:contacto@aldiente.cl">Soporte</a>
                 </div>
               </div>
             </div>
