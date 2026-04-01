@@ -19,6 +19,18 @@ import { useAuth } from '../../shared/context/AuthContext';
 import { listDocuments, uploadDocument } from './documents.api';
 import { DocumentCategoryPatient, DocumentCategoryStudent, UploadDocumentInput } from './types';
 
+const MAX_FILE_SIZE_BYTES = 4 * 1024 * 1024;
+const ALLOWED_FILE_TYPES = ['application/pdf'];
+const ALLOWED_FILE_EXTENSIONS = ['.pdf', '.jpg', '.jpeg', '.png', '.webp'];
+
+const isAllowedFileType = (file: File) => {
+  if (file.type === 'application/pdf') return true;
+  if (file.type.startsWith('image/')) return true;
+
+  const lowerName = file.name.toLowerCase();
+  return ALLOWED_FILE_EXTENSIONS.some((ext) => lowerName.endsWith(ext));
+};
+
 export type UploadDocumentModalProps = {
   isOpen: boolean;
   onDismiss: () => void;
@@ -76,7 +88,8 @@ const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({ isOpen, onDis
 
   const canSubmit = useMemo(() => {
     if (!title || !category || !file) return false;
-    if (file.size > 10 * 1024 * 1024) return false; // 10MB
+    if (file.size > MAX_FILE_SIZE_BYTES) return false;
+    if (!isAllowedFileType(file)) return false;
     if (isStudent && category === 'alumno_regular') {
       return year === currentYear;
     }
@@ -89,8 +102,13 @@ const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({ isOpen, onDis
       setFile(null);
       return;
     }
-    if (f.size > 10 * 1024 * 1024) {
-      setError('El archivo excede el tamaño máximo permitido de 10MB.');
+    if (!isAllowedFileType(f)) {
+      setError('Solo se permiten archivos PDF o imágenes.');
+      setFile(null);
+      return;
+    }
+    if (f.size > MAX_FILE_SIZE_BYTES) {
+      setError('El archivo excede el tamaño máximo permitido de 4MB.');
       setFile(null);
       return;
     }
@@ -149,7 +167,7 @@ const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({ isOpen, onDis
         </IonItem>
         <IonItem>
           <IonLabel position="stacked">Categoría</IonLabel>
-          <IonSelect value={category} placeholder="Selecciona" onIonChange={(e) => setCategory(e.detail.value)} interface="popover">
+          <IonSelect value={category} placeholder="Selecciona" onIonChange={(e) => setCategory(e.detail.value)} interface="alert">
             {categories.map(c => (
               <IonSelectOption key={c.value} value={c.value}>{c.label}</IonSelectOption>
             ))}
@@ -163,15 +181,15 @@ const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({ isOpen, onDis
         )}
         <IonItem>
           <IonLabel position="stacked">Archivo</IonLabel>
-          <input type="file" onChange={onFileChange} />
+          <input type="file" accept="application/pdf,image/*" onChange={onFileChange} />
         </IonItem>
         {file && (
-          <IonText color={file.size > 10 * 1024 * 1024 ? 'danger' : 'medium'} style={{ display: 'block', marginTop: 6 }}>
-            Archivo: {file.name} · {(file.size / (1024*1024)).toFixed(2)} MB (máx. 10MB)
+          <IonText color={file.size > MAX_FILE_SIZE_BYTES ? 'danger' : 'medium'} style={{ display: 'block', marginTop: 6 }}>
+            Archivo: {file.name} · {(file.size / (1024*1024)).toFixed(2)} MB (máx. 4MB)
           </IonText>
         )}
         <IonText color="medium" style={{ display: 'block', marginTop: 6 }}>
-          Límite por archivo: 10MB · Cuota por usuario: 30MB.
+          Formatos permitidos: PDF e imágenes · Límite por archivo: 4MB · Cuota por usuario: 30MB.
         </IonText>
         {error && (
           <IonText color="danger" style={{ display: 'block', marginTop: 8 }}>{error}</IonText>

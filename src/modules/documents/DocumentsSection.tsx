@@ -117,7 +117,7 @@ const DocumentsSection: React.FC<DocumentsSectionProps> = ({ onDocumentsChange }
             })()
           )}
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8, flexWrap: 'wrap' }}>
-            <IonSelect value={filter} placeholder="Filtrar por categoría" onIonChange={(e) => setFilter(e.detail.value)} interface="popover">
+            <IonSelect value={filter} placeholder="Filtrar por categoría" onIonChange={(e) => setFilter(e.detail.value)} interface="alert">
               {categories.map(c => (
                 <IonSelectOption key={c.value} value={c.value}>{c.label}</IonSelectOption>
               ))}

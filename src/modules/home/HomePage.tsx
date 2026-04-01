@@ -42,7 +42,7 @@ import { fadeInUp, staggerContainer, listItem, pageTransition } from '../../util
 import { useDebounce } from '../../shared/hooks/useDebounce';
 import { getStudentServices, deleteStudentService } from '../services/services.api';
 import ServiceFormModal from '../services/ServiceFormModal';
-import PatientOnboarding, { usePatientOnboarding, University } from '../onboarding/PatientOnboarding';
+import PatientOnboarding, { usePatientOnboarding } from '../onboarding/PatientOnboarding';
 import '../../theme/modern-design.css';
 
 const HomePage: React.FC = () => {
@@ -63,7 +63,6 @@ const HomePage: React.FC = () => {
   // Onboarding para pacientes
   const { 
     needsOnboarding, 
-    selectedUniversity, 
     completeOnboarding 
   } = usePatientOnboarding();
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -75,10 +74,10 @@ const HomePage: React.FC = () => {
     }
   }, [user?.role, needsOnboarding]);
 
-  const handleOnboardingComplete = useCallback((university: University) => {
-    completeOnboarding(university);
+  const handleOnboardingComplete = useCallback(() => {
+    completeOnboarding();
     setShowOnboarding(false);
-    setToastMsg(`¡Bienvenido! Ahora verás servicios de ${university.short_name || university.name}`);
+    setToastMsg('¡Bienvenido! Ya puedes explorar servicios cercanos.');
     setToastOpen(true);
   }, [completeOnboarding]);
   const [reloadKey, setReloadKey] = useState(0);

@@ -6,6 +6,24 @@ export const api = axios.create({
   timeout: 10000,
 });
 
+const clearSessionAndRedirectToLogin = () => {
+  try {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('mockUser');
+    localStorage.removeItem('token');
+  } catch {}
+
+  try { window.dispatchEvent(new Event('auth:changed')); } catch {}
+  try { window.dispatchEvent(new CustomEvent('auth:expired', { detail: { reason: 'expired' } })); } catch {}
+
+  try {
+    if (typeof window !== 'undefined' && window.location?.pathname !== '/login') {
+      window.location.replace('/login');
+    }
+  } catch {}
+};
+
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('authToken') || localStorage.getItem('token');
   config.headers = config.headers || {};
@@ -48,6 +66,7 @@ api.interceptors.response.use(
             const newToken = (r?.data as any)?.token;
             if (newToken) {
               localStorage.setItem('authToken', newToken);
+              try { localStorage.removeItem('token'); } catch {}
               // Actualizar header y reintentar
               originalRequest.headers = originalRequest.headers || {};
               originalRequest.headers.Authorization = `Bearer ${newToken}`;
@@ -55,34 +74,12 @@ api.interceptors.response.use(
             }
             return Promise.reject(error);
           })
-          .catch((e) => {
-            try {
-              localStorage.removeItem('authToken');
-              localStorage.removeItem('refreshToken');
-              localStorage.removeItem('mockUser');
-            } catch {}
-            try { window.dispatchEvent(new Event('auth:changed')); } catch {}
-            try { window.dispatchEvent(new CustomEvent('auth:expired', { detail: { reason: 'expired' } })); } catch {}
-            try {
-              if (typeof window !== 'undefined' && window.location?.pathname !== '/login') {
-                window.location.href = '/login';
-              }
-            } catch {}
+          .catch(() => {
+            clearSessionAndRedirectToLogin();
             return Promise.reject(error);
           });
       } else {
-        try {
-          localStorage.removeItem('authToken');
-          localStorage.removeItem('refreshToken');
-          localStorage.removeItem('mockUser');
-        } catch {}
-        try { window.dispatchEvent(new Event('auth:changed')); } catch {}
-        try { window.dispatchEvent(new CustomEvent('auth:expired', { detail: { reason: 'expired' } })); } catch {}
-        try {
-          if (typeof window !== 'undefined' && window.location?.pathname !== '/login') {
-            window.location.href = '/login';
-          }
-        } catch {}
+        clearSessionAndRedirectToLogin();
       }
     }
     return Promise.reject(error);

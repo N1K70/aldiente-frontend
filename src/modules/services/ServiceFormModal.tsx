@@ -240,6 +240,10 @@ export default function ServiceFormModal({ isOpen, studentId, onDismiss, onSaved
       setError('Debes seleccionar un servicio base');
       return;
     }
+    if (!price || Number.isNaN(Number(price)) || Number(price) <= 0) {
+      setError('Debes ingresar un precio válido mayor a 0');
+      return;
+    }
     
     // Validar rangos de horarios de disponibilidad
     const enabledDays = Object.entries(days).filter(([_, st]) => (st as DayState).enabled);
@@ -524,7 +528,7 @@ export default function ServiceFormModal({ isOpen, studentId, onDismiss, onSaved
                   <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-2)' }}>
                     <IonIcon icon={cashOutline} style={{ fontSize: 20, color: 'var(--color-primary-600)' }} />
                     <label className="caption" style={{ fontWeight: 500, color: 'var(--text-primary)' }}>
-                      Precio (CLP)
+                      Precio (CLP)*
                     </label>
                   </div>
                   <IonInput 
@@ -542,7 +546,7 @@ export default function ServiceFormModal({ isOpen, studentId, onDismiss, onSaved
                     }}
                   />
                   <p className="caption" style={{ marginTop: 'var(--space-2)', color: 'var(--text-secondary)' }}>
-                    Opcional. Puedes dejarlo vacío si se acuerda luego.
+                    Este campo es obligatorio. Además, nosotros agregaremos $3.000 CLP extra por cada reserva.
                   </p>
                 </div>
 

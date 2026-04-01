@@ -43,6 +43,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ className }) =>
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ show: boolean; message: string; color: string } | null>(null);
   const [tokenAvailable, setTokenAvailable] = useState<boolean>(() => !!(localStorage.getItem('authToken') || localStorage.getItem('token')));
+  const [notificationsAvailable, setNotificationsAvailable] = useState(true);
 
   const loadNotifications = useCallback(async () => {
     if (!user) return; // No cargar si no hay usuario autenticado
@@ -54,12 +55,28 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ className }) =>
       const data = await getNotifications({ limit: 20 });
       setNotifications(data.notifications);
       setUnreadCount(data.unread_count);
+      setNotificationsAvailable(true);
     } catch (error: any) {
       const status = error?.response?.status;
+      const errorCode = error?.code;
+      const requestUrl = String(error?.config?.url || '');
+      const isNotificationsEndpoint = /\/api\/notifications(?:\/|$)/i.test(requestUrl);
+      const isUnsupportedEndpoint = status === 404 || status === 405 || status === 501;
+      const isServerUnavailable = status === 502 || status === 503 || status === 504;
+      const isNetworkError = errorCode === 'ERR_NETWORK' || !error?.response;
+
+      // Si el backend aún no soporta notificaciones o está temporalmente no disponible,
+      // ocultamos el error al arranque y deshabilitamos el polling para no degradar la UX.
+      if (isNotificationsEndpoint && (isUnsupportedEndpoint || isServerUnavailable || isNetworkError)) {
+        setNotifications([]);
+        setUnreadCount(0);
+        setNotificationsAvailable(false);
+        return;
+      }
+
       // Silenciar 401 (expira sesión) para no ensuciar la consola, el interceptor redirige si corresponde
       if (status !== 401) {
         console.error('Error loading notifications:', error);
-        setToast({ show: true, message: 'Error al cargar notificaciones', color: 'danger' });
       }
       if (status === 401) {
         // Deshabilitar polling hasta que exista un token válido nuevamente
@@ -72,7 +89,13 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ className }) =>
 
   useEffect(() => {
     // Mantener sincronizado tokenAvailable ante cambios en localStorage o eventos de auth
-    const onStorage = () => setTokenAvailable(!!(localStorage.getItem('authToken') || localStorage.getItem('token')));
+    const onStorage = () => {
+      const hasToken = !!(localStorage.getItem('authToken') || localStorage.getItem('token'));
+      setTokenAvailable(hasToken);
+      if (hasToken) {
+        setNotificationsAvailable(true);
+      }
+    };
     const onAuthChanged = () => onStorage();
     window.addEventListener('storage', onStorage);
     window.addEventListener('auth:changed', onAuthChanged as any);
@@ -83,26 +106,26 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ className }) =>
   }, []);
 
   useEffect(() => {
-    if (user && tokenAvailable) {
+    if (user && tokenAvailable && notificationsAvailable) {
       loadNotifications();
       // Poll for new notifications cada 30s solo si hay token
       const interval = setInterval(loadNotifications, 30000);
       return () => clearInterval(interval);
     }
-  }, [loadNotifications, user, tokenAvailable]);
+  }, [loadNotifications, user, tokenAvailable, notificationsAvailable]);
 
   // Escuchar mensajes nuevos del chat para refrescar notificaciones
   useEffect(() => {
     const handleNewChatMessage = () => {
       // Refrescar notificaciones cuando llegue un mensaje nuevo
-      if (tokenAvailable) {
+      if (tokenAvailable && notificationsAvailable) {
         loadNotifications();
       }
     };
 
     window.addEventListener('chat:new-message', handleNewChatMessage as any);
     return () => window.removeEventListener('chat:new-message', handleNewChatMessage as any);
-  }, [loadNotifications, tokenAvailable]);
+  }, [loadNotifications, tokenAvailable, notificationsAvailable]);
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {
@@ -346,7 +369,10 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ className }) =>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={loadNotifications}
+                onClick={() => {
+                  setNotificationsAvailable(true);
+                  loadNotifications();
+                }}
                 className="btn-modern-ghost"
                 style={{ minWidth: '120px' }}
               >

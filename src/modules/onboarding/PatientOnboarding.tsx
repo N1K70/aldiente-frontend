@@ -34,7 +34,7 @@ export interface University {
 
 interface PatientOnboardingProps {
   isOpen: boolean;
-  onComplete: (university: University) => void;
+  onComplete: (university?: University | null) => void;
   onSkip?: () => void;
 }
 
@@ -59,10 +59,15 @@ export function usePatientOnboarding() {
     }
   }, []);
 
-  const completeOnboarding = useCallback((university: University) => {
+  const completeOnboarding = useCallback((university?: University | null) => {
     localStorage.setItem(ONBOARDING_KEY, 'true');
-    localStorage.setItem(SELECTED_UNIVERSITY_KEY, JSON.stringify(university));
-    setSelectedUniversity(university);
+    if (university) {
+      localStorage.setItem(SELECTED_UNIVERSITY_KEY, JSON.stringify(university));
+      setSelectedUniversity(university);
+    } else {
+      localStorage.removeItem(SELECTED_UNIVERSITY_KEY);
+      setSelectedUniversity(null);
+    }
     setNeedsOnboarding(false);
   }, []);
 
@@ -168,9 +173,7 @@ const PatientOnboarding: React.FC<PatientOnboardingProps> = ({
   };
 
   const handleComplete = () => {
-    if (selectedUniversity) {
-      onComplete(selectedUniversity);
-    }
+    onComplete(selectedUniversity || null);
   };
 
   const steps = [
@@ -433,9 +436,11 @@ const PatientOnboarding: React.FC<PatientOnboardingProps> = ({
     },
   ];
 
-  const currentStep = steps[step];
-  const isLastStep = step === steps.length - 1;
-  const canProceed = step === 0 || step === 1 || (step === 2 && selectedUniversity);
+  const patientSteps = steps.slice(0, 2);
+  const currentSteps = patientSteps;
+  const currentStep = currentSteps[step];
+  const isLastStep = step === currentSteps.length - 1;
+  const canProceed = step === 0 || step === 1;
 
   return (
     <IonModal isOpen={isOpen} backdropDismiss={false}>
@@ -453,7 +458,7 @@ const PatientOnboarding: React.FC<PatientOnboardingProps> = ({
             justifyContent: 'center', 
             marginBottom: 32 
           }}>
-            {steps.map((_, idx) => (
+            {currentSteps.map((_, idx) => (
               <div
                 key={idx}
                 style={{
@@ -506,7 +511,7 @@ const PatientOnboarding: React.FC<PatientOnboardingProps> = ({
             {step === 1 && hasLocation && (
               <IonButton
                 expand="block"
-                onClick={() => setStep(2)}
+                onClick={handleComplete}
                 style={{
                   '--background': 'linear-gradient(135deg, #a11b21 0%, #d4373f 100%)',
                   '--border-radius': '12px',
@@ -533,15 +538,12 @@ const PatientOnboarding: React.FC<PatientOnboardingProps> = ({
               </IonButton>
             )}
 
-            {isLastStep && (
+            {isLastStep && !hasLocation && (
               <IonButton
                 expand="block"
                 onClick={handleComplete}
-                disabled={!selectedUniversity}
                 style={{
-                  '--background': selectedUniversity 
-                    ? 'linear-gradient(135deg, #a11b21 0%, #d4373f 100%)'
-                    : '#cbd5e1',
+                  '--background': 'linear-gradient(135deg, #a11b21 0%, #d4373f 100%)',
                   '--border-radius': '12px',
                   height: 52,
                 }}
