@@ -175,6 +175,12 @@ const ReservationPage: React.FC = () => {
     return `Reservar ${sname}`;
   }, [service, serviceId, professional, studentId]);
 
+  const optionRowStyle = {
+    '--inner-padding-end': '0px',
+    '--padding-start': '0px',
+    '--min-height': '48px',
+  } as React.CSSProperties;
+
   const handleSubmit = async () => {
     try {
       // Validaciones simples
@@ -389,14 +395,33 @@ const ReservationPage: React.FC = () => {
                 />
               </div>
 
-              <IonItem>
-                <IonLabel position="stacked">¿Cómo pagas?</IonLabel>
+              <div style={{ padding: '0 16px' }}>
+                <IonLabel
+                  style={{ 
+                    fontSize: '16px', 
+                    fontWeight: '600', 
+                    color: 'var(--ion-color-dark)',
+                    marginBottom: '8px',
+                    display: 'block'
+                  }}
+                >
+                  ¿Cómo pagas?
+                </IonLabel>
                 <IonRadioGroup value={payment} onIonChange={(e) => setPayment(e.detail.value)}>
-                  <IonItem><IonLabel>Efectivo</IonLabel><IonRadio slot="end" value="efectivo" /></IonItem>
-                  <IonItem><IonLabel>Tarjeta</IonLabel><IonRadio slot="end" value="tarjeta" /></IonItem>
-                  <IonItem><IonLabel>Transferencia</IonLabel><IonRadio slot="end" value="transferencia" /></IonItem>
+                  <IonItem button detail={false} onClick={() => setPayment('efectivo')} style={optionRowStyle}>
+                    <IonLabel>Efectivo</IonLabel>
+                    <IonRadio slot="end" value="efectivo" />
+                  </IonItem>
+                  <IonItem button detail={false} onClick={() => setPayment('tarjeta')} style={optionRowStyle}>
+                    <IonLabel>Tarjeta</IonLabel>
+                    <IonRadio slot="end" value="tarjeta" />
+                  </IonItem>
+                  <IonItem button detail={false} onClick={() => setPayment('transferencia')} style={optionRowStyle}>
+                    <IonLabel>Transferencia</IonLabel>
+                    <IonRadio slot="end" value="transferencia" />
+                  </IonItem>
                   {webpayLink && (
-                    <IonItem>
+                    <IonItem button detail={false} onClick={() => setPayment('webpay')} style={optionRowStyle}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <img 
                           src="/assets/images/webpay_logo.svg" 
@@ -409,20 +434,36 @@ const ReservationPage: React.FC = () => {
                     </IonItem>
                   )}
                   {loadingWebpay && (
-                    <IonItem>
+                    <IonItem style={optionRowStyle}>
                       <IonLabel>Cargando opciones de pago...</IonLabel>
                     </IonItem>
                   )}
                 </IonRadioGroup>
-              </IonItem>
+              </div>
 
-              <IonItem>
-                <IonLabel position="stacked">Formato</IonLabel>
+              <div style={{ padding: '0 16px' }}>
+                <IonLabel
+                  style={{ 
+                    fontSize: '16px', 
+                    fontWeight: '600', 
+                    color: 'var(--ion-color-dark)',
+                    marginBottom: '8px',
+                    display: 'block'
+                  }}
+                >
+                  Formato
+                </IonLabel>
                 <IonRadioGroup value={format} onIonChange={(e) => setFormat(e.detail.value)}>
-                  <IonItem><IonLabel>Clínica</IonLabel><IonRadio slot="end" value="clinica" /></IonItem>
-                  <IonItem><IonLabel>Consulta online</IonLabel><IonRadio slot="end" value="online" /></IonItem>
+                  <IonItem button detail={false} onClick={() => setFormat('clinica')} style={optionRowStyle}>
+                    <IonLabel>Clínica</IonLabel>
+                    <IonRadio slot="end" value="clinica" />
+                  </IonItem>
+                  <IonItem button detail={false} onClick={() => setFormat('online')} style={optionRowStyle}>
+                    <IonLabel>Consulta online</IonLabel>
+                    <IonRadio slot="end" value="online" />
+                  </IonItem>
                 </IonRadioGroup>
-              </IonItem>
+              </div>
 
               <IonItem>
                 <IonLabel position="stacked">Notas</IonLabel>

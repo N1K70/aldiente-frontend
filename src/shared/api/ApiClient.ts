@@ -6,7 +6,15 @@ export const api = axios.create({
   timeout: 10000,
 });
 
+let isRedirectingToLogin = false;
+
 const clearSessionAndRedirectToLogin = () => {
+  if (isRedirectingToLogin) {
+    return;
+  }
+
+  isRedirectingToLogin = true;
+
   try {
     localStorage.removeItem('authToken');
     localStorage.removeItem('refreshToken');
@@ -56,6 +64,12 @@ api.interceptors.response.use(
     const status = error?.response?.status;
     const reqUrl = String(error?.config?.url || '');
     const originalRequest = error?.config;
+
+    if (status === 401 && /\/api\/auth\/refresh/i.test(reqUrl)) {
+      clearSessionAndRedirectToLogin();
+      return Promise.reject(error);
+    }
+
     if (status === 401 && !originalRequest?._retry && !/\/api\/(login|register|auth\/refresh)/i.test(reqUrl)) {
       originalRequest._retry = true;
       const refreshToken = localStorage.getItem('refreshToken');
@@ -72,6 +86,7 @@ api.interceptors.response.use(
               originalRequest.headers.Authorization = `Bearer ${newToken}`;
               return api(originalRequest);
             }
+            clearSessionAndRedirectToLogin();
             return Promise.reject(error);
           })
           .catch(() => {
@@ -80,8 +95,14 @@ api.interceptors.response.use(
           });
       } else {
         clearSessionAndRedirectToLogin();
+        return Promise.reject(error);
       }
     }
+
+    if (status === 401 && !/\/api\/(login|register)/i.test(reqUrl)) {
+      clearSessionAndRedirectToLogin();
+    }
+
     return Promise.reject(error);
   }
 );
