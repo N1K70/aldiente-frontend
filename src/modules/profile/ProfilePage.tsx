@@ -187,7 +187,9 @@ const ProfilePage: React.FC = () => {
     <IonPage>
       <IonHeader className="ion-no-border">
         <IonToolbar style={{ '--background': 'var(--bg-primary)' }}>
-          <IonTitle className="heading-md">Mi Perfil</IonTitle>
+          <IonTitle style={{ paddingInlineStart: '16px', fontSize: '1.4rem', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.5px' }}>
+            Mi Perfil
+          </IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent style={{ '--background': 'var(--bg-secondary)' }}>

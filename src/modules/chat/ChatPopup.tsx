@@ -20,6 +20,7 @@ interface ChatPopupProps {
   currentUserId: string;
   enabled: boolean;
   otherParticipantName?: string;
+  initialOpen?: boolean;
 }
 
 const connectionLabels: Record<ChatConnectionState, string> = {
@@ -29,8 +30,8 @@ const connectionLabels: Record<ChatConnectionState, string> = {
   error: 'Error',
 };
 
-const ChatPopup: React.FC<ChatPopupProps> = ({ appointmentId, token, currentUserId, enabled, otherParticipantName }) => {
-  const [isOpen, setIsOpen] = useState(false);
+const ChatPopup: React.FC<ChatPopupProps> = ({ appointmentId, token, currentUserId, enabled, otherParticipantName, initialOpen = false }) => {
+  const [isOpen, setIsOpen] = useState(initialOpen);
   const [message, setMessage] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -82,6 +83,12 @@ const ChatPopup: React.FC<ChatPopupProps> = ({ appointmentId, token, currentUser
       setUnreadCount(0);
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (initialOpen && enabled) {
+      setIsOpen(true);
+    }
+  }, [initialOpen, enabled, appointmentId]);
 
   const handleSubmit = async (evt: FormEvent<HTMLFormElement>) => {
     evt.preventDefault();

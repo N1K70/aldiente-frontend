@@ -20,15 +20,14 @@ import {
   IonCardTitle,
   IonCardContent,
 } from '@ionic/react';
-import { locationOutline, peopleOutline, calendarOutline, timeOutline, checkboxOutline, checkmarkDoneOutline, closeOutline, chatbubblesOutline, eyeOutline, alertCircleOutline, card, cashOutline } from 'ionicons/icons';
+import { locationOutline, peopleOutline, calendarOutline, timeOutline, checkboxOutline, checkmarkDoneOutline, closeOutline, chatbubblesOutline, eyeOutline, alertCircleOutline } from 'ionicons/icons';
 import { motion } from 'framer-motion';
 import { Appointment } from '../appointments/types';
 import { getAppointmentsForPatient } from '../appointments/appointments.api';
 import { useHistory } from 'react-router-dom';
-import { IonButton, IonToast, IonSpinner } from '@ionic/react';
+import { IonToast } from '@ionic/react';
 import { fadeInUp, staggerContainer, listItem, pageTransition } from '../../utils/animations';
 import '../../theme/modern-design.css';
-import { initiateAppointmentPayment } from '../webpay/webpay.api';
 
 const fmtDateTime = (iso?: string) => {
   if (!iso) return '—';
@@ -75,7 +74,6 @@ const PatientReservationsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [rows, setRows] = useState<Appointment[]>([]);
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'confirmed' | 'completed' | 'cancelled'>('all');
-  const [payingAppointmentId, setPayingAppointmentId] = useState<string | null>(null);
   const [toast, setToast] = useState({ open: false, msg: '', color: 'success' as 'success' | 'danger' | 'warning' });
 
   useEffect(() => {
@@ -143,74 +141,6 @@ const PatientReservationsPage: React.FC = () => {
 
   const empty = !loading && !error && upcoming.length === 0 && history.length === 0;
 
-  const handlePayment = async (appointmentId: string) => {
-    try {
-      setPayingAppointmentId(appointmentId);
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setToast({ open: true, msg: 'No se encontró token de autenticación', color: 'danger' });
-        setPayingAppointmentId(null);
-        return;
-      }
-
-      const response = await initiateAppointmentPayment(appointmentId, token);
-      console.log('[Webpay] Pago iniciado:', response);
-
-      // Redirigir a Webpay
-      window.location.href = response.redirectUrl;
-    } catch (error: any) {
-      console.error('[Webpay] Error al iniciar pago:', error);
-      setToast({ 
-        open: true, 
-        msg: error.message || 'Error al iniciar pago con Webpay', 
-        color: 'danger' 
-      });
-      setPayingAppointmentId(null);
-    }
-  };
-
-  const getPaymentStatusBadge = (appointment: any) => {
-    const paymentStatus = appointment.payment_status;
-    const paymentMethod = appointment.payment_method;
-
-    if (paymentStatus === 'approved') {
-      return (
-        <span className="badge-success" style={{ fontSize: '0.7rem', padding: '6px 12px', lineHeight: 1 }}>
-          <IonIcon icon={checkmarkDoneOutline} style={{ fontSize: '12px' }} />
-          <span>Pagado</span>
-        </span>
-      );
-    }
-
-    if (paymentStatus === 'pending_payment') {
-      return (
-        <span className="badge-warning" style={{ fontSize: '0.7rem', padding: '6px 12px', lineHeight: 1 }}>
-          <IonIcon icon={timeOutline} style={{ fontSize: '12px' }} />
-          <span>Pago pendiente</span>
-        </span>
-      );
-    }
-
-    if (paymentStatus === 'rejected') {
-      return (
-        <span className="badge-danger" style={{ fontSize: '0.7rem', padding: '6px 12px', lineHeight: 1 }}>
-          <IonIcon icon={closeOutline} style={{ fontSize: '12px' }} />
-          <span>Pago rechazado</span>
-        </span>
-      );
-    }
-
-    return null;
-  };
-
-  const needsPayment = (appointment: any) => {
-    const notes = appointment.notes || '';
-    const hasWebpayInNotes = notes.toLowerCase().includes('pago: webpay');
-    const paymentStatus = appointment.payment_status;
-    
-    return hasWebpayInNotes && (!paymentStatus || paymentStatus === 'pending' || paymentStatus === 'rejected');
-  };
-
   return (
     <IonPage>
       <IonHeader className="ion-no-border">
@@ -218,7 +148,9 @@ const PatientReservationsPage: React.FC = () => {
           <IonButtons slot="start">
             <IonBackButton defaultHref="/tabs/profile" />
           </IonButtons>
-          <IonTitle className="heading-md">Mis Reservas</IonTitle>
+          <IonTitle style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.5px' }}>
+            Mis Reservas
+          </IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent style={{ '--background': 'var(--bg-secondary)' }}>
@@ -336,7 +268,6 @@ const PatientReservationsPage: React.FC = () => {
                             <h3 className="heading-md" style={{ margin: 0 }}>{professional}</h3>
                           </div>
                           <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
-                            {getPaymentStatusBadge(a)}
                             <span className={badgeClass} style={{ fontSize: '0.75rem', padding: '8px 16px', lineHeight: 1 }}>
                               <IonIcon icon={a.status === 'pending' ? timeOutline : a.status === 'confirmed' ? checkboxOutline : a.status === 'completed' ? checkmarkDoneOutline : closeOutline} style={{ fontSize: '14px' }} />
                               <span>{label}</span>
@@ -363,26 +294,6 @@ const PatientReservationsPage: React.FC = () => {
 
                       <div className="service-card-footer">
                         <div style={{ display: 'flex', gap: 'var(--space-3)', flexDirection: 'column' }}>
-                          {needsPayment(a) && (
-                            <button
-                              className="btn-modern-primary"
-                              style={{ width: '100%' }}
-                              onClick={() => handlePayment(a.id)}
-                              disabled={payingAppointmentId === a.id}
-                            >
-                              {payingAppointmentId === a.id ? (
-                                <>
-                                  <IonSpinner name="crescent" style={{ width: 16, height: 16 }} />
-                                  <span>Procesando...</span>
-                                </>
-                              ) : (
-                                <>
-                                  <IonIcon icon={card} />
-                                  <span>Pagar con Webpay</span>
-                                </>
-                              )}
-                            </button>
-                          )}
                           <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
                             <button
                               className="btn-modern-secondary"
@@ -396,7 +307,7 @@ const PatientReservationsPage: React.FC = () => {
                               <button
                                 className="btn-modern-primary"
                                 style={{ flex: 1 }}
-                                onClick={() => router.push(`/tabs/appointments/${a.id}`)}
+                                onClick={() => router.push(`/tabs/appointments/${a.id}?openChat=1`)}
                               >
                                 <IonIcon icon={chatbubblesOutline} />
                                 Chat

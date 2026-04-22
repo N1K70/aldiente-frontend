@@ -20,13 +20,21 @@ import {
   IonText,
 } from '@ionic/react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { peopleOutline, starOutline, timeOutline, locationOutline } from 'ionicons/icons';
+import { peopleOutline, starOutline, timeOutline, locationOutline, calendarOutline, shieldCheckmarkOutline } from 'ionicons/icons';
 import { motion } from 'framer-motion';
 import { api } from '../../shared/api/ApiClient';
+import { getAvailabilityForService } from './services.api';
 import { fadeInUp, staggerContainer, listItem, pageTransition } from '../../utils/animations';
 import '../../theme/modern-design.css';
 
 interface RouteParams { id: string }
+
+interface AvailabilityItem {
+  id: string;
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+}
 
 export interface ServiceSummary {
   id: string;
@@ -46,10 +54,70 @@ interface ProviderItem {
   price?: number | null;
 }
 
+type AvailabilityPreview = {
+  label: string;
+  hasAvailability: boolean;
+};
+
 const norm = (s?: string) => (s || '')
   .toLowerCase()
   .normalize('NFD')
   .replace(/[\u0300-\u036f]/g, '');
+
+const weekdayLabels = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+
+const buildAvailabilityPreview = (rows: AvailabilityItem[]): AvailabilityPreview => {
+  if (!rows.length) {
+    return { label: 'Sin disponibilidad publicada', hasAvailability: false };
+  }
+
+  const sorted = rows
+    .filter((row) => typeof row.day_of_week === 'number' && !!row.start_time)
+    .slice()
+    .sort((a, b) => {
+      if (a.day_of_week !== b.day_of_week) return a.day_of_week - b.day_of_week;
+      return String(a.start_time).localeCompare(String(b.start_time));
+    });
+
+  const now = new Date();
+  const currentDay = now.getDay();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+  let best: AvailabilityItem | null = null;
+  let bestDelta = Number.POSITIVE_INFINITY;
+
+  for (const row of sorted) {
+    const start = String(row.start_time).slice(0, 5);
+    const [hours, minutes] = start.split(':').map(Number);
+    if (Number.isNaN(hours) || Number.isNaN(minutes)) continue;
+
+    let dayDelta = row.day_of_week - currentDay;
+    const startMinutes = hours * 60 + minutes;
+
+    if (dayDelta < 0 || (dayDelta === 0 && startMinutes < currentMinutes)) {
+      dayDelta += 7;
+    }
+
+    if (dayDelta < bestDelta || (dayDelta === bestDelta && best && start < String(best.start_time).slice(0, 5))) {
+      best = row;
+      bestDelta = dayDelta;
+    }
+  }
+
+  if (!best) {
+    const fallback = sorted[0];
+    return {
+      label: `${weekdayLabels[fallback.day_of_week] || 'Próximo día'} • ${String(fallback.start_time).slice(0, 5)} h`,
+      hasAvailability: true,
+    };
+  }
+
+  const dayLabel = bestDelta === 0 ? 'Hoy' : bestDelta === 1 ? 'Mañana' : weekdayLabels[best.day_of_week] || 'Próximo día';
+  return {
+    label: `${dayLabel} • ${String(best.start_time).slice(0, 5)} h`,
+    hasAvailability: true,
+  };
+};
 
 const ServiceDetailPage: React.FC = () => {
   const history = useHistory();
@@ -64,6 +132,7 @@ const ServiceDetailPage: React.FC = () => {
   const [providers, setProviders] = useState<ProviderItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [availabilityByService, setAvailabilityByService] = useState<Record<string, AvailabilityPreview>>({});
 
   // Cargar el servicio por ID si no vino en el estado de navegación
   useEffect(() => {
@@ -129,6 +198,32 @@ const ServiceDetailPage: React.FC = () => {
     return () => { mounted = false; };
   }, [service?.name]);
 
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      if (!providers.length) {
+        if (mounted) setAvailabilityByService({});
+        return;
+      }
+
+      const entries = await Promise.all(
+        providers.map(async (provider) => {
+          try {
+            const rows = await getAvailabilityForService(provider.serviceId);
+            return [provider.serviceId, buildAvailabilityPreview(rows as AvailabilityItem[])] as const;
+          } catch {
+            return [provider.serviceId, { label: 'Sin disponibilidad publicada', hasAvailability: false }] as const;
+          }
+        })
+      );
+
+      if (!mounted) return;
+      setAvailabilityByService(Object.fromEntries(entries));
+    })();
+
+    return () => { mounted = false; };
+  }, [providers]);
+
   return (
     <IonPage>
       <IonHeader className="ion-no-border">
@@ -175,6 +270,41 @@ const ServiceDetailPage: React.FC = () => {
             </motion.div>
           )}
 
+          <motion.div variants={fadeInUp}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 'var(--space-3)',
+                padding: 'var(--space-4)',
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '12px',
+                marginBottom: 'var(--space-6)'
+              }}
+            >
+              <div
+                style={{
+                  background: 'var(--color-primary-100)',
+                  color: 'var(--color-primary-600)',
+                  padding: '10px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <IonIcon icon={shieldCheckmarkOutline} style={{ fontSize: '1.5rem' }} />
+              </div>
+              <div>
+                <h4 className="body-md" style={{ fontWeight: 600, margin: '0 0 2px 0', color: 'var(--text-primary)' }}>Tratamientos Seguros</h4>
+                <p className="body-sm" style={{ margin: 0, color: 'var(--text-secondary)' }}>
+                  Todo servicio es realizado por estudiantes y <strong>supervisado por docentes</strong>.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+
           <h3 className="heading-md" style={{ marginBottom: 'var(--space-4)', color: 'var(--text-primary)' }}>
             Profesionales disponibles ({providers.length})
           </h3>
@@ -183,7 +313,9 @@ const ServiceDetailPage: React.FC = () => {
             variants={staggerContainer}
             className="grid-modern"
           >
-            {providers.map((p) => (
+            {providers.map((p) => {
+              const availability = availabilityByService[p.serviceId];
+              return (
               <motion.div key={p.id} variants={listItem}>
                 <div 
                   className="service-card-modern hover-lift" 
@@ -232,6 +364,24 @@ const ServiceDetailPage: React.FC = () => {
                         <span>{p.waitMins ?? 45} min</span>
                       </div>
                     </div>
+
+                    <div
+                      style={{
+                        padding: '12px 14px',
+                        borderRadius: 12,
+                        background: availability?.hasAvailability ? 'var(--gradient-primary-soft)' : 'var(--bg-elevated)',
+                        border: availability?.hasAvailability ? '1px solid var(--color-primary-200)' : '1px solid var(--color-gray-200)',
+                        marginBottom: 'var(--space-4)'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 4 }}>
+                        <IonIcon icon={calendarOutline} style={{ color: availability?.hasAvailability ? 'var(--color-primary-600)' : 'var(--text-secondary)' }} />
+                        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Próxima disponibilidad</span>
+                      </div>
+                      <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
+                        {availability?.label || 'Cargando disponibilidad...'}
+                      </p>
+                    </div>
                   </div>
 
                   <div className="service-card-footer">
@@ -253,7 +403,8 @@ const ServiceDetailPage: React.FC = () => {
                   </div>
                 </div>
               </motion.div>
-            ))}
+              );
+            })}
           </motion.div>
         </motion.div>
       </IonContent>

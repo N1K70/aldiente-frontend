@@ -41,6 +41,7 @@ import NotificationCenter from '../notifications/NotificationCenter';
 import { fadeInUp, staggerContainer, listItem, pageTransition } from '../../utils/animations';
 import { useDebounce } from '../../shared/hooks/useDebounce';
 import { getStudentServices, deleteStudentService } from '../services/services.api';
+import { getAppointmentsForStudent } from '../appointments/appointments.api';
 import ServiceFormModal from '../services/ServiceFormModal';
 import PatientOnboarding, { usePatientOnboarding } from '../onboarding/PatientOnboarding';
 import '../../theme/modern-design.css';
@@ -106,8 +107,10 @@ const HomePage: React.FC = () => {
   const [items, setItems] = useState<PublicServiceItem[]>([]);
   // Lista de servicios del estudiante
   const [studentServices, setStudentServices] = useState<any[]>([]);
+  // Citas del estudiante para métricas
+  const [studentAppointments, setStudentAppointments] = useState<any[]>([]);
 
-  // Cargar servicios del estudiante
+  // Cargar métricas del estudiante (servicios y citas)
   useEffect(() => {
     if (user?.role !== 'student' || !studentId) return;
     let alive = true;
@@ -115,10 +118,16 @@ const HomePage: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const list = await getStudentServices(studentId);
-        if (alive) setStudentServices(list);
+        const [list, apps] = await Promise.all([
+          getStudentServices(studentId),
+          getAppointmentsForStudent().catch(() => [])
+        ]);
+        if (alive) {
+          setStudentServices(list);
+          setStudentAppointments(apps);
+        }
       } catch (e: any) {
-        if (alive) setError('No se pudieron cargar tus servicios');
+        if (alive) setError('No se pudieron cargar tus métricas ni servicios');
       } finally {
         if (alive) setLoading(false);
       }
@@ -194,7 +203,11 @@ const HomePage: React.FC = () => {
     <IonPage>
       <IonHeader className="ion-no-border">
         <IonToolbar style={{ '--background': 'var(--bg-primary)' }}>
-          <IonTitle className="heading-md">ALDIENTE</IonTitle>
+          <IonTitle style={{ paddingInlineStart: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+              <img src="/assets/images/LOGO_ALDIENTE_SINFONDO.png" alt="ALDIENTE" style={{ height: '36px', objectFit: 'contain', marginTop: '4px' }} />
+            </div>
+          </IonTitle>
           <IonButtons slot="end">
             <NotificationCenter className="toolbar-icon-button" />
           </IonButtons>
@@ -224,13 +237,51 @@ const HomePage: React.FC = () => {
             </p>
           </motion.div>
 
-          {/* Sección para estudiantes: Tarjetas de acción modernas */}
+          {/* Sección para estudiantes: Dashboard de Crecimiento y Action Cards */}
           {user?.role === 'student' && (
             <motion.div
               variants={staggerContainer}
               className="grid-modern"
               style={{ marginBottom: 'var(--space-8)' }}
             >
+              {/* Dashboard Metrics (Nuevo) */}
+              <motion.div variants={fadeInUp} style={{ width: '100%', gridColumn: '1 / -1' }}>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+                  gap: 'var(--space-4)',
+                  marginBottom: 'var(--space-6)'
+                }}>
+                  {/* Métrica 1: Servicios Activos */}
+                  <div className="floating-card" style={{ padding: 'var(--space-4)', textAlign: 'center' }}>
+                    <div style={{ width: 40, height: 40, background: 'var(--gradient-primary-soft)', borderRadius: '50%', margin: '0 auto var(--space-2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <IonIcon icon={briefcaseOutline} style={{ color: 'var(--color-primary-600)', fontSize: 20 }} />
+                    </div>
+                    <h4 className="heading-xl" style={{ margin: '0 0 4px 0', color: 'var(--text-primary)' }}>{studentServices.length}</h4>
+                    <p className="body-sm" style={{ color: 'var(--text-secondary)', margin: 0 }}>Servicios</p>
+                  </div>
+                  
+                  {/* Métrica 2: Citas Totales */}
+                  <div className="floating-card" style={{ padding: 'var(--space-4)', textAlign: 'center' }}>
+                    <div style={{ width: 40, height: 40, background: 'rgba(16, 185, 129, 0.1)', borderRadius: '50%', margin: '0 auto var(--space-2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <IonIcon icon={calendarOutline} style={{ color: '#10b981', fontSize: 20 }} />
+                    </div>
+                    <h4 className="heading-xl" style={{ margin: '0 0 4px 0', color: 'var(--text-primary)' }}>{studentAppointments.length}</h4>
+                    <p className="body-sm" style={{ color: 'var(--text-secondary)', margin: 0 }}>Citas Históricas</p>
+                  </div>
+                  
+                  {/* Métrica 3: Vistas de Perfil (Mocked for Growth vibes) */}
+                  <div className="floating-card" style={{ padding: 'var(--space-4)', textAlign: 'center' }}>
+                    <div style={{ width: 40, height: 40, background: 'rgba(245, 158, 11, 0.1)', borderRadius: '50%', margin: '0 auto var(--space-2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <IonIcon icon={peopleOutline} style={{ color: '#f59e0b', fontSize: 20 }} />
+                    </div>
+                    <h4 className="heading-xl" style={{ margin: '0 0 4px 0', color: 'var(--text-primary)' }}>12</h4>
+                    <p className="body-sm" style={{ color: 'var(--text-secondary)', margin: 0 }}>Vistas Perfil</p>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Botones de Acción */}
               <motion.div variants={listItem}>
                 <div className="floating-card">
                   <div style={{ marginBottom: 'var(--space-4)' }}>
@@ -292,7 +343,114 @@ const HomePage: React.FC = () => {
                     onClick={() => history.push('/tabs/appointments')}
                   >
                     <IonIcon icon={calendarOutline} />
-                    Ver calendario
+                    Ver citas
+                  </button>
+                </div>
+              </motion.div>
+
+              <motion.div variants={listItem}>
+                <div className="floating-card">
+                  <div style={{ marginBottom: 'var(--space-4)' }}>
+                    <div style={{
+                      width: 56,
+                      height: 56,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'var(--gradient-primary-soft)',
+                      borderRadius: 14,
+                      marginBottom: 'var(--space-4)'
+                    }}>
+                      <IonIcon icon={chatbubblesOutline} style={{ fontSize: 28, color: 'var(--color-primary-600)' }} />
+                    </div>
+                    <h3 className="heading-md" style={{ marginBottom: 'var(--space-2)' }}>
+                      Conversaciones
+                    </h3>
+                    <p className="body-sm" style={{ marginBottom: 'var(--space-5)' }}>
+                      Entra rápido a tus chats activos con pacientes
+                    </p>
+                  </div>
+                  <button
+                    className="btn-modern-secondary"
+                    style={{ width: '100%' }}
+                    onClick={() => history.push('/tabs/appointments')}
+                  >
+                    <IonIcon icon={chatbubblesOutline} />
+                    Abrir conversaciones
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+
+          {user?.role === 'patient' && (
+            <motion.div
+              variants={staggerContainer}
+              className="grid-modern"
+              style={{ marginBottom: 'var(--space-8)' }}
+            >
+              <motion.div variants={listItem}>
+                <div className="floating-card">
+                  <div style={{ marginBottom: 'var(--space-4)' }}>
+                    <div style={{
+                      width: 56,
+                      height: 56,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'var(--gradient-primary-soft)',
+                      borderRadius: 14,
+                      marginBottom: 'var(--space-4)'
+                    }}>
+                      <IonIcon icon={calendarOutline} style={{ fontSize: 28, color: 'var(--color-primary-600)' }} />
+                    </div>
+                    <h3 className="heading-md" style={{ marginBottom: 'var(--space-2)' }}>
+                      Mis Reservas
+                    </h3>
+                    <p className="body-sm" style={{ marginBottom: 'var(--space-5)' }}>
+                      Revisa tus citas próximas e historial de atención
+                    </p>
+                  </div>
+                  <button
+                    className="btn-modern-secondary"
+                    style={{ width: '100%' }}
+                    onClick={() => history.push('/tabs/profile/reservas')}
+                  >
+                    <IonIcon icon={calendarOutline} />
+                    Ver reservas
+                  </button>
+                </div>
+              </motion.div>
+
+              <motion.div variants={listItem}>
+                <div className="floating-card">
+                  <div style={{ marginBottom: 'var(--space-4)' }}>
+                    <div style={{
+                      width: 56,
+                      height: 56,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'var(--gradient-primary-soft)',
+                      borderRadius: 14,
+                      marginBottom: 'var(--space-4)'
+                    }}>
+                      <IonIcon icon={chatbubblesOutline} style={{ fontSize: 28, color: 'var(--color-primary-600)' }} />
+                    </div>
+                    <h3 className="heading-md" style={{ marginBottom: 'var(--space-2)' }}>
+                      Conversaciones
+                    </h3>
+                    <p className="body-sm" style={{ marginBottom: 'var(--space-5)' }}>
+                      Entra rápido a tus chats activos con estudiantes
+                    </p>
+                  </div>
+                  <button
+                    className="btn-modern-secondary"
+                    style={{ width: '100%' }}
+                    onClick={() => history.push('/tabs/profile/reservas')}
+                  >
+                    <IonIcon icon={chatbubblesOutline} />
+                    Abrir conversaciones
                   </button>
                 </div>
               </motion.div>
