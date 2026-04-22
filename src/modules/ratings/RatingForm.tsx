@@ -12,7 +12,7 @@ import {
   IonLabel,
   IonToast,
 } from '@ionic/react';
-import { star, starOutline } from 'ionicons/icons';
+import { star, starOutline, checkmarkCircle } from 'ionicons/icons';
 import { createRating } from './ratings.api';
 import { CreateRatingRequest } from './types';
 
@@ -105,26 +105,43 @@ const RatingForm: React.FC<RatingFormProps> = ({
       <IonCard style={{ borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
         <IonCardHeader>
           <IonCardTitle style={{ fontSize: '20px', textAlign: 'center' }}>
-            Calificar Atención
+            Califica tu experiencia
           </IonCardTitle>
-          <IonText color="medium" style={{ textAlign: 'center', display: 'block' }}>
-            ¿Cómo fue tu experiencia con {toUserName}?
+          <IonText color="medium" style={{ textAlign: 'center', display: 'block', marginTop: '8px', fontSize: '14px' }}>
+            Tu opinión ayuda a otros pacientes a tomar mejores decisiones
+          </IonText>
+          <IonText color="medium" style={{ textAlign: 'center', display: 'block', marginTop: '4px', fontSize: '13px', fontWeight: 500 }}>
+            Evaluando a: <strong>{toUserName}</strong>
           </IonText>
         </IonCardHeader>
         
         <IonCardContent style={{ textAlign: 'center' }}>
           {/* Estrellas */}
-          <div style={{ margin: '20px 0' }}>
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+          <div style={{ margin: '24px 0' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
               {renderStars()}
             </div>
             <IonText style={{ 
-              fontSize: '16px', 
-              fontWeight: '600',
-              color: rating > 0 ? '#D40710' : '#666'
+              fontSize: '18px', 
+              fontWeight: '700',
+              color: rating > 0 ? '#D40710' : '#999',
+              display: 'block',
+              minHeight: '24px'
             }}>
               {getRatingText()}
             </IonText>
+            {rating > 0 && (
+              <IonText style={{ 
+                fontSize: '12px', 
+                color: '#666',
+                display: 'block',
+                marginTop: '8px'
+              }}>
+                {rating <= 2 && 'Lamentamos tu experiencia. Tu feedback es valioso.'}
+                {rating === 3 && 'Gracias por tu honestidad. Nos ayuda a mejorar.'}
+                {rating >= 4 && '¡Nos alegra mucho tu satisfacción!'}
+              </IonText>
+            )}
           </div>
 
           {/* Comentario */}

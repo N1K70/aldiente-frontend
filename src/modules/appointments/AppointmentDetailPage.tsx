@@ -35,7 +35,7 @@ import {
   deleteAppointmentAttachment,
   type AppointmentAttachment,
 } from './appointments.api';
-import { calendarOutline, timeOutline, personOutline, documentTextOutline, checkmarkCircleOutline } from 'ionicons/icons';
+import { calendarOutline, timeOutline, personOutline, documentTextOutline, checkmarkCircleOutline, starOutline, alertCircleOutline } from 'ionicons/icons';
 import RatingForm from '../ratings/RatingForm';
 import RatingDisplay from '../ratings/RatingDisplay';
 import { useAuth } from '../../shared/context/AuthContext';
@@ -68,6 +68,7 @@ const AppointmentDetailPage: React.FC = () => {
   const [uploading, setUploading] = useState(false);
   const [attachments, setAttachments] = useState<AppointmentAttachment[]>([]);
   const [showRatingForm, setShowRatingForm] = useState(false);
+  const [hasRated, setHasRated] = useState(false);
   const [form, setForm] = useState({
     scheduled_at: '',
     notes: '',
@@ -254,41 +255,66 @@ const AppointmentDetailPage: React.FC = () => {
               />
             )}
 
-            {/* Sistema de Calificaciones */}
-            {appointment.status === 'completed' && user?.role === 'patient' && (
+            {/* Sistema de Calificaciones - Banner Destacado */}
+            {appointment.status === 'completed' && user?.role === 'patient' && !hasRated && (
+              <div
+                style={{
+                  marginTop: '16px',
+                  padding: '16px',
+                  borderRadius: '12px',
+                  background: 'linear-gradient(135deg, #fff7ed 0%, #fef3c7 100%)',
+                  border: '2px solid #f59e0b',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '12px'
+                }}
+              >
+                <IonIcon
+                  icon={alertCircleOutline}
+                  style={{ fontSize: '24px', color: '#d97706', marginTop: '2px', flexShrink: 0 }}
+                />
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ margin: '0 0 4px 0', color: '#92400e', fontSize: '16px', fontWeight: 600 }}>
+                    Tu opinión es importante
+                  </h3>
+                  <p style={{ margin: '0 0 12px 0', color: '#b45309', fontSize: '14px' }}>
+                    Ayuda a otros pacientes compartiendo tu experiencia con {appointment.student_name || 'el estudiante'}
+                  </p>
+                  <IonButton
+                    expand="block"
+                    onClick={() => setShowRatingForm(true)}
+                    style={{
+                      background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                      borderRadius: '8px',
+                      fontWeight: 600,
+                      height: '40px'
+                    }}
+                  >
+                    <IonIcon icon={starOutline} slot="start" />
+                    Calificar Ahora
+                  </IonButton>
+                </div>
+              </div>
+            )}
+
+            {/* Formulario de Calificación */}
+            {appointment.status === 'completed' && user?.role === 'patient' && showRatingForm && (
               <IonCard style={{ marginTop: '16px' }}>
                 <IonCardHeader>
-                  <IonCardTitle>Calificación</IonCardTitle>
+                  <IonCardTitle>Califica tu experiencia</IonCardTitle>
                 </IonCardHeader>
                 <IonCardContent>
-                  {showRatingForm ? (
-                    <RatingForm
-                      appointmentId={appointmentId}
-                      toUserId={appointment.student_id}
-                      toUserName={appointment.student_name || 'Estudiante'}
-                      onRatingCreated={() => {
-                        setShowRatingForm(false);
-                        setToast({ show: true, message: 'Calificación enviada exitosamente', color: 'success' });
-                      }}
-                      onCancel={() => setShowRatingForm(false)}
-                    />
-                  ) : (
-                    <div style={{ textAlign: 'center' }}>
-                      <IonText color="medium" style={{ display: 'block', marginBottom: '16px' }}>
-                        ¿Cómo fue tu experiencia con {appointment.student_name || 'el estudiante'}?
-                      </IonText>
-                      <IonButton
-                        expand="block"
-                        onClick={() => setShowRatingForm(true)}
-                        style={{
-                          background: 'linear-gradient(135deg, #D40710, #FF5252)',
-                          borderRadius: '12px'
-                        }}
-                      >
-                        Calificar Atención
-                      </IonButton>
-                    </div>
-                  )}
+                  <RatingForm
+                    appointmentId={appointmentId}
+                    toUserId={appointment.student_id}
+                    toUserName={appointment.student_name || 'Estudiante'}
+                    onRatingCreated={() => {
+                      setShowRatingForm(false);
+                      setHasRated(true);
+                      setToast({ show: true, message: 'Calificación enviada exitosamente', color: 'success' });
+                    }}
+                    onCancel={() => setShowRatingForm(false)}
+                  />
                 </IonCardContent>
               </IonCard>
             )}
