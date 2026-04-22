@@ -38,8 +38,6 @@ export interface AvailabilityItem {
 }
 import CustomDatePicker from '../../components/CustomDatePicker';
 import TimeSlotPicker from '../../components/TimeSlotPicker';
-import { getWebpayLinkByPrice } from '../../utils/webpayPrices';
-import { createWebpayPayment } from '../webpay/webpay.api';
 
 interface Params { studentId: string; serviceId: string }
 
@@ -53,15 +51,14 @@ const ReservationPage: React.FC = () => {
 
   const [selectedDate, setSelectedDate] = useState<string>(''); // YYYY-MM-DD
   const [selectedTime, setSelectedTime] = useState<string>(''); // HH:mm
-  const [payment, setPayment] = useState<'efectivo' | 'tarjeta' | 'transferencia' | 'webpay'>('efectivo');
+  const [payment, setPayment] = useState<'efectivo' | 'tarjeta' | 'transferencia'>('efectivo');
   const [format, setFormat] = useState<'clinica' | 'online'>('clinica');
   const [notes, setNotes] = useState('');
   const [toast, setToast] = useState<{ open: boolean; msg: string; color?: string }>({ open: false, msg: '' });
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [availability, setAvailability] = useState<AvailabilityItem[]>([]);
   const [loadingAvail, setLoadingAvail] = useState<boolean>(false);
-  const [webpayLink, setWebpayLink] = useState<string | null>(null);
-  const [loadingWebpay, setLoadingWebpay] = useState<boolean>(false);
+
   const minDateStr = useMemo(() => `${new Date().toISOString().split('T')[0]}T00:00:00`, []);
 
   // Colores de paleta Ionic (con fallback)
@@ -218,16 +215,9 @@ const ReservationPage: React.FC = () => {
           .join(' '),
       };
 
-      const newAppointment = await createAppointment(payload);
-      
-      // Si el pago es con Webpay, redirigir a la página de reservas donde podrá pagar
-      if (payment === 'webpay') {
-        setToast({ open: true, msg: 'Reserva creada. Ahora puedes proceder al pago.', color: 'success' });
-        setTimeout(() => history.replace('/tabs/profile/reservas'), 1000);
-      } else {
-        setToast({ open: true, msg: 'Reserva creada con éxito', color: 'success' });
-        setTimeout(() => history.replace('/tabs/profile/reservas'), 700);
-      }
+      await createAppointment(payload);
+      setToast({ open: true, msg: 'Reserva creada con éxito', color: 'success' });
+      setTimeout(() => history.replace('/tabs/profile/reservas'), 700);
     } catch (e: any) {
       console.error('[Reservation] Error:', e);
       setToast({ open: true, msg: e.message || 'No se pudo crear la reserva', color: 'danger' });
@@ -253,31 +243,6 @@ const ReservationPage: React.FC = () => {
     })();
     return () => { mounted = false; };
   }, [serviceId]);
-
-  // Cargar link de Webpay basado en el precio del servicio
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      if (!service?.price) {
-        setWebpayLink(null);
-        return;
-      }
-      
-      try {
-        setLoadingWebpay(true);
-        const link = await getWebpayLinkByPrice(service.price);
-        if (!mounted) return;
-        setWebpayLink(link);
-      } catch (e) {
-        console.error('Error al cargar link de Webpay:', e);
-        if (!mounted) return;
-        setWebpayLink(null);
-      } finally {
-        if (mounted) setLoadingWebpay(false);
-      }
-    })();
-    return () => { mounted = false; };
-  }, [service?.price]);
 
   // Array de fechas disponibles para el CustomDatePicker
   const availableDatesArray = useMemo((): string[] => {
@@ -420,24 +385,6 @@ const ReservationPage: React.FC = () => {
                     <IonLabel>Transferencia</IonLabel>
                     <IonRadio slot="end" value="transferencia" />
                   </IonItem>
-                  {webpayLink && (
-                    <IonItem button detail={false} onClick={() => setPayment('webpay')} style={optionRowStyle}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <img 
-                          src="/assets/images/webpay_logo.svg" 
-                          alt="Webpay" 
-                          style={{ height: '24px', width: 'auto' }}
-                        />
-                        <IonLabel>Webpay</IonLabel>
-                      </div>
-                      <IonRadio slot="end" value="webpay" />
-                    </IonItem>
-                  )}
-                  {loadingWebpay && (
-                    <IonItem style={optionRowStyle}>
-                      <IonLabel>Cargando opciones de pago...</IonLabel>
-                    </IonItem>
-                  )}
                 </IonRadioGroup>
               </div>
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   IonContent, 
   IonPage, 
@@ -39,6 +39,19 @@ const Login: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const history = useHistory();
+
+  useEffect(() => {
+    const onAuthExpired = () => {
+      setLoading(false);
+      setError('La sesión ha caducado. Inicia sesión nuevamente.');
+    };
+
+    window.addEventListener('auth:expired', onAuthExpired as EventListener);
+
+    return () => {
+      window.removeEventListener('auth:expired', onAuthExpired as EventListener);
+    };
+  }, []);
 
   const handleLogin = async () => {
     if (!email || !password) {

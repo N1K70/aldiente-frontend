@@ -87,7 +87,7 @@ export default function AppointmentsPage() {
   const [toastMsg, setToastMsg] = useState('');
   const [reloadKey, setReloadKey] = useState(0);
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | 'all'>('all');
-  const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
+  const [viewMode, setViewMode] = useState<'calendar' | 'list'>('list');
 
   const [confirmAction, setConfirmAction] = useState<{
     id: string;
@@ -313,7 +313,9 @@ export default function AppointmentsPage() {
     <IonPage>
       <IonHeader className="ion-no-border">
         <IonToolbar style={{ '--background': 'var(--bg-primary)' }}>
-          <IonTitle className="heading-md">{isHistoryMode ? 'Historial de citas' : 'Mis Citas'}</IonTitle>
+          <IonTitle style={{ paddingInlineStart: '16px', fontSize: '1.4rem', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.5px' }}>
+            {isHistoryMode ? 'Historial de citas' : 'Mis Citas'}
+          </IonTitle>
           <IonButtons slot="end">
             <button 
               onClick={() => setReloadKey(k => k + 1)} 
@@ -537,7 +539,7 @@ export default function AppointmentsPage() {
                                   <button
                                     className="btn-modern-primary"
                                     style={{ flex: 1 }}
-                                    onClick={() => history.push(`/tabs/appointments/${a.id}`)}
+                                    onClick={() => history.push(`/tabs/appointments/${a.id}?openChat=1`)}
                                   >
                                     <IonIcon icon={chatbubblesOutline} />
                                     Chat
@@ -628,7 +630,7 @@ export default function AppointmentsPage() {
                                   <button
                                     className="btn-modern-primary"
                                     style={{ flex: 1 }}
-                                    onClick={() => history.push(`/tabs/appointments/${a.id}`)}
+                                    onClick={() => history.push(`/tabs/appointments/${a.id}?openChat=1`)}
                                   >
                                     <IonIcon icon={chatbubblesOutline} />
                                     Chat

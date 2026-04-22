@@ -24,7 +24,7 @@ import {
   IonChip,
   IonIcon,
 } from '@ionic/react';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { api } from '../../shared/api/ApiClient';
 import { FILES_URL } from '../../config';
 import {
@@ -60,6 +60,7 @@ interface Appointment {
 const AppointmentDetailPage: React.FC = () => {
   const { appointmentId } = useParams<RouteParams>();
   const history = useHistory();
+  const location = useLocation();
   const { user } = useAuth();
   const [appointment, setAppointment] = useState<Appointment | null>(null);
   const [loading, setLoading] = useState(true);
@@ -75,6 +76,10 @@ const AppointmentDetailPage: React.FC = () => {
   const [toast, setToast] = useState<{ show: boolean; message: string; color: string } | null>(null);
 
   const token = useMemo(() => localStorage.getItem('authToken') || localStorage.getItem('token') || '', []);
+  const shouldOpenChat = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('openChat') === '1';
+  }, [location.search]);
   const chatEnabled = useMemo(() => {
     if (!appointment) return false;
     return appointment.status === 'confirmed' || appointment.status === 'completed';
@@ -240,6 +245,7 @@ const AppointmentDetailPage: React.FC = () => {
                 token={token}
                 currentUserId={user.id}
                 enabled={chatEnabled}
+                initialOpen={shouldOpenChat}
                 otherParticipantName={
                   user.role === 'patient' 
                     ? appointment.student_name || 'Estudiante'
