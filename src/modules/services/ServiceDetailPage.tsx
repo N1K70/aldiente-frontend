@@ -20,10 +20,11 @@ import {
   IonText,
 } from '@ionic/react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { peopleOutline, starOutline, timeOutline, locationOutline, calendarOutline, shieldCheckmarkOutline } from 'ionicons/icons';
+import { peopleOutline, starOutline, timeOutline, locationOutline, calendarOutline, shieldCheckmarkOutline, checkmarkCircle, flashOutline } from 'ionicons/icons';
 import { motion } from 'framer-motion';
 import { api } from '../../shared/api/ApiClient';
 import { getAvailabilityForService } from './services.api';
+import { getUserRatingStats } from '../ratings/ratings.api';
 import { fadeInUp, staggerContainer, listItem, pageTransition } from '../../utils/animations';
 import '../../theme/modern-design.css';
 
@@ -133,6 +134,7 @@ const ServiceDetailPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [availabilityByService, setAvailabilityByService] = useState<Record<string, AvailabilityPreview>>({});
+  const [ratingByStudent, setRatingByStudent] = useState<Record<string, { avg: number; total: number }>>({});
 
   // Cargar el servicio por ID si no vino en el estado de navegación
   useEffect(() => {
@@ -221,6 +223,33 @@ const ServiceDetailPage: React.FC = () => {
       setAvailabilityByService(Object.fromEntries(entries));
     })();
 
+    return () => { mounted = false; };
+  }, [providers]);
+
+  // Cargar ratings reales por estudiante para mostrar señales de confianza
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      if (!providers.length) {
+        if (mounted) setRatingByStudent({});
+        return;
+      }
+      const uniqueIds: string[] = Array.from(new Set(providers.map((p) => p.id)));
+      const entries = await Promise.all(
+        uniqueIds.map(async (sid: string) => {
+          try {
+            const stats = await getUserRatingStats(sid);
+            const avg = Number((stats as any)?.average ?? (stats as any)?.avg ?? 0) || 0;
+            const total = Number((stats as any)?.total ?? (stats as any)?.count ?? 0) || 0;
+            return [sid, { avg, total }] as const;
+          } catch {
+            return [sid, { avg: 0, total: 0 }] as const;
+          }
+        })
+      );
+      if (!mounted) return;
+      setRatingByStudent(Object.fromEntries(entries));
+    })();
     return () => { mounted = false; };
   }, [providers]);
 
@@ -315,6 +344,9 @@ const ServiceDetailPage: React.FC = () => {
           >
             {providers.map((p) => {
               const availability = availabilityByService[p.serviceId];
+              const rating = ratingByStudent[p.id];
+              const hasRating = !!rating && rating.total > 0;
+              const isTopRated = hasRating && rating.avg >= 4.5;
               return (
               <motion.div key={p.id} variants={listItem}>
                 <div 
@@ -340,10 +372,48 @@ const ServiceDetailPage: React.FC = () => {
                     </div>
                     
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-2)' }}>
-                      <h3 className="heading-md" style={{ margin: 0 }}>{p.name}</h3>
+                      <h3 className="heading-md" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
+                        {p.name}
+                        <IonIcon icon={checkmarkCircle} style={{ color: '#10b981', fontSize: '1.05rem' }} />
+                      </h3>
                       {typeof p.price === 'number' && (
                         <span className="badge-primary" style={{ fontSize: '0.875rem' }}>
                           {p.price > 0 ? `$${p.price.toFixed(0)}` : 'Gratis'}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Señales de confianza */}
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 'var(--space-3)' }}>
+                      <span
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 4,
+                          padding: '4px 8px', borderRadius: 999, fontSize: '0.75rem', fontWeight: 600,
+                          background: '#ecfdf5', color: '#059669', border: '1px solid #34d399'
+                        }}
+                      >
+                        <IonIcon icon={shieldCheckmarkOutline} /> Verificado
+                      </span>
+                      {isTopRated && (
+                        <span
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 4,
+                            padding: '4px 8px', borderRadius: 999, fontSize: '0.75rem', fontWeight: 600,
+                            background: '#fff7ed', color: '#b45309', border: '1px solid #fdba74'
+                          }}
+                        >
+                          <IonIcon icon={starOutline} /> Alta calificación
+                        </span>
+                      )}
+                      {availability?.hasAvailability && (
+                        <span
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 4,
+                            padding: '4px 8px', borderRadius: 999, fontSize: '0.75rem', fontWeight: 600,
+                            background: '#eff6ff', color: '#1d4ed8', border: '1px solid #93c5fd'
+                          }}
+                        >
+                          <IonIcon icon={flashOutline} /> Disponible pronto
                         </span>
                       )}
                     </div>
@@ -353,11 +423,11 @@ const ServiceDetailPage: React.FC = () => {
                     <div style={{ display: 'flex', gap: 'var(--space-3)', marginBottom: 'var(--space-5)', flexWrap: 'wrap' }}>
                       <div className="meta-item-modern">
                         <IonIcon icon={starOutline} style={{ color: '#f59e0b' }} />
-                        <span>{(p.rating ?? 4.5).toFixed(1)}</span>
+                        <span>{hasRating ? rating!.avg.toFixed(1) : 'Nuevo'}</span>
                       </div>
                       <div className="meta-item-modern">
                         <IonIcon icon={peopleOutline} />
-                        <span>{p.reviews ?? 0} reseñas</span>
+                        <span>{hasRating ? `${rating!.total} reseñas` : 'Sin reseñas aún'}</span>
                       </div>
                       <div className="meta-item-modern">
                         <IonIcon icon={timeOutline} />

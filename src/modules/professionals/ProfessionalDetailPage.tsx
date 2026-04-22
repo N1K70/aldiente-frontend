@@ -19,8 +19,9 @@ import {
   IonButton,
 } from '@ionic/react';
 import { useLocation, useParams, useHistory } from 'react-router-dom';
-import { peopleOutline, starOutline, timeOutline, calendarOutline, checkmarkCircle, shieldCheckmarkOutline } from 'ionicons/icons';
+import { peopleOutline, starOutline, timeOutline, calendarOutline, checkmarkCircle, shieldCheckmarkOutline, flashOutline, medalOutline } from 'ionicons/icons';
 import { getStudentServices, getAvailabilityForService } from '../services/services.api';
+import { getUserRatingStats } from '../ratings/ratings.api';
 import { StudentService } from '../services/types';
 import RatingDisplay from '../ratings/RatingDisplay';
 
@@ -103,6 +104,7 @@ const ProfessionalDetailPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [services, setServices] = useState<StudentService[]>([]);
   const [availabilityByService, setAvailabilityByService] = useState<Record<string, AvailabilityPreview>>({});
+  const [ratingStats, setRatingStats] = useState<{ avg: number; total: number }>({ avg: 0, total: 0 });
 
   const serviceNames = useMemo(() => {
     const set = new Set<string>();
@@ -156,6 +158,30 @@ const ProfessionalDetailPage: React.FC = () => {
     return () => { mounted = false; };
   }, [services]);
 
+  // Cargar rating real del profesional para mostrar señales de confianza
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const stats = await getUserRatingStats(id);
+        if (!mounted) return;
+        const avg = Number((stats as any)?.average ?? (stats as any)?.avg ?? 0) || 0;
+        const total = Number((stats as any)?.total ?? (stats as any)?.count ?? 0) || 0;
+        setRatingStats({ avg, total });
+      } catch {
+        if (mounted) setRatingStats({ avg: 0, total: 0 });
+      }
+    })();
+    return () => { mounted = false; };
+  }, [id]);
+
+  const hasAnyAvailability = useMemo(
+    () => Object.values(availabilityByService).some((a: AvailabilityPreview) => a?.hasAvailability),
+    [availabilityByService]
+  );
+  const hasRating = ratingStats.total > 0;
+  const isTopRated = hasRating && ratingStats.avg >= 4.5;
+
   const title = useMemo(() => p?.name || `Estudiante ${id}`, [p, id]);
 
   return (
@@ -187,18 +213,33 @@ const ProfessionalDetailPage: React.FC = () => {
                   {title}
                   <IonIcon icon={checkmarkCircle} style={{ color: '#10b981', fontSize: '1.1rem' }} />
                 </h3>
-                <div className="pro-meta" style={{ marginBottom: '8px' }}>
-                  <span className="pro-chip" style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #34d399' }}>
-                    Estudiante Verificado
+                <div className="pro-meta" style={{ marginBottom: '8px', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  <span className="pro-chip" style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #34d399', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                    <IonIcon icon={shieldCheckmarkOutline} /> Estudiante Verificado
                   </span>
+                  {isTopRated && (
+                    <span className="pro-chip" style={{ background: '#fff7ed', color: '#b45309', border: '1px solid #fdba74', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      <IonIcon icon={medalOutline} /> Top valorado
+                    </span>
+                  )}
+                  {hasAnyAvailability && (
+                    <span className="pro-chip" style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #93c5fd', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      <IonIcon icon={flashOutline} /> Disponible pronto
+                    </span>
+                  )}
+                  {services.length > 0 && (
+                    <span className="pro-chip" style={{ background: '#f5f3ff', color: '#6d28d9', border: '1px solid #c4b5fd', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      <IonIcon icon={peopleOutline} /> {services.length} servicio{services.length === 1 ? '' : 's'} activo{services.length === 1 ? '' : 's'}
+                    </span>
+                  )}
                 </div>
                 <div className="pro-meta">
                   <span className="pro-chip">
-                    <IonIcon icon={starOutline} style={{ color: '#f59e0b' }} /> {(p?.rating ?? 0).toFixed(1)}
+                    <IonIcon icon={starOutline} style={{ color: '#f59e0b' }} /> {hasRating ? ratingStats.avg.toFixed(1) : 'Nuevo'}
                   </span>
-                  {typeof p?.reviews === 'number' && (
-                    <span className="pro-chip muted">{p.reviews} reseñas</span>
-                  )}
+                  <span className="pro-chip muted">
+                    {hasRating ? `${ratingStats.total} reseñas` : 'Sin reseñas aún'}
+                  </span>
                 </div>
               </div>
             </div>
