@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ALDIENTE Frontend
 
-## Getting Started
+Frontend web de ALDIENTE (Next.js) con integración a:
 
-First, run the development server:
+- `aldiente-backend` (API REST)
+- `chatsvc` (Socket.IO)
+- PostgreSQL local para desarrollo
+
+## Levantar todo con Docker Compose
+
+Desde `aldiente-frontend`:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+docker compose up --build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Servicios expuestos:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Frontend: `http://localhost:3000`
+- Backend: `http://localhost:3001`
+- ChatSvc: `http://localhost:3002`
+- PostgreSQL: `localhost:5432`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Base de datos (volumen existente)
 
-## Learn More
+Este setup usa el volumen Docker externo `aldiente-frontend_postgres_data` para reutilizar datos locales ya existentes.
 
-To learn more about Next.js, take a look at the following resources:
+Para que backend/chatsvc conecten correctamente con ese volumen, las credenciales quedan alineadas a:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `DB_USER=postgres`
+- `DB_PASSWORD=postgres`
+- `DB_NAME=aldiente`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Si tu volumen fue creado con otras credenciales, deberás ajustar variables en `docker-compose.yml` o recrear el volumen.
 
-## Deploy on Vercel
+Para apagar:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+docker compose down
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Para apagar y limpiar volúmenes (DB + node_modules en volúmenes):
+
+```bash
+docker compose down -v
+```
+
+## Nota sobre dependencias locales
+
+Si no tienes `node`/`npm` instalados en tu máquina, puedes trabajar solo con Docker Compose.
+
+## Estructura esperada de carpetas
+
+Este compose asume estas rutas vecinas:
+
+- `../aldiente-backend`
+- `../ALDIENTE/chatsvc`
+
+Si cambian, actualiza los `context` y `volumes` en `docker-compose.yml`.

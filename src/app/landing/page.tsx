@@ -98,7 +98,7 @@ function LandingDesktop() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
             {[
               { n: '01', t: 'Encuentra tu estudiante', d: 'Filtra por servicio, precio, distancia y rating. Ve reseñas y al supervisor asignado.', icon: 'search', tint: '#10A9C6' },
-              { n: '02', t: 'Agenda en segundos',     d: 'Elige día y hora. Paga con Webpay o en la clínica. Recibirás confirmación en tu correo.', icon: 'calendar', tint: '#6366F1' },
+              { n: '02', t: 'Agenda en segundos',     d: 'Elige día y hora. Reserva sin fricción y recibe confirmación en tu correo.', icon: 'calendar', tint: '#6366F1' },
               { n: '03', t: 'Atención supervisada',   d: 'El estudiante realiza el procedimiento bajo supervisión directa de su docente.', icon: 'shield', tint: '#10B981' },
             ].map(s => (
               <Glass hi key={s.n} radius={22} style={{ padding: 28 }}>
@@ -340,7 +340,7 @@ export default function LandingPage() {
           {[
             { n: '1', title: 'Cuéntanos qué necesitas', desc: 'Un quiz visual de 30 segundos. Tocas iconos, no llenas formularios.' },
             { n: '2', title: 'Elige a tu estudiante', desc: 'Mira calificaciones, supervisor y disponibilidad antes de reservar.' },
-            { n: '3', title: 'Paga seguro y ven', desc: 'Webpay y recordatorios automáticos. Cambios gratis con 24h.' },
+            { n: '3', title: 'Confirma y ven', desc: 'Confirmación inmediata y recordatorios automáticos. Cambios gratis con 24h.' },
           ].map(s => (
             <Glass key={s.n} radius={22} style={{ padding: 18, display: 'flex', gap: 14, alignItems: 'flex-start' }}>
               <div style={{

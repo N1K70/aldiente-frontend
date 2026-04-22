@@ -1,0 +1,95 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: aldiente_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: aldiente
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d aldiente"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build:
+      context: ../aldiente-backend
+      dockerfile: Dockerfile
+    container_name: aldiente_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      JWT_SECRET: aldiente_dev_secret
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/aldiente
+      DB_SSL: "false"
+      FRONTEND_URL: http://localhost:3000
+      MAILER_URL: ""
+    ports:
+      - "3001:3001"
+    command: sh -c "npm install && npm run dev"
+    volumes:
+      - ../aldiente-backend:/app
+      - backend_node_modules:/app/node_modules
+
+  chatsvc:
+    build:
+      context: ../ALDIENTE/chatsvc
+      dockerfile: Dockerfile
+    container_name: aldiente_chatsvc
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: 3002
+      JWT_SECRET: aldiente_dev_secret
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: aldiente
+      ALLOWED_ORIGINS: http://localhost:3000,http://127.0.0.1:3000
+    ports:
+      - "3002:3002"
+    command: sh -c "npm install && npm run dev"
+    volumes:
+      - ../ALDIENTE/chatsvc:/app
+      - chatsvc_node_modules:/app/node_modules
+
+  frontend:
+    image: node:20-alpine
+    container_name: aldiente_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+      - chatsvc
+    working_dir: /app
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_BACKEND_URL: http://localhost:3001
+      NEXT_PUBLIC_CHAT_URL: http://localhost:3002
+    ports:
+      - "3000:3000"
+    command: sh -c "npm install && npm run dev -- --port 3000"
+    volumes:
+      - ./:/app
+      - frontend_node_modules:/app/node_modules
+
+volumes:
+  postgres_data:
+    external: true
+    name: aldiente-frontend_postgres_data
+  backend_node_modules:
+  chatsvc_node_modules:
+  frontend_node_modules:

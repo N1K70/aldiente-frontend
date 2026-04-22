@@ -323,7 +323,7 @@ function SignupInner() {
               setLoading(true);
               try {
                 const rutValidation = validateAndFormatRut(data.rut);
-                await register({
+                const result = await register({
                   name: data.name,
                   lastname: data.lastname,
                   email: data.email,
@@ -337,9 +337,14 @@ function SignupInner() {
                   university: data.university || undefined,
                   careerYear: data.careerYear || undefined,
                 });
-                const stored = localStorage.getItem('authUser');
-                const storedRole = stored ? JSON.parse(stored).role : null;
-                router.push(storedRole === 'student' || storedRole === 'admin' ? '/dashboard' : '/quiz');
+
+                if (result.authenticated) {
+                  const finalRole = result.role ?? role;
+                  router.push(finalRole === 'student' || finalRole === 'admin' ? '/dashboard' : '/quiz');
+                  return;
+                }
+
+                router.push('/login?registered=1');
               } catch {
                 setError('No se pudo crear la cuenta. Intenta nuevamente.');
               } finally {

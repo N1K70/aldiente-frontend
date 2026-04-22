@@ -14,7 +14,7 @@ type AuthContextType = {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (data: RegisterData) => Promise<void>;
+  register: (data: RegisterData) => Promise<{ role?: User['role']; authenticated: boolean }>;
   logout: () => void;
 };
 
@@ -80,6 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
       localStorage.setItem('authUser', JSON.stringify(u));
       setUser(u);
+      window.dispatchEvent(new Event('auth:changed'));
     } finally {
       setLoading(false);
     }
@@ -102,10 +103,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         careerYear: registerData.careerYear,
       });
       const token = data.token || data.accessToken || data.jwt;
-      if (!token) throw new Error('No se recibió token');
-      localStorage.setItem('authToken', token);
-      document.cookie = `authToken=${token}; path=/; SameSite=Lax`;
-      if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
 
       const u: User = {
         id: String(data?.user?.id ?? data?.id ?? ''),
@@ -113,8 +110,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         role: data?.user?.role ?? registerData.role ?? 'patient',
         name: data?.user?.name ?? registerData.fullName ?? `${registerData.name} ${registerData.lastname}`.trim(),
       };
-      localStorage.setItem('authUser', JSON.stringify(u));
-      setUser(u);
+
+      if (token) {
+        localStorage.setItem('authToken', token);
+        document.cookie = `authToken=${token}; path=/; SameSite=Lax`;
+        if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
+        localStorage.setItem('authUser', JSON.stringify(u));
+        setUser(u);
+        window.dispatchEvent(new Event('auth:changed'));
+      }
+
+      return { role: u.role, authenticated: Boolean(token) };
     } finally {
       setLoading(false);
     }

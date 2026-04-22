@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { Icon, Button, Glass } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -48,10 +48,10 @@ const ADMIN_LINKS = [
   { id: 'settings', icon: 'shield',   label: 'Ajustes',       href: '/perfil' },
 ];
 
-interface SidebarLinkProps { icon: string; label: string; active?: boolean; badge?: string; onClick?: () => void; }
-const SidebarLink: React.FC<SidebarLinkProps> = ({ icon, label, active, badge, onClick }) => (
-  <div
-    onClick={onClick}
+interface SidebarLinkProps { icon: string; label: string; href: string; active?: boolean; badge?: string; }
+const SidebarLink: React.FC<SidebarLinkProps> = ({ icon, label, href, active, badge }) => (
+  <Link
+    href={href}
     style={{
       display: 'flex', alignItems: 'center', gap: 12,
       padding: '10px 14px', borderRadius: 12, cursor: 'pointer',
@@ -60,6 +60,7 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({ icon, label, active, badge, o
       fontWeight: active ? 700 : 500, fontSize: 14,
       border: active ? '1px solid rgba(16,169,198,0.2)' : '1px solid transparent',
       transition: 'all 0.15s',
+      textDecoration: 'none',
     }}
   >
     <Icon name={icon as Parameters<typeof Icon>[0]['name']} size={18} color={active ? 'var(--brand-600)' : 'var(--ink-500)'} />
@@ -69,13 +70,12 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({ icon, label, active, badge, o
         {badge}
       </span>
     )}
-  </div>
+  </Link>
 );
 
 interface SidebarProps { role?: 'patient' | 'student' | 'admin'; activeId?: string; }
 export const Sidebar: React.FC<SidebarProps> = ({ role = 'patient', activeId }) => {
-  const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const links = role === 'student' ? STUDENT_LINKS : role === 'admin' ? ADMIN_LINKS : PATIENT_LINKS;
   const initials = user?.name ? user.name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase() : role === 'student' ? 'SM' : 'MR';
 
@@ -106,7 +106,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role = 'patient', activeId }) 
 
       {/* Nav links */}
       {links.map(l => (
-        <SidebarLink key={l.id} icon={l.icon} label={l.label} active={l.id === activeId} badge={'badge' in l ? (l as { badge: string }).badge : undefined} onClick={() => router.push(l.href)} />
+        <SidebarLink key={l.id} icon={l.icon} label={l.label} href={l.href} active={l.id === activeId} badge={'badge' in l ? (l as { badge: string }).badge : undefined} />
       ))}
 
       <div style={{ flex: 1 }} />
@@ -121,20 +121,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ role = 'patient', activeId }) 
         <div style={{ fontSize: 12, color: 'var(--ink-600)', lineHeight: 1.4, marginBottom: 10 }}>
           Habla con nuestro equipo de soporte.
         </div>
-        <button onClick={() => router.push('/chat')} style={{
+        <Link href="/chat" style={{ textDecoration: 'none' }}>
+          <button style={{
           width: '100%', padding: '8px 10px', borderRadius: 10,
           background: '#fff', border: '1px solid rgba(10,22,40,0.08)',
           fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 700,
           color: 'var(--brand-700)', cursor: 'pointer',
-        }}>Chatear con soporte</button>
+          }}>Chatear con soporte</button>
+        </Link>
       </div>
 
       {/* User chip */}
-      <div style={{
+      <Link href="/perfil" style={{ textDecoration: 'none' }}>
+        <div style={{
         marginTop: 10, padding: '8px 10px', borderRadius: 12,
         display: 'flex', alignItems: 'center', gap: 10,
         background: 'rgba(255,255,255,0.6)', cursor: 'pointer',
-      }} onClick={() => router.push('/perfil')}>
+      }}>
         <div style={{
           width: 32, height: 32, borderRadius: 999, flexShrink: 0,
           background: role === 'student' ? 'linear-gradient(135deg, #C7D2FE, #818CF8)' : 'linear-gradient(135deg, #FDE68A, #F59E0B)',
@@ -150,7 +153,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ role = 'patient', activeId }) 
           </div>
         </div>
         <Icon name="chevron" size={14} color="var(--ink-400)" />
-      </div>
+        </div>
+      </Link>
     </aside>
   );
 };
