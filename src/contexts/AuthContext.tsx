@@ -16,6 +16,7 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => void;
+  updateUser: (patch: Partial<User>) => void;
 };
 
 type RegisterData = {
@@ -76,7 +77,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id: String(data?.user?.id ?? data?.userId ?? data?.id ?? ''),
         email: data?.user?.email ?? data?.email ?? email,
         role: data?.user?.role ?? data?.role,
-        name: data?.user?.name ?? data?.name,
+        name: data?.user?.name ?? data?.user?.fullName ?? data?.user?.full_name ?? data?.name ?? data?.fullName ?? data?.full_name,
       };
       localStorage.setItem('authUser', JSON.stringify(u));
       setUser(u);
@@ -101,8 +102,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         university: registerData.university,
         careerYear: registerData.careerYear,
       });
-      const token = data.token || data.accessToken || data.jwt;
-      if (!token) throw new Error('No se recibió token');
+
+      let token = data.token || data.accessToken || data.jwt;
+
+      // Backend created the account but didn't return a token — auto-login
+      if (!token) {
+        const loginRes = await api.post('/api/login', {
+          email: registerData.email,
+          password: registerData.password,
+        });
+        token = loginRes.data.token || loginRes.data.accessToken || loginRes.data.jwt;
+        if (!token) throw new Error('No se recibió token');
+        Object.assign(data, loginRes.data);
+      }
+
       localStorage.setItem('authToken', token);
       document.cookie = `authToken=${token}; path=/; SameSite=Lax`;
       if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
@@ -120,6 +133,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  const updateUser = useCallback((patch: Partial<User>) => {
+    setUser(prev => {
+      if (!prev) return prev;
+      const updated = { ...prev, ...patch };
+      localStorage.setItem('authUser', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
   const logout = useCallback(() => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('refreshToken');
@@ -130,7 +152,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

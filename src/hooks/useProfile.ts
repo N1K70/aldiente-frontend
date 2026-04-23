@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { api } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface Profile {
   name?: string;
@@ -28,6 +29,7 @@ export function useProfile(role?: 'patient' | 'student') {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { updateUser } = useAuth();
 
   const endpoint = role === 'student' ? '/api/students/profile' : '/api/patients/profile';
 
@@ -38,10 +40,13 @@ export function useProfile(role?: 'patient' | 'student') {
         const raw = res.data?.profile ?? res.data ?? {};
         setProfile(raw);
         setError(null);
+        // Sync name to AuthContext so greeting shows correct name
+        const name = raw.name ?? raw.full_name ?? raw.fullName;
+        if (name) updateUser({ name });
       })
       .catch(err => setError(err?.response?.data?.message ?? err.message))
       .finally(() => setLoading(false));
-  }, [endpoint]);
+  }, [endpoint, updateUser]);
 
   useEffect(() => { load(); }, [load]);
 
