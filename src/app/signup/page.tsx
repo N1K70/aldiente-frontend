@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Button, Icon, TextField } from '@/components/ui';
 import TermsModal from '@/components/TermsModal';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsDesktop } from '@/components/desktop-shell';
 import { formatRutOnInput, validateAndFormatRut } from '@/lib/rut';
 
 type Role = 'patient' | 'student';
@@ -168,9 +169,41 @@ function SignupInner() {
     return '';
   };
 
+  const isDesktop = useIsDesktop();
+
+  type IconName = Parameters<typeof Icon>[0]['name'];
+  const brandFeatures: { icon: IconName; text: string }[] = [
+    { icon: 'shield', text: 'Estudiantes verificados con supervisión docente' },
+    { icon: 'star',   text: 'Precios accesibles sin sacrificar calidad' },
+    { icon: 'check',  text: 'Agenda, paga y gestiona todo en un solo lugar' },
+  ];
+
   return (
-    <div style={{ minHeight: '100dvh', overflow: 'auto', background: 'var(--bg-aurora)' }}>
-      <div style={{ padding: '60px 24px 40px', minHeight: '100dvh', display: 'flex', flexDirection: 'column', maxWidth: 520, margin: '0 auto' }}>
+    <div style={{ minHeight: '100dvh', background: 'var(--bg-aurora)', display: isDesktop ? 'flex' : 'block', fontFamily: 'var(--font-body)' }}>
+      {isDesktop && (
+        <div style={{ width: 420, flexShrink: 0, background: 'linear-gradient(160deg, #0E8AA5 0%, #4F46E5 100%)', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '64px 48px', color: '#fff' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 48 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>A</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, letterSpacing: '-0.03em' }}>ALDIENTE</div>
+          </div>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 34, fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1.15, margin: '0 0 16px' }}>
+            Odontología de calidad, accesible para todos
+          </h2>
+          <p style={{ fontSize: 15, opacity: 0.85, lineHeight: 1.6, margin: '0 0 40px' }}>
+            Conectamos pacientes con estudiantes de odontología supervisados.
+          </p>
+          {brandFeatures.map(f => (
+            <div key={f.text} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 16 }}>
+              <div style={{ width: 32, height: 32, borderRadius: 10, background: 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
+                <Icon name={f.icon} size={16} color="#fff" />
+              </div>
+              <span style={{ fontSize: 14, opacity: 0.9, lineHeight: 1.5 }}>{f.text}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      <div style={{ flex: 1, overflowY: isDesktop ? 'auto' : undefined, display: isDesktop ? 'flex' : 'block', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ padding: isDesktop ? '48px 48px 40px' : '60px 24px 40px', minHeight: isDesktop ? undefined : '100dvh', display: 'flex', flexDirection: 'column', width: '100%', maxWidth: isDesktop ? 520 : undefined, margin: isDesktop ? undefined : '0 auto' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
           <button
             type="button"
@@ -222,10 +255,10 @@ function SignupInner() {
         {step === 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 24 }}>
             {role === 'patient' ? (
-              <>
+              <React.Fragment>
                 <TextField label="Nombre" icon="user" value={data.name} onChange={e => upd('name', e.target.value)} placeholder="Maria" autoFocus />
                 <TextField label="Apellido" value={data.lastname} onChange={e => upd('lastname', e.target.value)} placeholder="Rivas" />
-              </>
+              </React.Fragment>
             ) : (
               <TextField label="Nombre completo" icon="user" value={data.fullName} onChange={e => upd('fullName', e.target.value)} placeholder="Sofia Mendez" autoFocus />
             )}
@@ -233,7 +266,7 @@ function SignupInner() {
             <TextField label="RUT" icon="shield" value={data.rut} onChange={e => upd('rut', formatRutOnInput(e.target.value))} placeholder="12.345.678-9" />
 
             {role === 'patient' ? (
-              <>
+              <React.Fragment>
                 <TextField label="Fecha de nacimiento" icon="calendar" type="date" value={data.birthDate} onChange={e => upd('birthDate', e.target.value)} />
                 <SelectField
                   label="Genero (opcional)"
@@ -247,12 +280,12 @@ function SignupInner() {
                     { value: 'prefer_not_to_say', label: 'Prefiero no decirlo' },
                   ]}
                 />
-              </>
+              </React.Fragment>
             ) : (
-              <>
+              <React.Fragment>
                 <TextField label="Universidad" icon="graduation" value={data.university} onChange={e => upd('university', e.target.value)} placeholder="Universidad de Chile" />
                 <TextField label="Ano de carrera" icon="calendar" value={data.careerYear} onChange={e => upd('careerYear', e.target.value.replace(/[^\d]/g, ''))} placeholder="5" />
-              </>
+              </React.Fragment>
             )}
 
             <TextField label="Ciudad" icon="home" value={data.location} onChange={e => upd('location', e.target.value)} placeholder="Santiago" />
@@ -358,7 +391,7 @@ function SignupInner() {
           </div>
         </div>
       </div>
-
+      </div>
       {showTerms && <TermsModal onClose={() => setShowTerms(false)} />}
     </div>
   );

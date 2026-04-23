@@ -25,9 +25,9 @@ export function useIsDesktop() {
 const PATIENT_LINKS = [
   { id: 'home',    icon: 'home',     label: 'Inicio',             href: '/home' },
   { id: 'search',  icon: 'search',   label: 'Buscar estudiantes', href: '/explorar' },
-  { id: 'appts',   icon: 'calendar', label: 'Mis citas',          href: '/citas',   badge: '2' },
-  { id: 'chat',    icon: 'chat',     label: 'Mensajes',           href: '/chat',    badge: '3' },
-  { id: 'docs',    icon: 'shield',   label: 'Documentos',         href: '/perfil' },
+  { id: 'appts',   icon: 'calendar', label: 'Mis citas',          href: '/citas' },
+  { id: 'chat',    icon: 'chat',     label: 'Mensajes',           href: '/chat' },
+  { id: 'docs',    icon: 'shield',   label: 'Documentos',         href: '/documentos' },
   { id: 'profile', icon: 'user',     label: 'Perfil',             href: '/perfil' },
 ];
 
@@ -76,7 +76,20 @@ interface SidebarProps { role?: 'patient' | 'student' | 'admin'; activeId?: stri
 export const Sidebar: React.FC<SidebarProps> = ({ role = 'patient', activeId }) => {
   const router = useRouter();
   const { user, logout } = useAuth();
-  const links = role === 'student' ? STUDENT_LINKS : role === 'admin' ? ADMIN_LINKS : PATIENT_LINKS;
+  const { notifications } = useNotifications();
+
+  const unread = notifications.filter(n => !n.read);
+  const citasBadge = unread.filter(n => ['appointment', 'reservation'].includes(n.type)).length || undefined;
+  const chatBadge  = unread.filter(n => ['chat', 'message'].includes(n.type)).length || undefined;
+
+  const baseLinks = role === 'student' ? STUDENT_LINKS : role === 'admin' ? ADMIN_LINKS : PATIENT_LINKS;
+  const links = baseLinks.map(l => ({
+    ...l,
+    badge: l.id === 'appts' ? (citasBadge ? String(citasBadge) : undefined)
+         : l.id === 'chat'  ? (chatBadge  ? String(chatBadge)  : undefined)
+         : undefined,
+  }));
+
   const initials = user?.name ? user.name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase() : role === 'student' ? 'SM' : 'MR';
 
   return (
@@ -106,7 +119,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role = 'patient', activeId }) 
 
       {/* Nav links */}
       {links.map(l => (
-        <SidebarLink key={l.id} icon={l.icon} label={l.label} active={l.id === activeId} badge={'badge' in l ? (l as { badge: string }).badge : undefined} onClick={() => router.push(l.href)} />
+        <SidebarLink key={l.id} icon={l.icon} label={l.label} active={l.id === activeId} badge={l.badge} onClick={() => router.push(l.href)} />
       ))}
 
       <div style={{ flex: 1 }} />

@@ -6,6 +6,7 @@ import { Icon, Button, Glass } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { DesktopShell, useIsDesktop } from '@/components/desktop-shell';
 import { useAppointments } from '@/hooks/useAppointments';
+import { useProfile } from '@/hooks/useProfile';
 import { api } from '@/lib/api';
 
 const STATUS_MAP = {
@@ -19,7 +20,11 @@ function DashboardDesktop() {
   const router = useRouter();
   const { user } = useAuth();
   const { appointments, upcoming, loading, refresh } = useAppointments('student');
+  const { profile } = useProfile('student');
   const firstName = user?.name?.split(' ')[0] ?? 'tú';
+
+  const supervisorName = profile.supervisor_name ?? (profile as Record<string, unknown>).supervisorName as string | undefined;
+  const supervisorTitle = profile.supervisor_title ?? (profile as Record<string, unknown>).supervisorTitle as string | undefined;
 
   const pendingRequests = appointments.filter(a => a.status === 'pending');
 
@@ -110,17 +115,21 @@ function DashboardDesktop() {
             ))}
           </Glass>
 
-          <Glass radius={18} style={{ padding: 18 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ink-500)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Tu supervisora</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-              <div style={{ width: 44, height: 44, borderRadius: 14, background: 'linear-gradient(135deg, #FDE68A, #F59E0B)', color: '#fff', fontWeight: 700, fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>PM</div>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink-900)' }}>Dra. Patricia Morales</div>
-                <div style={{ fontSize: 12, color: 'var(--success-600)' }}>● Disponible hoy</div>
+          {supervisorName && (
+            <Glass radius={18} style={{ padding: 18 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ink-500)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Tu supervisor/a</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                <div style={{ width: 44, height: 44, borderRadius: 14, background: 'linear-gradient(135deg, #FDE68A, #F59E0B)', color: '#fff', fontWeight: 700, fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  {supervisorName.split(' ').slice(0, 2).map((w: string) => w[0]).join('').toUpperCase()}
+                </div>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink-900)' }}>{supervisorName}</div>
+                  {supervisorTitle && <div style={{ fontSize: 12, color: 'var(--ink-500)' }}>{supervisorTitle}</div>}
+                </div>
               </div>
-            </div>
-            <Button size="sm" full variant="glass" icon="chat" onClick={() => router.push('/chat')}>Enviar mensaje</Button>
-          </Glass>
+              <Button size="sm" full variant="glass" icon="chat" onClick={() => router.push('/chat')}>Enviar mensaje</Button>
+            </Glass>
+          )}
         </div>
       </div>
     </DesktopShell>

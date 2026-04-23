@@ -29,7 +29,7 @@ function AvatarBadge({ initials, role }: { initials: string; role?: string }) {
 }
 
 // ── Patient datos ──────────────────────────────────────────────
-function PatientDatosSection({ profile, saving, onSave }: { profile: Record<string, string>; saving: boolean; onSave: (d: Record<string, string>) => void }) {
+function PatientDatosSection({ profile, onSave }: { profile: Record<string, string>; onSave: (d: Record<string, string>) => Promise<boolean> }) {
   const [form, setForm] = useState({
     name:      profile.name      ?? '',
     email:     profile.email     ?? '',
@@ -39,7 +39,21 @@ function PatientDatosSection({ profile, saving, onSave }: { profile: Record<stri
     gender:    profile.gender    ?? '',
     address:   profile.address   ?? '',
   });
+  const [status, setStatus] = useState<'idle' | 'saving' | 'ok' | 'err'>('idle');
+  const [errMsg, setErrMsg] = useState('');
   const upd = (k: keyof typeof form, v: string) => setForm(f => ({ ...f, [k]: v }));
+
+  const handleSave = async () => {
+    setStatus('saving');
+    const ok = await onSave(form);
+    if (ok) {
+      setStatus('ok');
+      setTimeout(() => setStatus('idle'), 3000);
+    } else {
+      setStatus('err');
+      setErrMsg('No se pudo guardar. Verifica tu conexión e intenta de nuevo.');
+    }
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -61,15 +75,17 @@ function PatientDatosSection({ profile, saving, onSave }: { profile: Record<stri
         </div>
       </div>
       <TextField label="Dirección" value={form.address} onChange={e => upd('address', e.target.value)} placeholder="Av. Ejemplo 123, Santiago" />
+      {status === 'ok' && <div style={{ padding: '10px 14px', borderRadius: 10, background: 'rgba(34,197,94,0.1)', color: '#16a34a', fontSize: 13, fontWeight: 600 }}>¡Cambios guardados correctamente!</div>}
+      {status === 'err' && <div style={{ padding: '10px 14px', borderRadius: 10, background: 'var(--danger-100,#fee2e2)', color: 'var(--danger-600,#dc2626)', fontSize: 13 }}>{errMsg}</div>}
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Button size="md" disabled={saving} onClick={() => onSave(form)}>{saving ? 'Guardando…' : 'Guardar cambios'}</Button>
+        <Button size="md" disabled={status === 'saving'} onClick={handleSave}>{status === 'saving' ? 'Guardando…' : 'Guardar cambios'}</Button>
       </div>
     </div>
   );
 }
 
 // ── Student datos ──────────────────────────────────────────────
-function StudentDatosSection({ profile, saving, onSave }: { profile: Record<string, string>; saving: boolean; onSave: (d: Record<string, string>) => void }) {
+function StudentDatosSection({ profile, onSave }: { profile: Record<string, string>; onSave: (d: Record<string, string>) => Promise<boolean> }) {
   const [universities, setUniversities] = useState<University[]>([]);
   const [form, setForm] = useState({
     full_name:              profile.full_name            ?? profile.name ?? '',
@@ -82,6 +98,8 @@ function StudentDatosSection({ profile, saving, onSave }: { profile: Record<stri
     certifications:         profile.certifications       ?? '',
     bio:                    profile.bio                  ?? '',
   });
+  const [status, setStatus] = useState<'idle' | 'saving' | 'ok' | 'err'>('idle');
+  const [errMsg, setErrMsg] = useState('');
   const upd = (k: keyof typeof form, v: string) => setForm(f => ({ ...f, [k]: v }));
 
   useEffect(() => {
@@ -90,6 +108,18 @@ function StudentDatosSection({ profile, saving, onSave }: { profile: Record<stri
       setUniversities(Array.isArray(d) ? d : (d?.universities ?? []));
     }).catch(() => {});
   }, []);
+
+  const handleSave = async () => {
+    setStatus('saving');
+    const ok = await onSave(form);
+    if (ok) {
+      setStatus('ok');
+      setTimeout(() => setStatus('idle'), 3000);
+    } else {
+      setStatus('err');
+      setErrMsg('No se pudo guardar. Verifica tu conexión e intenta de nuevo.');
+    }
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -122,17 +152,19 @@ function StudentDatosSection({ profile, saving, onSave }: { profile: Record<stri
         <textarea value={form.bio} onChange={e => upd('bio', e.target.value)} rows={3} placeholder="Cuéntales a los pacientes sobre ti…"
           style={{ borderRadius: 12, border: '1.5px solid rgba(10,22,40,0.1)', padding: '10px 12px', fontSize: 14, fontFamily: 'var(--font-body)', resize: 'vertical', background: 'rgba(255,255,255,0.7)', color: 'var(--ink-900)', outline: 'none' }} />
       </div>
+      {status === 'ok' && <div style={{ padding: '10px 14px', borderRadius: 10, background: 'rgba(34,197,94,0.1)', color: '#16a34a', fontSize: 13, fontWeight: 600 }}>¡Cambios guardados correctamente!</div>}
+      {status === 'err' && <div style={{ padding: '10px 14px', borderRadius: 10, background: 'var(--danger-100,#fee2e2)', color: 'var(--danger-600,#dc2626)', fontSize: 13 }}>{errMsg}</div>}
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Button size="md" disabled={saving} onClick={() => onSave(form)}>{saving ? 'Guardando…' : 'Guardar cambios'}</Button>
+        <Button size="md" disabled={status === 'saving'} onClick={handleSave}>{status === 'saving' ? 'Guardando…' : 'Guardar cambios'}</Button>
       </div>
     </div>
   );
 }
 
 // ── DatosSection router ────────────────────────────────────────
-function DatosSection({ role, profile, saving, onSave }: { role?: string; profile: Record<string, string>; saving: boolean; onSave: (d: Record<string, string>) => void }) {
-  if (role === 'student') return <StudentDatosSection profile={profile} saving={saving} onSave={onSave} />;
-  return <PatientDatosSection profile={profile} saving={saving} onSave={onSave} />;
+function DatosSection({ role, profile, onSave }: { role?: string; profile: Record<string, string>; onSave: (d: Record<string, string>) => Promise<boolean> }) {
+  if (role === 'student') return <StudentDatosSection profile={profile} onSave={onSave} />;
+  return <PatientDatosSection profile={profile} onSave={onSave} />;
 }
 
 // ── Seguridad ──────────────────────────────────────────────────
@@ -196,10 +228,67 @@ function SaludSection({ profile, saving, onSave }: { profile: Record<string, str
   );
 }
 
+// ── Notificaciones ────────────────────────────────────────────
+function NotificacionesSection() {
+  const router = useRouter();
+  const [prefs, setPrefs] = useState({ citas: true, mensajes: true, recordatorios: true, promociones: false });
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const toggle = (key: keyof typeof prefs) => setPrefs(p => ({ ...p, [key]: !p[key] }));
+
+  const handleSave = async () => {
+    setSaving(true);
+    try { await api.put('/api/notifications/preferences', prefs); } catch { /* ignore */ }
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
+  };
+
+  const items: { key: keyof typeof prefs; label: string; sub: string }[] = [
+    { key: 'citas',        label: 'Citas y reservas',     sub: 'Confirmaciones, cambios y cancelaciones' },
+    { key: 'mensajes',     label: 'Mensajes nuevos',       sub: 'Cuando recibes un mensaje en el chat' },
+    { key: 'recordatorios',label: 'Recordatorios',         sub: 'Alertas 24h antes de una cita' },
+    { key: 'promociones',  label: 'Novedades y ofertas',   sub: 'Nuevos servicios y descuentos' },
+  ];
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 4 }}>
+        <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink-900)' }}>Preferencias de notificaciones</div>
+        <Button size="sm" variant="glass" onClick={() => router.push('/notificaciones')}>Ver todas</Button>
+      </div>
+
+      {items.map(item => (
+        <Glass key={item.key} radius={16} style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink-900)' }}>{item.label}</div>
+            <div style={{ fontSize: 12, color: 'var(--ink-500)', marginTop: 2 }}>{item.sub}</div>
+          </div>
+          <button
+            type="button"
+            onClick={() => toggle(item.key)}
+            style={{ width: 44, height: 26, borderRadius: 999, border: 'none', cursor: 'pointer', background: prefs[item.key] ? 'var(--brand-500)' : 'var(--ink-200)', transition: 'background 200ms', position: 'relative', flexShrink: 0 }}
+          >
+            <span style={{ position: 'absolute', top: 3, left: prefs[item.key] ? 21 : 3, width: 20, height: 20, borderRadius: 999, background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.2)', transition: 'left 200ms' }} />
+          </button>
+        </Glass>
+      ))}
+
+      {saved && <div style={{ padding: '10px 16px', borderRadius: 12, background: 'rgba(16,185,129,0.1)', color: '#065f46', fontSize: 13, fontWeight: 600 }}>¡Preferencias guardadas!</div>}
+
+      <Button size="md" onClick={handleSave} disabled={saving}>
+        {saving ? 'Guardando…' : 'Guardar preferencias'}
+      </Button>
+    </div>
+  );
+}
+
 // ── Section dispatcher ─────────────────────────────────────────
-function SectionContent({ section, role, profile, saving, onSave }: { section: Section; role?: string; profile: Record<string, string>; saving: boolean; onSave: (d: Record<string, string>) => void }) {
-  if (section === 'datos') return <DatosSection role={role} profile={profile} saving={saving} onSave={onSave} />;
+function SectionContent({ section, role, profile, saving, onSave }: { section: Section; role?: string; profile: Record<string, string>; saving: boolean; onSave: (d: Record<string, string>) => Promise<boolean> }) {
+  if (section === 'datos') return <DatosSection role={role} profile={profile} onSave={onSave} />;
   if (section === 'seguridad') return <SeguridadSection />;
+  if (section === 'notificaciones') return <NotificacionesSection />;
   if (section === 'salud' && role !== 'student') return <SaludSection profile={profile} saving={saving} onSave={onSave} />;
   return (
     <div style={{ padding: 40, textAlign: 'center', color: 'var(--ink-400)', fontSize: 14 }}>
@@ -266,7 +355,7 @@ function PerfilDesktop() {
           {loading ? (
             <div style={{ padding: 40, textAlign: 'center', color: 'var(--ink-400)', fontSize: 14 }}>Cargando…</div>
           ) : (
-            <SectionContent section={section} role={user?.role} profile={merged} saving={saving} onSave={data => save(data)} />
+            <SectionContent section={section} role={user?.role} profile={merged} saving={saving} onSave={save} />
           )}
         </Glass>
       </div>
@@ -307,7 +396,7 @@ export default function PerfilPage() {
             <div style={{ padding: 40, textAlign: 'center', color: 'var(--ink-400)', fontSize: 14 }}>Cargando…</div>
           ) : (
             <Glass radius={20} style={{ padding: 20 }}>
-              <SectionContent section={section} role={user?.role} profile={merged} saving={saving} onSave={data => save(data)} />
+              <SectionContent section={section} role={user?.role} profile={merged} saving={saving} onSave={save} />
             </Glass>
           )}
         </div>

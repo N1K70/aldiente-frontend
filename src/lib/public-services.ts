@@ -138,6 +138,25 @@ export async function fetchAllStudentServices() {
   return Array.isArray(raw) ? raw : (raw.services ?? raw.data ?? []);
 }
 
+const MOCK_SERVICES: PublicServiceItem[] = [
+  { id: 'mock-1', name: 'Limpieza dental', category: 'Prevención', description: 'Limpieza profesional y pulido dental.', price: 15000, duration: 45, studentName: 'Estudiante ALDIENTE', studentUniversity: 'Universidad de Chile' },
+  { id: 'mock-2', name: 'Blanqueamiento dental', category: 'Estética', description: 'Tratamiento de blanqueamiento supervisado.', price: 35000, duration: 60, studentName: 'Estudiante ALDIENTE', studentUniversity: 'PUC' },
+  { id: 'mock-3', name: 'Obturación (empaste)', category: 'Restauración', description: 'Relleno de caries con resina compuesta.', price: 20000, duration: 50, studentName: 'Estudiante ALDIENTE', studentUniversity: 'USACH' },
+  { id: 'mock-4', name: 'Extracción simple', category: 'Cirugía menor', description: 'Extracción de diente con anestesia local.', price: 18000, duration: 40, studentName: 'Estudiante ALDIENTE', studentUniversity: 'Universidad de Chile' },
+  { id: 'mock-5', name: 'Radiografía periapical', category: 'Diagnóstico', description: 'Toma radiográfica y diagnóstico.', price: 8000, duration: 20, studentName: 'Estudiante ALDIENTE', studentUniversity: 'UNAB' },
+  { id: 'mock-6', name: 'Sellantes de fosetas', category: 'Prevención', description: 'Aplicación preventiva en molares.', price: 12000, duration: 30, studentName: 'Estudiante ALDIENTE', studentUniversity: 'UDP' },
+];
+
+export async function fetchAllServices(): Promise<PublicServiceItem[]> {
+  try {
+    const rows = await fetchAllStudentServices();
+    const mapped = (rows as Record<string, unknown>[]).map(mapServiceRow);
+    return mapped.length > 0 ? mapped : MOCK_SERVICES;
+  } catch {
+    return MOCK_SERVICES;
+  }
+}
+
 export async function fetchProvidersForServiceName(serviceName: string) {
   const rows = await fetchAllStudentServices();
   const target = normalizeText(serviceName);

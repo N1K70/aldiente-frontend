@@ -4,12 +4,14 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Glass, Icon, Button } from '@/components/ui';
 import { api } from '@/lib/api';
+import { useIsDesktop, DesktopShell } from '@/components/desktop-shell';
 
 const LABELS = ['', 'Muy malo', 'Malo', 'Regular', 'Bueno', 'Excelente'];
 
 export default function CalificarPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const isDesktop = useIsDesktop();
 
   const [studentName, setStudentName] = useState('el estudiante');
   const [toUserId, setToUserId] = useState('');
@@ -45,27 +47,33 @@ export default function CalificarPage() {
     }
   };
 
-  if (done) return (
-    <div style={{ minHeight: '100dvh', background: 'var(--bg-aurora)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, fontFamily: 'var(--font-body)', gap: 20 }}>
-      <div style={{ width: 80, height: 80, borderRadius: 999, background: 'var(--success-100)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Icon name="check" size={40} color="var(--success-600,#16a34a)" />
+  if (done) {
+    const doneContent = (
+      <div style={{ minHeight: '100dvh', background: 'var(--bg-aurora)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, fontFamily: 'var(--font-body)', gap: 20 }}>
+        <div style={{ width: 80, height: 80, borderRadius: 999, background: 'var(--success-100)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Icon name="check" size={40} color="var(--success-600,#16a34a)" />
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, color: 'var(--ink-900)' }}>¡Gracias por tu calificación!</div>
+          <p style={{ fontSize: 15, color: 'var(--ink-500)', marginTop: 8 }}>Tu opinión ayuda a mejorar la plataforma.</p>
+        </div>
+        <Button size="lg" onClick={() => router.push('/citas')}>Volver a mis citas</Button>
       </div>
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, color: 'var(--ink-900)' }}>¡Gracias por tu calificación!</div>
-        <p style={{ fontSize: 15, color: 'var(--ink-500)', marginTop: 8 }}>Tu opinión ayuda a mejorar la plataforma.</p>
-      </div>
-      <Button size="lg" onClick={() => router.push('/citas')}>Volver a mis citas</Button>
-    </div>
-  );
+    );
+    if (isDesktop) return <DesktopShell role="patient" activeId="appts" title="Calificar atención">{doneContent}</DesktopShell>;
+    return doneContent;
+  }
 
-  return (
+  const content = (
     <div className="app-scroll" style={{ minHeight: '100dvh', overflowY: 'auto', background: 'var(--bg-aurora)', fontFamily: 'var(--font-body)', paddingBottom: 60 }}>
-      <div style={{ padding: '56px 20px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
-        <button onClick={() => router.back()} style={{ width: 44, height: 44, borderRadius: 999, background: 'rgba(255,255,255,0.78)', backdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.9)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <Icon name="arrow_left" size={20} />
-        </button>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, letterSpacing: '-0.03em', margin: 0, color: 'var(--ink-900)' }}>Calificar atención</h1>
-      </div>
+      {!isDesktop && (
+        <div style={{ padding: '56px 20px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button onClick={() => router.back()} style={{ width: 44, height: 44, borderRadius: 999, background: 'rgba(255,255,255,0.78)', backdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.9)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name="arrow_left" size={20} />
+          </button>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, letterSpacing: '-0.03em', margin: 0, color: 'var(--ink-900)' }}>Calificar atención</h1>
+        </div>
+      )}
 
       <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 14 }}>
         <Glass hi radius={20} style={{ padding: 28, textAlign: 'center' }}>
@@ -106,4 +114,7 @@ export default function CalificarPage() {
       </div>
     </div>
   );
+
+  if (isDesktop) return <DesktopShell role="patient" activeId="appts" title="Calificar atención">{content}</DesktopShell>;
+  return content;
 }

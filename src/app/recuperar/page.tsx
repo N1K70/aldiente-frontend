@@ -14,18 +14,29 @@ export default function RecuperarPage() {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [devLink, setDevLink] = useState('');
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
 
     setLoading(true);
+    setError('');
     try {
-      const data = await requestPasswordReset(email).catch(() => null);
+      const data = await requestPasswordReset(email);
       const link = (data as { devResetLink?: string } | null)?.devResetLink;
       if (link) setDevLink(link);
-    } finally {
       setSent(true);
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      if (status === 404 || (msg && /not found|no existe|registrado/i.test(msg))) {
+        setError('No encontramos una cuenta con ese correo. Verifica e inténtalo de nuevo.');
+      } else {
+        // For unknown errors, show generic success (security best practice)
+        setSent(true);
+      }
+    } finally {
       setLoading(false);
     }
   };
@@ -67,7 +78,8 @@ export default function RecuperarPage() {
             Ingresa tu correo y te enviaremos un enlace para restablecerla.
           </p>
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <TextField label="Correo electronico" icon="mail" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="tu@correo.cl" />
+            <TextField label="Correo electronico" icon="mail" type="email" value={email} onChange={e => { setEmail(e.target.value); setError(''); }} placeholder="tu@correo.cl" />
+            {error && <div style={{ padding: '10px 14px', borderRadius: 12, background: 'rgba(239,68,68,0.08)', color: '#991b1b', fontSize: 13, fontWeight: 500 }}>{error}</div>}
             <Button size="lg" full type="submit" disabled={loading || !email}>
               {loading ? 'Enviando...' : 'Enviar enlace'}
             </Button>

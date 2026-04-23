@@ -19,6 +19,8 @@ export interface Profile {
   alternative_location?: string;
   certifications?: string;
   bio?: string;
+  supervisor_name?: string;
+  supervisor_title?: string;
 }
 
 export function useProfile(role?: 'patient' | 'student') {
@@ -47,8 +49,12 @@ export function useProfile(role?: 'patient' | 'student') {
     setSaving(true);
     try {
       const res = await api.put(endpoint, data);
-      const updated = res.data?.profile ?? res.data ?? data;
-      setProfile(prev => ({ ...prev, ...updated }));
+      // Always apply what was sent; additionally merge any profile fields from the API response
+      const fromApi = res.data?.profile ?? (
+        res.data && typeof res.data === 'object' && !('message' in res.data) ? res.data : null
+      );
+      setProfile(prev => ({ ...prev, ...data, ...(fromApi ?? {}) }));
+      setError(null);
       return true;
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ?? (err as { message?: string })?.message ?? 'Error al guardar';

@@ -8,8 +8,54 @@ import { Button } from '@/components/ui';
 import { Icon } from '@/components/ui';
 import { Wordmark } from '@/components/brand';
 import { useIsDesktop } from '@/components/desktop-shell';
+import { api } from '@/lib/api';
 
-function LandingDesktop() {
+interface PlatformStats {
+  patients: string;
+  students: string;
+  rating: string;
+  socialProofCount: string;
+}
+
+const DEFAULT_STATS: PlatformStats = {
+  patients: '2.400+',
+  students: '180+',
+  rating: '4.8★',
+  socialProofCount: '+500',
+};
+
+function usePlatformStats(): PlatformStats {
+  const [stats, setStats] = useState<PlatformStats>(DEFAULT_STATS);
+
+  useEffect(() => {
+    const tryEndpoints = async () => {
+      const endpoints = ['/api/stats', '/api/platform/stats', '/api/metrics'];
+      for (const ep of endpoints) {
+        try {
+          const res = await api.get(ep);
+          const d = res.data as Record<string, unknown>;
+          const patients = Number(d.total_patients ?? d.patients ?? d.patientCount ?? 0);
+          const students = Number(d.total_students ?? d.students ?? d.studentCount ?? 0);
+          const rating = Number(d.avg_rating ?? d.avgRating ?? d.rating ?? 0);
+          if (patients > 0 || students > 0) {
+            setStats({
+              patients: patients >= 1000 ? `${(patients / 1000).toFixed(1).replace('.0', '')}k+` : `${patients}+`,
+              students: students > 0 ? `${students}+` : DEFAULT_STATS.students,
+              rating: rating > 0 ? `${rating.toFixed(1)}★` : DEFAULT_STATS.rating,
+              socialProofCount: patients > 0 ? `+${patients}` : DEFAULT_STATS.socialProofCount,
+            });
+          }
+          return;
+        } catch { /* try next */ }
+      }
+    };
+    tryEndpoints();
+  }, []);
+
+  return stats;
+}
+
+function LandingDesktop({ stats }: { stats: PlatformStats }) {
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
   return (
@@ -48,7 +94,7 @@ function LandingDesktop() {
             <Button size="lg" variant="glass" onClick={() => router.push('/signup?role=student')}>Soy estudiante</Button>
           </div>
           <div style={{ display: 'flex', gap: 32, fontSize: 13, color: 'var(--ink-600)' }}>
-            {[['2.400+', 'Pacientes atendidos'], ['180+', 'Estudiantes activos'], ['4.8★', 'Rating promedio']].map(([v, l]) => (
+            {[[stats.patients, 'Pacientes atendidos'], [stats.students, 'Estudiantes activos'], [stats.rating, 'Rating promedio']].map(([v, l]) => (
               <div key={l}>
                 <b style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--ink-900)', letterSpacing: '-0.02em', display: 'block' }}>{v}</b>
                 {l}
@@ -142,6 +188,7 @@ function LandingDesktop() {
 
 export default function LandingPage() {
   const isDesktop = useIsDesktop();
+  const stats = usePlatformStats();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollY, setScrollY] = useState(0);
 
@@ -154,7 +201,7 @@ export default function LandingPage() {
     return () => el.removeEventListener('scroll', onScroll);
   }, [isDesktop]);
 
-  if (isDesktop) return <LandingDesktop />;
+  if (isDesktop) return <LandingDesktop stats={stats} />;
 
   return (
     <div
@@ -276,9 +323,9 @@ export default function LandingPage() {
           <div style={{ fontSize: 14, color: 'var(--ink-600)', lineHeight: 1.3 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 2, marginBottom: 2 }}>
               {[0,1,2,3,4].map(i => <Icon key={i} name="star" size={13} color="#F59E0B" stroke={0} />)}
-              <span style={{ fontWeight: 700, color: 'var(--ink-900)', marginLeft: 4 }}>4.9</span>
+              <span style={{ fontWeight: 700, color: 'var(--ink-900)', marginLeft: 4 }}>{stats.rating.replace('★', '')}</span>
             </div>
-            <span><b style={{ color: 'var(--ink-900)' }}>+500 pacientes</b> confían en nosotros</span>
+            <span><b style={{ color: 'var(--ink-900)' }}>{stats.socialProofCount} pacientes</b> confían en nosotros</span>
           </div>
         </div>
       </section>

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Glass, Icon, Button } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
+import { useIsDesktop, DesktopShell } from '@/components/desktop-shell';
 
 interface Appointment {
   id: string;
@@ -53,6 +54,7 @@ function needsWebpay(a: Appointment) {
 
 export default function ReservasPage() {
   const router = useRouter();
+  const isDesktop = useIsDesktop();
   const { user } = useAuth();
   const [rows, setRows] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -140,17 +142,19 @@ export default function ReservasPage() {
     );
   };
 
-  return (
+  const inner = (
     <div className="app-scroll" style={{ minHeight: '100dvh', overflowY: 'auto', background: 'var(--bg-aurora)', fontFamily: 'var(--font-body)', paddingBottom: 60 }}>
-      <div style={{ padding: '56px 20px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
-        <button onClick={() => router.back()} style={{ width: 44, height: 44, borderRadius: 999, background: 'rgba(255,255,255,0.78)', backdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.9)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <Icon name="arrow_left" size={20} />
-        </button>
-        <div>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, letterSpacing: '-0.03em', margin: 0, color: 'var(--ink-900)' }}>Mis reservas</h1>
-          <p style={{ fontSize: 13, color: 'var(--ink-500)', margin: 0 }}>{rows.length} en total</p>
+      {!isDesktop && (
+        <div style={{ padding: '56px 20px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button onClick={() => router.back()} style={{ width: 44, height: 44, borderRadius: 999, background: 'rgba(255,255,255,0.78)', backdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.9)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name="arrow_left" size={20} />
+          </button>
+          <div>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, letterSpacing: '-0.03em', margin: 0, color: 'var(--ink-900)' }}>Mis reservas</h1>
+            <p style={{ fontSize: 13, color: 'var(--ink-500)', margin: 0 }}>{rows.length} en total</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Filtros */}
       <div style={{ padding: '0 20px 14px', overflowX: 'auto' }}>
@@ -191,4 +195,7 @@ export default function ReservasPage() {
       </div>
     </div>
   );
+
+  if (isDesktop) return <DesktopShell role="patient" activeId="appts" title="Mis reservas">{inner}</DesktopShell>;
+  return inner;
 }

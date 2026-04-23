@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { Glass, Icon, Button } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
+import { useIsDesktop, DesktopShell } from '@/components/desktop-shell';
 
 // ── Types ──────────────────────────────────────────────────────
 interface Appointment {
@@ -57,6 +58,8 @@ export default function AppointmentDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { user } = useAuth();
+  const isDesktop = useIsDesktop();
+  const role = user?.role === 'student' ? 'student' : 'patient';
 
   const [appt, setAppt] = useState<Appointment | null>(null);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -143,20 +146,29 @@ export default function AppointmentDetailPage() {
   const otherName = user?.role === 'patient' ? (appt?.student_name ?? 'Estudiante') : (appt?.patient_name ?? 'Paciente');
   const statusInfo = STATUS_MAP[appt?.status ?? 'pending'] ?? STATUS_MAP.pending;
 
-  if (loading) return (
-    <div style={{ minHeight: '100dvh', background: 'var(--bg-aurora)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+  const spinner = (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: isDesktop ? 400 : '100dvh', background: isDesktop ? 'transparent' : 'var(--bg-aurora)' }}>
       <div style={{ width: 32, height: 32, border: '3px solid rgba(10,22,40,0.1)', borderTopColor: 'var(--brand-500)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 
-  if (!appt) return (
-    <div style={{ minHeight: '100dvh', background: 'var(--bg-aurora)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, fontFamily: 'var(--font-body)' }}>
-      <Icon name="calendar" size={48} color="var(--ink-300)" />
-      <p style={{ color: 'var(--ink-500)', fontSize: 15 }}>No se encontró la cita</p>
-      <Button size="md" onClick={() => router.push('/citas')}>Volver</Button>
-    </div>
-  );
+  if (loading) {
+    if (isDesktop) return <DesktopShell role={role} activeId="appts" title="Detalle de cita">{spinner}</DesktopShell>;
+    return spinner;
+  }
+
+  if (!appt) {
+    const empty = (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, minHeight: isDesktop ? 400 : '100dvh', fontFamily: 'var(--font-body)' }}>
+        <Icon name="calendar" size={48} color="var(--ink-300)" />
+        <p style={{ color: 'var(--ink-500)', fontSize: 15 }}>No se encontró la cita</p>
+        <Button size="md" onClick={() => router.push('/citas')}>Volver</Button>
+      </div>
+    );
+    if (isDesktop) return <DesktopShell role={role} activeId="appts" title="Detalle de cita">{empty}</DesktopShell>;
+    return <div style={{ minHeight: '100dvh', background: 'var(--bg-aurora)' }}>{empty}</div>;
+  }
 
   const scheduledDate = appt.scheduled_at
     ? new Date(appt.scheduled_at).toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
@@ -165,25 +177,32 @@ export default function AppointmentDetailPage() {
     ? new Date(appt.scheduled_at).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })
     : undefined;
 
-  return (
-    <div className="app-scroll" style={{ minHeight: '100dvh', overflowY: 'auto', background: 'var(--bg-aurora)', fontFamily: 'var(--font-body)', paddingBottom: 48 }}>
+  const content = (
+    <div style={{ fontFamily: 'var(--font-body)', paddingBottom: 48 }}>
       {/* Toast */}
       {toast && (
         <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', background: toastType === 'success' ? 'var(--success-500,#22c55e)' : 'var(--danger-500,#ef4444)', color: '#fff', padding: '10px 20px', borderRadius: 12, fontSize: 14, fontWeight: 500, zIndex: 100, boxShadow: '0 4px 20px rgba(0,0,0,0.15)', whiteSpace: 'nowrap' }}>{toast}</div>
       )}
 
-      {/* Header */}
-      <div style={{ padding: '56px 20px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
-        <button onClick={() => router.back()} style={{ width: 44, height: 44, borderRadius: 999, background: 'rgba(255,255,255,0.78)', backdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.9)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <Icon name="arrow_left" size={20} />
-        </button>
-        <div style={{ flex: 1 }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, letterSpacing: '-0.03em', margin: 0, color: 'var(--ink-900)' }}>Detalle de cita</h1>
+      {/* Header — mobile only (desktop uses DesktopShell topbar) */}
+      {!isDesktop && (
+        <div style={{ padding: '56px 20px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button onClick={() => router.back()} style={{ width: 44, height: 44, borderRadius: 999, background: 'rgba(255,255,255,0.78)', backdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.9)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name="arrow_left" size={20} />
+          </button>
+          <div style={{ flex: 1 }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, letterSpacing: '-0.03em', margin: 0, color: 'var(--ink-900)' }}>Detalle de cita</h1>
+          </div>
+          <span style={{ fontSize: 11, fontWeight: 700, padding: '5px 12px', borderRadius: 999, background: statusInfo.bg, color: statusInfo.fg }}>{statusInfo.label}</span>
         </div>
-        <span style={{ fontSize: 11, fontWeight: 700, padding: '5px 12px', borderRadius: 999, background: statusInfo.bg, color: statusInfo.fg }}>{statusInfo.label}</span>
-      </div>
+      )}
+      {isDesktop && (
+        <div style={{ padding: '16px 32px 4px', display: 'flex', justifyContent: 'flex-end' }}>
+          <span style={{ fontSize: 11, fontWeight: 700, padding: '5px 12px', borderRadius: 999, background: statusInfo.bg, color: statusInfo.fg }}>{statusInfo.label}</span>
+        </div>
+      )}
 
-      <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ padding: isDesktop ? '0 32px' : '0 20px', display: 'flex', flexDirection: 'column', gap: 14, maxWidth: isDesktop ? 720 : undefined }}>
 
         {/* Main info */}
         <Glass hi radius={20} style={{ padding: 20 }}>
@@ -270,6 +289,20 @@ export default function AppointmentDetailPage() {
           </Glass>
         )}
       </div>
+    </div>
+  );
+
+  if (isDesktop) {
+    return (
+      <DesktopShell role={role} activeId="appts" title="Detalle de cita">
+        {content}
+      </DesktopShell>
+    );
+  }
+
+  return (
+    <div className="app-scroll" style={{ minHeight: '100dvh', overflowY: 'auto', background: 'var(--bg-aurora)' }}>
+      {content}
     </div>
   );
 }

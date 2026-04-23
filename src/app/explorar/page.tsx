@@ -6,7 +6,7 @@ import { Button, Glass, Icon, TextField } from '@/components/ui';
 import BottomNav from '@/components/BottomNav';
 import { DesktopShell, useIsDesktop } from '@/components/desktop-shell';
 import PatientOnboarding, { usePatientOnboarding } from '@/components/PatientOnboarding';
-import { fetchUniversityServices, normalizeText, PublicServiceItem } from '@/lib/public-services';
+import { fetchUniversityServices, fetchAllServices, normalizeText, PublicServiceItem } from '@/lib/public-services';
 
 const CATEGORY_FILTERS = [
   { id: 'blanqueamiento', label: 'Blanqueamiento', icon: 'sun', tint: '#F59E0B' },
@@ -76,7 +76,9 @@ function ExploreContent({
   activeCategory,
   setActiveCategory,
   universityName,
+  showingAll,
   onChangeUniversity,
+  onClearUniversity,
 }: {
   services: PublicServiceItem[];
   loading: boolean;
@@ -85,7 +87,9 @@ function ExploreContent({
   activeCategory: string;
   setActiveCategory: (value: string) => void;
   universityName: string;
+  showingAll: boolean;
   onChangeUniversity: () => void;
+  onClearUniversity: () => void;
 }) {
   const router = useRouter();
 
@@ -104,10 +108,27 @@ function ExploreContent({
         <div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color: 'var(--ink-900)', letterSpacing: '-0.03em' }}>Servicios</div>
           <div style={{ fontSize: 14, color: 'var(--ink-600)', marginTop: 4 }}>
-            {loading ? 'Cargando servicios...' : `${filtered.length} resultado${filtered.length !== 1 ? 's' : ''} en ${universityName}`}
+            {loading ? 'Cargando servicios...' : `${filtered.length} resultado${filtered.length !== 1 ? 's' : ''}`}
           </div>
         </div>
         <Button size="md" variant="glass" onClick={onChangeUniversity}>Cambiar universidad</Button>
+      </div>
+
+      {/* University filter chip */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
+        {showingAll ? (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 999, fontSize: 12, fontWeight: 700, background: 'rgba(10,22,40,0.06)', color: 'var(--ink-600)', border: '1px solid rgba(10,22,40,0.08)' }}>
+            Todas las universidades
+          </span>
+        ) : (
+          <button
+            onClick={onClearUniversity}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 999, fontSize: 12, fontWeight: 700, background: 'rgba(16,169,198,0.1)', color: 'var(--brand-700)', border: '1px solid rgba(16,169,198,0.2)', cursor: 'pointer' }}
+          >
+            {universityName}
+            <span style={{ fontSize: 14, lineHeight: 1, fontWeight: 400 }}>×</span>
+          </button>
+        )}
       </div>
 
       <div style={{ marginBottom: 16 }}>
@@ -172,6 +193,7 @@ export default function ExplorarPage() {
   const [showUniversityFlow, setShowUniversityFlow] = useState(false);
   const [services, setServices] = useState<PublicServiceItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showingAll, setShowingAll] = useState(false);
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('');
 
@@ -180,11 +202,34 @@ export default function ExplorarPage() {
   useEffect(() => {
     if (!selectedUniversity?.id) return;
     setLoading(true);
+    setShowingAll(false);
     fetchUniversityServices(selectedUniversity.id)
-      .then(setServices)
-      .catch(() => setServices([]))
+      .then(result => {
+        if (result.length === 0) {
+          // University has no services — fallback to all
+          return fetchAllServices().then(all => {
+            setServices(all);
+            setShowingAll(true);
+          });
+        }
+        setServices(result);
+        setShowingAll(false);
+      })
+      .catch(() => {
+        fetchAllServices()
+          .then(all => { setServices(all); setShowingAll(true); })
+          .catch(() => setServices([]));
+      })
       .finally(() => setLoading(false));
   }, [selectedUniversity?.id]);
+
+  const loadAll = () => {
+    setLoading(true);
+    fetchAllServices()
+      .then(all => { setServices(all); setShowingAll(true); })
+      .catch(() => setServices([]))
+      .finally(() => setLoading(false));
+  };
 
   const handleUniversitySelect = (university: Parameters<typeof completeOnboarding>[0]) => {
     if (needsOnboarding || !selectedUniversity) {
@@ -199,6 +244,8 @@ export default function ExplorarPage() {
     return <PatientOnboarding onComplete={handleUniversitySelect} />;
   }
 
+  const universityName = selectedUniversity?.short_name || selectedUniversity?.name || 'Mi universidad';
+
   const content = (
     <ExploreContent
       services={services}
@@ -207,14 +254,16 @@ export default function ExplorarPage() {
       setSearch={setSearch}
       activeCategory={activeCategory}
       setActiveCategory={setActiveCategory}
-      universityName={selectedUniversity?.short_name || selectedUniversity?.name || 'tu universidad'}
+      universityName={universityName}
+      showingAll={showingAll}
       onChangeUniversity={() => setShowUniversityFlow(true)}
+      onClearUniversity={loadAll}
     />
   );
 
   if (isDesktop) {
     return (
-      <DesktopShell role="patient" activeId="search" title="Explorar servicios" subtitle={selectedUniversity?.name ? `Catalogo disponible en ${selectedUniversity.name}` : undefined}>
+      <DesktopShell role="patient" activeId="search" title="Explorar servicios" subtitle={showingAll ? 'Todas las universidades' : selectedUniversity?.name ? `Catálogo en ${selectedUniversity.name}` : undefined}>
         {content}
       </DesktopShell>
     );
