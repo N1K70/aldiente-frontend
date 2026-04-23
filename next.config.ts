@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Reads PORT env variable from preview_start
 };
 
 export default nextConfig;
