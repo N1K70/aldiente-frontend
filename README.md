@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ALDIENTE Web
 
-## Getting Started
+Frontend productivo de ALDIENTE. Este proyecto reemplaza al frontend legacy `aldiente-frontend`.
 
-First, run the development server:
+## Estado del repositorio
+
+- Aplicacion actual: `aldiente-web`
+- Stack: Next.js, React, TypeScript, Tailwind CSS
+- Deploy frontend: Vercel
+- Servicios backend: Railway
+- Base de datos: Supabase/PostgreSQL
+- Frontend legacy: `aldiente-frontend` queda solo como referencia historica
+
+## Desarrollo local
+
+```bash
+npm install
+npm run dev
+```
+
+La aplicacion queda disponible en:
+
+```text
+http://localhost:3000
+```
+
+## Scripts
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run build
+npm run start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Variables de entorno
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Crear `.env.local` a partir de `.env.example`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+NEXT_PUBLIC_BACKEND_URL=http://localhost:3001
+NEXT_PUBLIC_CHAT_URL=http://localhost:3005
+```
 
-## Learn More
+En Vercel, confirmar estas variables para produccion:
 
-To learn more about Next.js, take a look at the following resources:
+```env
+NEXT_PUBLIC_BACKEND_URL=https://<backend-railway>
+NEXT_PUBLIC_CHAT_URL=https://<chat-railway>
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Servicios externos
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Backend API: Railway
+- Chat realtime: Railway + Socket.IO
+- Archivos: Railway, consumido por backend/API
+- Base de datos: Supabase/PostgreSQL
+- Hosting frontend: Vercel
 
-## Deploy on Vercel
+## Checklist antes de salir a mercado
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Confirmar que Vercel despliega desde `aldiente-web`.
+- Validar que `NEXT_PUBLIC_BACKEND_URL` apunta al backend productivo.
+- Validar que `NEXT_PUBLIC_CHAT_URL` apunta al servicio productivo de chat.
+- Ejecutar build de produccion en CI o entorno compatible.
+- Probar flujos criticos: signup, login, perfil, explorar, reservar, pago, confirmacion, chat, documentos y reagendar.
+- Revisar que no aparezcan datos mock en produccion cuando falla la API.
+- Confirmar copy comercial, FAQ, senales de confianza y eventos de conversion.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Documentacion de salida a mercado
+
+- [Readiness frontend](docs/launch-readiness.md)
+- [Prompt agente investigador mercado](docs/market-research-prompt.md)
