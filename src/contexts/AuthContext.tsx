@@ -80,7 +80,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         name: data?.user?.name ?? data?.user?.fullName ?? data?.user?.full_name ?? data?.name ?? data?.fullName ?? data?.full_name,
       };
       localStorage.setItem('authUser', JSON.stringify(u));
+      if (u.role) document.cookie = `authRole=${u.role}; path=/; SameSite=Lax`;
       setUser(u);
+      window.dispatchEvent(new Event('auth:changed'));
     } finally {
       setLoading(false);
     }
@@ -127,7 +129,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         name: data?.user?.name ?? registerData.fullName ?? `${registerData.name} ${registerData.lastname}`.trim(),
       };
       localStorage.setItem('authUser', JSON.stringify(u));
+      if (u.role) document.cookie = `authRole=${u.role}; path=/; SameSite=Lax`;
       setUser(u);
+      window.dispatchEvent(new Event('auth:changed'));
     } finally {
       setLoading(false);
     }
@@ -147,6 +151,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('authUser');
     document.cookie = 'authToken=; path=/; max-age=0';
+    document.cookie = 'authRole=; path=/; max-age=0';
     setUser(null);
     window.dispatchEvent(new Event('auth:changed'));
   }, []);

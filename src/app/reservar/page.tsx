@@ -9,6 +9,7 @@ import { useAvailabilities } from '@/hooks/useAvailabilities';
 import { useStudent } from '@/hooks/useStudent';
 import { api } from '@/lib/api';
 import { fetchPublicServicesByUniversityName, fetchUniversities, filterHookServices, PublicServiceItem, UniversityOption } from '@/lib/public-services';
+import { reportFrontendError } from '@/lib/frontend-observability';
 
 const HOOK_SERVICES = [
   { key: 'limpieza', name: 'Limpieza dental', icon: 'sparkle', description: 'Limpieza profesional y cuidado preventivo.' },
@@ -52,6 +53,7 @@ function AuthBooking({
 
   const { slots, byDate, loading: slotsLoading } = useAvailabilities(serviceId || null);
   const services = student?.services ?? [];
+  const hasServices = services.length > 0;
   const selectedService = services.find(item => item.id === serviceId) ?? services[0];
   const availableDates = useMemo(() => Array.from(new Set(slots.map(slot => slot.date))).sort(), [slots]);
   const availableTimes = date ? byDate(date) : [];
@@ -76,6 +78,12 @@ function AuthBooking({
       const appointmentId = res.data?.appointment?.id ?? res.data?.id ?? '';
       router.push(`/confirmacion?id=${appointmentId}`);
     } catch (err) {
+      reportFrontendError({
+        module: 'reservar',
+        action: 'createAppointment',
+        message: 'Error creando cita autenticada',
+        details: { studentId, serviceId, date, time },
+      });
       const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'No se pudo crear la cita.';
       setError(message);
     } finally {
@@ -87,7 +95,12 @@ function AuthBooking({
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       {step === 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {(services.length ? services : [{ id: 'clean', name: 'Limpieza dental', price: 15000, duration: 45 }]).map(service => {
+          {!hasServices && (
+            <Glass radius={18} style={{ padding: 18, textAlign: 'center', color: 'var(--ink-500)' }}>
+              Este estudiante no tiene servicios publicados por ahora.
+            </Glass>
+          )}
+          {services.map(service => {
             const selected = serviceId === service.id;
             return (
               <button
@@ -231,7 +244,7 @@ function AuthBooking({
   const actions = (
     <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
       {step > 0 && <Button size="md" variant="ghost" onClick={() => setStep(current => current - 1)}>Atras</Button>}
-      <Button size="md" disabled={!canContinue || submitting} onClick={() => (step < 2 ? setStep(current => current + 1) : confirm())}>
+      <Button size="md" disabled={!canContinue || submitting || (step === 0 && !hasServices)} onClick={() => (step < 2 ? setStep(current => current + 1) : confirm())}>
         {submitting ? 'Confirmando...' : step === 2 ? 'Confirmar y pagar' : 'Continuar'}
       </Button>
     </div>
@@ -313,7 +326,14 @@ function GuestCheckout() {
     setLoadingUniversities(true);
     fetchUniversities()
       .then(setUniversities)
-      .catch(() => setUniversities([]))
+      .catch(() => {
+        reportFrontendError({
+          module: 'reservar',
+          action: 'fetchUniversities',
+          message: 'Error cargando universidades para guest checkout',
+        });
+        setUniversities([]);
+      })
       .finally(() => setLoadingUniversities(false));
   }, []);
 
@@ -329,7 +349,15 @@ function GuestCheckout() {
         const filtered = filterHookServices(allServices, selectedHook);
         setServices(filtered.length > 0 ? filtered : allServices);
       })
-      .catch(() => setServices([]))
+      .catch(() => {
+        reportFrontendError({
+          module: 'reservar',
+          action: 'fetchPublicServicesByUniversityName',
+          message: 'Error cargando servicios públicos por universidad',
+          details: { university: selectedUniversity.name, hook: selectedHook },
+        });
+        setServices([]);
+      })
       .finally(() => setLoadingServices(false));
   }, [selectedHook, selectedUniversity]);
 
@@ -354,6 +382,12 @@ function GuestCheckout() {
       setSuccessData(res.data);
       setStep('success');
     } catch (err) {
+      reportFrontendError({
+        module: 'reservar',
+        action: 'guestCheckout',
+        message: 'Error procesando reserva en guest checkout',
+        details: { university: selectedUniversity?.name, serviceId: selectedService.id, date, time },
+      });
       const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'No se pudo procesar la reserva.';
       setError(message);
     } finally {

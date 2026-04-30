@@ -7,6 +7,8 @@ const PUBLIC_ONLY = ['/login', '/signup', '/welcome'];
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get('authToken')?.value;
+  const role = request.cookies.get('authRole')?.value;
+  const isStudent = role === 'student' || role === 'admin';
 
   const isProtected = PROTECTED.some(p => pathname.startsWith(p));
   const isPublicOnly = PUBLIC_ONLY.some(p => pathname.startsWith(p));
@@ -16,7 +18,15 @@ export function proxy(request: NextRequest) {
   }
 
   if (isPublicOnly && token) {
+    return NextResponse.redirect(new URL(isStudent ? '/dashboard' : '/home', request.url));
+  }
+
+  if (token && pathname.startsWith('/dashboard') && !isStudent) {
     return NextResponse.redirect(new URL('/home', request.url));
+  }
+
+  if (token && pathname.startsWith('/home') && isStudent) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
   return NextResponse.next();

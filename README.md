@@ -30,6 +30,8 @@ http://localhost:3000
 npm run dev
 npm run build
 npm run start
+npm run typecheck
+npm run qa:gate
 ```
 
 ## Variables de entorno
@@ -70,3 +72,6 @@ NEXT_PUBLIC_CHAT_URL=https://<chat-railway>
 
 - [Readiness frontend](docs/launch-readiness.md)
 - [Prompt agente investigador mercado](docs/market-research-prompt.md)
+- [Sistema QA + Desarrollo](docs/qa-dev-system.md)
+- [QA Evidence Log](docs/qa-evidence-log.md)
+- [Entorno Dev con Docker](docs/docker-dev.md)
