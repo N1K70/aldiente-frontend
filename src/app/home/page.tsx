@@ -10,6 +10,7 @@ import { useAppointments } from '@/hooks/useAppointments';
 import { useNotifications } from '@/hooks/useNotifications';
 import PatientOnboarding, { usePatientOnboarding } from '@/components/PatientOnboarding';
 import { fetchUniversityServices, normalizeText, PublicServiceItem } from '@/lib/public-services';
+import { reportFrontendError } from '@/lib/frontend-observability';
 
 const STATUS_LABEL: Record<string, string> = { confirmed: 'Confirmada', pending: 'Pendiente', completed: 'Completada', cancelled: 'Cancelada' };
 const SERVICE_TONES = ['#10A9C6', '#6366F1', '#F59E0B', '#EC4899'] as const;
@@ -48,22 +49,34 @@ function ApptDateBadge({ dateStr, time }: { dateStr: string; time?: string }) {
 function useUniversityHighlights(universityId?: string) {
   const [services, setServices] = useState<PublicServiceItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
     if (!universityId) {
       setServices([]);
+      setLoadError('');
       return;
     }
 
     let mounted = true;
     setLoading(true);
+    setLoadError('');
 
     fetchUniversityServices(universityId)
       .then(rows => {
         if (mounted) setServices(rows);
       })
       .catch(() => {
-        if (mounted) setServices([]);
+        if (mounted) {
+          reportFrontendError({
+            module: 'home',
+            action: 'fetchUniversityServices',
+            message: 'Error cargando highlights de universidad en Home',
+            details: { universityId },
+          });
+          setServices([]);
+          setLoadError('No pudimos cargar servicios de tu universidad en este momento.');
+        }
       })
       .finally(() => {
         if (mounted) setLoading(false);
@@ -111,7 +124,7 @@ function useUniversityHighlights(universityId?: string) {
     return Array.from(unique.values()).slice(0, 3);
   }, [services]);
 
-  return { featuredServices, featuredStudents, loading };
+  return { featuredServices, featuredStudents, loading, loadError };
 }
 
 function HomeDesktop() {
@@ -119,7 +132,7 @@ function HomeDesktop() {
   const { user } = useAuth();
   const { next, upcoming, loading } = useAppointments('patient');
   const { needsOnboarding, selectedUniversity, completeOnboarding } = usePatientOnboarding();
-  const { featuredServices, featuredStudents, loading: catalogLoading } = useUniversityHighlights(selectedUniversity?.id);
+  const { featuredServices, featuredStudents, loading: catalogLoading, loadError } = useUniversityHighlights(selectedUniversity?.id);
   const firstName = user?.name?.split(' ')[0] ?? 'tú';
 
   if (needsOnboarding) return <PatientOnboarding onComplete={completeOnboarding} />;
@@ -139,6 +152,11 @@ function HomeDesktop() {
             <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink-900)', marginTop: 4 }}>{selectedUniversity.name}</div>
           </div>
           <Button size="md" variant="glass" onClick={() => router.push('/explorar')}>Explorar servicios</Button>
+        </Glass>
+      )}
+      {loadError && (
+        <Glass radius={14} style={{ padding: 12, marginBottom: 16, border: '1px solid rgba(245,158,11,0.28)', background: 'rgba(245,158,11,0.08)' }}>
+          <div style={{ fontSize: 13, color: 'var(--ink-700)' }}>{loadError}</div>
         </Glass>
       )}
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 20, marginBottom: 24 }}>
@@ -272,7 +290,7 @@ export default function HomePage() {
   const { next, upcoming, loading } = useAppointments('patient');
   const { unreadCount } = useNotifications();
   const { needsOnboarding, selectedUniversity, completeOnboarding } = usePatientOnboarding();
-  const { featuredServices, featuredStudents, loading: catalogLoading } = useUniversityHighlights(selectedUniversity?.id);
+  const { featuredServices, featuredStudents, loading: catalogLoading, loadError } = useUniversityHighlights(selectedUniversity?.id);
 
   if (isDesktop) return <HomeDesktop />;
   if (needsOnboarding) return <PatientOnboarding onComplete={completeOnboarding} />;
@@ -308,6 +326,13 @@ export default function HomePage() {
             <Icon name="graduation" size={13} color="var(--brand-700)" />
             {selectedUniversity.name}
           </div>
+        </div>
+      )}
+      {loadError && (
+        <div style={{ padding: '0 20px 8px' }}>
+          <Glass radius={14} style={{ padding: 12, border: '1px solid rgba(245,158,11,0.28)', background: 'rgba(245,158,11,0.08)' }}>
+            <div style={{ fontSize: 13, color: 'var(--ink-700)' }}>{loadError}</div>
+          </Glass>
         </div>
       )}
 

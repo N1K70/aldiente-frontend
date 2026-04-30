@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { api } from '@/lib/api';
+import { reportFrontendError } from '@/lib/frontend-observability';
 
 const CHAT_URL = process.env.NEXT_PUBLIC_CHAT_URL || '';
 const SOCKET_CONNECT_TIMEOUT = 4000;
@@ -41,7 +42,13 @@ async function fetchHistory(appointmentId: string): Promise<ChatMessage[]> {
     const res = await api.get(`/api/appointments/${appointmentId}/messages`);
     const raw = Array.isArray(res.data) ? res.data : (res.data?.messages ?? res.data?.data ?? []);
     return raw.map(mapMsg);
-  } catch {
+  } catch (e: any) {
+    reportFrontendError({
+      module: 'chat',
+      action: 'fetchHistory',
+      message: 'Error cargando historial de chat',
+      details: { appointmentId, status: e?.response?.status ?? null },
+    });
     return [];
   }
 }
@@ -126,7 +133,14 @@ export function useChat(appointmentId: string | null) {
       if (modeRef.current === 'socket') startHttpMode(appointmentId);
     });
 
-    socket.on('connect_error', () => {
+    socket.on('connect_error', (e: any) => {
+      reportFrontendError({
+        module: 'chat',
+        action: 'socketConnectError',
+        severity: 'warning',
+        message: 'Error conectando socket de chat, usando fallback HTTP',
+        details: { appointmentId, reason: e?.message ?? 'unknown' },
+      });
       if (modeRef.current === 'pending') {
         if (timeoutRef.current) { clearTimeout(timeoutRef.current); timeoutRef.current = null; }
         socket.disconnect();
@@ -158,7 +172,14 @@ export function useChat(appointmentId: string | null) {
     if (modeRef.current === 'socket' && socketRef.current?.connected) {
       socketRef.current.emit('chat:message', { appointmentId, content });
     } else {
-      postMessage(appointmentId, content).catch(() => {});
+      postMessage(appointmentId, content).catch((e: any) => {
+        reportFrontendError({
+          module: 'chat',
+          action: 'sendMessage',
+          message: 'Error enviando mensaje por fallback HTTP',
+          details: { appointmentId, status: e?.response?.status ?? null },
+        });
+      });
     }
   }, [appointmentId]);
 

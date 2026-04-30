@@ -4,6 +4,7 @@ import React, { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Glass, Icon, Button } from '@/components/ui';
 import { api } from '@/lib/api';
+import { reportFrontendError } from '@/lib/frontend-observability';
 
 interface PaymentDetails {
   buyOrder?: string;
@@ -31,7 +32,15 @@ function WebpayReturnContent() {
 
       try {
         if (TBK_TOKEN && TBK_ORDEN) {
-          await api.post('/api/webpay/cancel', { TBK_TOKEN, TBK_ID_SESION: TBK_SESION ?? '', TBK_ORDEN_COMPRA: TBK_ORDEN }).catch(() => {});
+          await api.post('/api/webpay/cancel', { TBK_TOKEN, TBK_ID_SESION: TBK_SESION ?? '', TBK_ORDEN_COMPRA: TBK_ORDEN }).catch((e: any) => {
+            reportFrontendError({
+              module: 'webpay',
+              action: 'cancel',
+              severity: 'warning',
+              message: 'Error informando cancelacion de pago',
+              details: { status: e?.response?.status ?? null },
+            });
+          });
           setStatus('cancelled');
           setMessage('Has cancelado el pago');
           return;
@@ -53,6 +62,16 @@ function WebpayReturnContent() {
           setDetails(result);
         }
       } catch (e: any) {
+        reportFrontendError({
+          module: 'webpay',
+          action: 'commit',
+          message: 'Error procesando retorno de Webpay',
+          details: {
+            status: e?.response?.status ?? null,
+            hasTokenWs: Boolean(token_ws),
+            hasCancelToken: Boolean(TBK_TOKEN),
+          },
+        });
         setStatus('error');
         setMessage(e?.response?.data?.message ?? 'Error al procesar el pago');
       }

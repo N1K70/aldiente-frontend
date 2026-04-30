@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { DesktopShell, useIsDesktop } from '@/components/desktop-shell';
 import BottomNav from '@/components/BottomNav';
 import { api } from '@/lib/api';
+import { reportFrontendError } from '@/lib/frontend-observability';
 
 interface UserDocument {
   id: string;
@@ -51,7 +52,15 @@ function UploadModal({ isStudent, onClose, onUploaded }: { isStudent: boolean; o
     api.get('/api/documents').then(r => {
       const docs: UserDocument[] = Array.isArray(r.data) ? r.data : (r.data?.documents ?? []);
       setUsedBytes(docs.reduce((s, d) => s + Number(d.file_size ?? 0), 0));
-    }).catch(() => {});
+    }).catch((e: any) => {
+      reportFrontendError({
+        module: 'documentos',
+        action: 'loadUsedQuota',
+        severity: 'warning',
+        message: 'Error cargando documentos para cuota',
+        details: { status: e?.response?.status ?? null },
+      });
+    });
   }, []);
 
   const usedPct = Math.min(1, usedBytes / QUOTA);
@@ -80,6 +89,12 @@ function UploadModal({ isStudent, onClose, onUploaded }: { isStudent: boolean; o
       onUploaded();
       onClose();
     } catch (e: any) {
+      reportFrontendError({
+        module: 'documentos',
+        action: 'upload',
+        message: 'Error subiendo documento',
+        details: { status: e?.response?.status ?? null, category },
+      });
       setError(e?.response?.data?.message ?? 'Error al subir el documento');
     } finally {
       setSubmitting(false);
@@ -241,7 +256,15 @@ export default function DocumentosPage() {
         const d = r.data;
         setDocs(Array.isArray(d) ? d : (d?.documents ?? []));
       })
-      .catch(() => setDocs([]))
+      .catch((e: any) => {
+        reportFrontendError({
+          module: 'documentos',
+          action: 'load',
+          message: 'Error cargando documentos',
+          details: { status: e?.response?.status ?? null, filter: filter || null },
+        });
+        setDocs([]);
+      })
       .finally(() => setLoading(false));
   };
 
@@ -304,3 +327,5 @@ export default function DocumentosPage() {
     </div>
   );
 }
+
+

@@ -8,6 +8,7 @@ import TermsModal from '@/components/TermsModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsDesktop } from '@/components/desktop-shell';
 import { formatRutOnInput, validateAndFormatRut } from '@/lib/rut';
+import { reportFrontendError } from '@/lib/frontend-observability';
 
 type Role = 'patient' | 'student';
 
@@ -138,7 +139,7 @@ function SignupInner() {
 
   const steps = [
     { title: copy[role].title, sub: copy[role].sub },
-    { title: 'Credenciales de acceso', sub: 'Tu cuenta quedara asociada solo a correo y contrasena.' },
+    { title: 'Credenciales de acceso', sub: 'Tu cuenta quedará asociada solo a correo y contraseña.' },
   ];
 
   const validateStepOne = () => {
@@ -153,7 +154,7 @@ function SignupInner() {
     }
 
     if (!data.fullName || !data.university || !data.careerYear) {
-      return 'Completa nombre completo, universidad y ano de carrera.';
+      return 'Completa nombre completo, universidad y año de carrera.';
     }
 
     return '';
@@ -162,10 +163,10 @@ function SignupInner() {
   const validateAll = () => {
     const baseError = validateStepOne();
     if (baseError) return baseError;
-    if (!data.email || !data.pw) return 'Completa correo y contrasena.';
-    if (data.pw.length < 6) return 'La contrasena debe tener al menos 6 caracteres.';
-    if (data.pw !== data.confirmPw) return 'Las contrasenas no coinciden.';
-    if (!acceptTerms) return 'Debes aceptar los terminos y condiciones.';
+    if (!data.email || !data.pw) return 'Completa correo y contraseña.';
+    if (data.pw.length < 6) return 'La contraseña debe tener al menos 6 caracteres.';
+    if (data.pw !== data.confirmPw) return 'Las contraseñas no coinciden.';
+    if (!acceptTerms) return 'Debes aceptar los términos y condiciones.';
     return '';
   };
 
@@ -295,8 +296,8 @@ function SignupInner() {
         {step === 1 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 24 }}>
             <TextField label="Correo electronico" icon="mail" type="email" value={data.email} onChange={e => upd('email', e.target.value)} placeholder={role === 'student' ? 'tu@universidad.cl' : 'tu@correo.cl'} autoFocus />
-            <TextField label="Contrasena" icon="lock" type="password" value={data.pw} onChange={e => upd('pw', e.target.value)} placeholder="Minimo 6 caracteres" help="Usa al menos 6 caracteres." />
-            <TextField label="Confirmar contrasena" icon="lock" type="password" value={data.confirmPw} onChange={e => upd('confirmPw', e.target.value)} placeholder="Repite tu contrasena" />
+            <TextField label="Contraseña" icon="lock" type="password" value={data.pw} onChange={e => upd('pw', e.target.value)} placeholder="Mínimo 6 caracteres" help="Usa al menos 6 caracteres." />
+            <TextField label="Confirmar contraseña" icon="lock" type="password" value={data.confirmPw} onChange={e => upd('confirmPw', e.target.value)} placeholder="Repite tu contraseña" />
 
             <label style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px', borderRadius: 16, background: 'rgba(255,255,255,0.72)', border: '1px solid rgba(10,22,40,0.08)', cursor: 'pointer' }}>
               <input type="checkbox" checked={acceptTerms} onChange={e => setAcceptTerms(e.target.checked)} style={{ width: 18, height: 18, marginTop: 2, accentColor: 'var(--brand-600)' }} />
@@ -310,14 +311,14 @@ function SignupInner() {
                   }}
                   style={{ border: 'none', background: 'none', padding: 0, color: 'var(--brand-700)', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-body)' }}
                 >
-                  terminos y condiciones
+                  términos y condiciones
                 </button>
-                {' '}y la politica de privacidad.
+                {' '}y la política de privacidad.
               </span>
             </label>
 
             <div style={{ padding: '14px 16px', borderRadius: 16, background: 'rgba(16,169,198,0.08)', border: '1px solid rgba(16,169,198,0.16)', fontSize: 13, color: 'var(--ink-700)', lineHeight: 1.5 }}>
-              El acceso queda habilitado solo por correo y contrasena.
+              El acceso queda habilitado solo por correo y contraseña.
             </div>
           </div>
         )}
@@ -354,26 +355,38 @@ function SignupInner() {
 
               setError('');
               setLoading(true);
+              const normalizedEmail = data.email.trim().toLowerCase();
               try {
                 const rutValidation = validateAndFormatRut(data.rut);
+                const normalizedName = data.name.trim();
+                const normalizedLastname = data.lastname.trim();
+                const normalizedFullName = data.fullName.trim();
+                const normalizedUniversity = data.university.trim();
+                const normalizedLocation = data.location.trim();
                 await register({
-                  name: data.name,
-                  lastname: data.lastname,
-                  email: data.email,
+                  name: normalizedName,
+                  lastname: normalizedLastname,
+                  email: normalizedEmail,
                   password: data.pw,
                   role,
                   rut: rutValidation.formatted ?? undefined,
                   birthDate: data.birthDate || undefined,
                   gender: data.gender || undefined,
-                  location: data.location || undefined,
-                  fullName: data.fullName || undefined,
-                  university: data.university || undefined,
+                  location: normalizedLocation || undefined,
+                  fullName: normalizedFullName || undefined,
+                  university: normalizedUniversity || undefined,
                   careerYear: data.careerYear || undefined,
                 });
                 const stored = localStorage.getItem('authUser');
                 const storedRole = stored ? JSON.parse(stored).role : null;
                 router.push(storedRole === 'student' || storedRole === 'admin' ? '/dashboard' : '/quiz');
               } catch {
+                reportFrontendError({
+                  module: 'signup',
+                  action: 'register',
+                  message: 'Error creando cuenta en signup',
+                  details: { role, emailDomain: normalizedEmail.split('@')[1] ?? null },
+                });
                 setError('No se pudo crear la cuenta. Intenta nuevamente.');
               } finally {
                 setLoading(false);
