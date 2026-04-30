@@ -77,3 +77,4 @@ NEXT_PUBLIC_CHAT_URL=https://<chat-railway>
 - [Entorno Dev con Docker](docs/docker-dev.md)
 - [Release Checklist](docs/release-checklist.md)
 - [Rollback Vercel/Railway](docs/rollback-vercel-railway.md)
+- [Monitoreo de Errores Frontend](docs/frontend-monitoring.md)

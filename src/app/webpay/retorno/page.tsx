@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Glass, Icon, Button } from '@/components/ui';
 import { api } from '@/lib/api';
 import { reportFrontendError } from '@/lib/frontend-observability';
+import { trackFunnelEvent } from '@/lib/frontend-analytics';
 
 interface PaymentDetails {
   buyOrder?: string;
@@ -56,6 +57,11 @@ function WebpayReturnContent() {
           setStatus('success');
           setMessage('¡Pago aprobado exitosamente!');
           setDetails(result);
+          trackFunnelEvent('funnel_payment_completed', {
+            buyOrder: result.buyOrder ?? null,
+            amount: result.amount ?? null,
+            method: 'webpay',
+          });
         } else {
           setStatus('error');
           setMessage('El pago fue rechazado');
@@ -158,3 +164,4 @@ export default function WebpayReturnPage() {
     </Suspense>
   );
 }
+

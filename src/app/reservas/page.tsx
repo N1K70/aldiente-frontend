@@ -6,6 +6,7 @@ import { Glass, Icon, Button } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 import { useIsDesktop, DesktopShell } from '@/components/desktop-shell';
+import { trackFunnelEvent } from '@/lib/frontend-analytics';
 
 interface Appointment {
   id: string;
@@ -94,6 +95,7 @@ export default function ReservasPage() {
   const handlePay = async (id: string) => {
     setPaying(id);
     try {
+      trackFunnelEvent('funnel_payment_started', { appointmentId: id, method: 'webpay' });
       const res = await api.post(`/api/appointments/${id}/payment/initiate`);
       const url = res.data?.redirectUrl ?? res.data?.url;
       if (url) window.location.href = url;

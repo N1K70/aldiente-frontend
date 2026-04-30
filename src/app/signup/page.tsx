@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useIsDesktop } from '@/components/desktop-shell';
 import { formatRutOnInput, validateAndFormatRut } from '@/lib/rut';
 import { reportFrontendError } from '@/lib/frontend-observability';
+import { trackFunnelEvent } from '@/lib/frontend-analytics';
 
 type Role = 'patient' | 'student';
 
@@ -379,6 +380,10 @@ function SignupInner() {
                 });
                 const stored = localStorage.getItem('authUser');
                 const storedRole = stored ? JSON.parse(stored).role : null;
+                trackFunnelEvent('funnel_signup_completed', {
+                  role,
+                  emailDomain: normalizedEmail.split('@')[1] ?? null,
+                });
                 router.push(storedRole === 'student' || storedRole === 'admin' ? '/dashboard' : '/quiz');
               } catch {
                 reportFrontendError({

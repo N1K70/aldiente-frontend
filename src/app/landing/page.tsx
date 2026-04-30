@@ -9,6 +9,7 @@ import { Icon } from '@/components/ui';
 import { Wordmark } from '@/components/brand';
 import { useIsDesktop } from '@/components/desktop-shell';
 import { api } from '@/lib/api';
+import { trackFunnelEvent } from '@/lib/frontend-analytics';
 
 interface PlatformStats {
   patients: string;
@@ -191,6 +192,10 @@ export default function LandingPage() {
   const stats = usePlatformStats();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    trackFunnelEvent('funnel_visit', { source: 'landing' });
+  }, []);
 
   useEffect(() => {
     if (isDesktop) return;
