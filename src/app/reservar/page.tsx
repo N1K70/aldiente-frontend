@@ -10,6 +10,7 @@ import { useStudent } from '@/hooks/useStudent';
 import { api } from '@/lib/api';
 import { fetchPublicServicesByUniversityName, fetchUniversities, filterHookServices, PublicServiceItem, UniversityOption } from '@/lib/public-services';
 import { reportFrontendError } from '@/lib/frontend-observability';
+import { trackFunnelEvent } from '@/lib/frontend-analytics';
 
 const HOOK_SERVICES = [
   { key: 'limpieza', name: 'Limpieza dental', icon: 'sparkle', description: 'Limpieza profesional y cuidado preventivo.' },
@@ -69,6 +70,12 @@ function AuthBooking({
     setError('');
     try {
       const scheduledAt = `${date}T${time}:00`;
+      trackFunnelEvent('funnel_booking_started', {
+        flow: 'auth',
+        serviceId,
+        studentId,
+        paymentMethod,
+      });
       const res = await api.post('/api/appointments', {
         studentServiceId: serviceId,
         availabilityId: availabilityId || undefined,
@@ -371,6 +378,11 @@ function GuestCheckout() {
     setError('');
     try {
       const scheduledAt = `${date}T${time}:00`;
+      trackFunnelEvent('funnel_booking_started', {
+        flow: 'guest',
+        serviceId: selectedService.id,
+        university: selectedUniversity?.name ?? null,
+      });
       const res = await api.post('/api/guest-checkout', {
         student_service_id: selectedService.id,
         scheduled_at: scheduledAt,

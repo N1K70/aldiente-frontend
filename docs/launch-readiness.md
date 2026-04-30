@@ -35,7 +35,7 @@ Fecha base: 2026-04-29
 
 - [x] Agregar CI minimo: install, build y typecheck/lint.
 - [x] Definir checklist de release.
-- [ ] Definir monitoreo de errores frontend.
+- [x] Definir monitoreo de errores frontend.
 - [x] Documentar rollback de Vercel/Railway.
 
 ## Notas de validacion
