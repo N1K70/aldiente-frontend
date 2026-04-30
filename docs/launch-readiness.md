@@ -29,14 +29,14 @@ Fecha base: 2026-04-29
 - [ ] Agregar FAQ orientada a pacientes y estudiantes.
 - [ ] Agregar senales de confianza: universidades, condiciones de atencion, soporte y seguridad de pagos.
 - [ ] Definir eventos de funnel: visita, registro, servicio visto, reserva iniciada, pago iniciado y pago completado.
-- [ ] Instrumentar errores criticos: auth, pagos, chat, documentos.
+- [x] Instrumentar errores criticos: auth, pagos, chat, documentos.
 
 ## P2 - Operacion
 
-- [ ] Agregar CI minimo: install, build y typecheck/lint.
-- [ ] Definir checklist de release.
+- [x] Agregar CI minimo: install, build y typecheck/lint.
+- [x] Definir checklist de release.
 - [ ] Definir monitoreo de errores frontend.
-- [ ] Documentar rollback de Vercel/Railway.
+- [x] Documentar rollback de Vercel/Railway.
 
 ## Notas de validacion
 
