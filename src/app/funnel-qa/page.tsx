@@ -146,21 +146,33 @@ export default function FunnelQaPage() {
             {missingEvents.length === 0 ? 'Cobertura completa en esta sesion.' : `Faltan: ${missingEvents.join(', ')}`}
           </div>
           <div style={{ marginTop: 8, display: 'flex', justifyContent: 'flex-end' }}>
-            <Button
-              size="sm"
-              variant="glass"
-              onClick={async () => {
-                try {
-                  await navigator.clipboard.writeText(coverageSummary);
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 1200);
-                } catch {
-                  // Ignore clipboard restrictions in some browsers.
-                }
-              }}
-            >
-              {copied ? 'Copiado' : 'Copiar resumen'}
-            </Button>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  if (missingEvents.length > 0) setEventFilter(missingEvents[0] as (typeof EVENT_FILTERS)[number]);
+                }}
+                disabled={missingEvents.length === 0}
+              >
+                Ver primer faltante
+              </Button>
+              <Button
+                size="sm"
+                variant="glass"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(coverageSummary);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 1200);
+                  } catch {
+                    // Ignore clipboard restrictions in some browsers.
+                  }
+                }}
+              >
+                {copied ? 'Copiado' : 'Copiar resumen'}
+              </Button>
+            </div>
           </div>
         </Glass>
 
