@@ -70,6 +70,11 @@ export default function FunnelQaPage() {
             <div style={{ fontSize: 13, color: 'var(--ink-500)', marginTop: 4 }}>
               {filteredEvents.length} de {events.length} evento(s)
             </div>
+            {eventFilter !== 'all' && (
+              <div style={{ marginTop: 6, display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 8px', borderRadius: 999, background: 'rgba(16,169,198,0.12)', border: '1px solid rgba(16,169,198,0.25)', fontSize: 11, fontWeight: 700, color: 'var(--brand-700)' }}>
+                Filtro activo: {eventFilter}
+              </div>
+            )}
             {lastReloadAt && (
               <div style={{ fontSize: 12, color: 'var(--ink-500)', marginTop: 2 }}>
                 Ultima recarga: {new Date(lastReloadAt).toLocaleString('es-CL')}
