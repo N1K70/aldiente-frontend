@@ -16,6 +16,7 @@ interface UserDocument {
   category: string;
   year?: number;
   file_url: string;
+  file_name?: string;
   file_size?: number;
   created_at: string;
 }
@@ -73,7 +74,7 @@ function UploadModal({ isStudent, onClose, onUploaded }: { isStudent: boolean; o
     setFile(f);
   };
 
-  const canSubmit = title && category && file && !(isStudent && category === 'alumno_regular' && year !== currentYear);
+  const canSubmit = title.trim() && category && file && !(isStudent && category === 'alumno_regular' && year !== currentYear);
 
   const handleSubmit = async () => {
     if (!canSubmit || !file) return;
@@ -81,11 +82,21 @@ function UploadModal({ isStudent, onClose, onUploaded }: { isStudent: boolean; o
     try {
       const form = new FormData();
       form.append('file', file);
-      form.append('title', title);
-      form.append('category', category);
-      if (desc) form.append('description', desc);
-      if (year) form.append('year', String(year));
-      await api.post('/api/documents', form);
+      const uploadRes = await api.post('/api/files/upload', form);
+      const fileUrl = uploadRes.data?.url ?? uploadRes.data?.file_url;
+
+      if (!fileUrl) throw new Error('No se recibio URL del archivo');
+
+      await api.post('/api/documents', {
+        title: title.trim(),
+        category,
+        description: desc.trim() || undefined,
+        year,
+        file_url: fileUrl,
+        file_name: file.name,
+        file_size: file.size,
+        file_mime: file.type || undefined,
+      });
       onUploaded();
       onClose();
     } catch (e: any) {
@@ -93,7 +104,7 @@ function UploadModal({ isStudent, onClose, onUploaded }: { isStudent: boolean; o
         module: 'documentos',
         action: 'upload',
         message: 'Error subiendo documento',
-        details: { status: e?.response?.status ?? null, category },
+        details: { status: e?.response?.status ?? null, category, hasFile: Boolean(file) },
       });
       setError(e?.response?.data?.message ?? 'Error al subir el documento');
     } finally {
