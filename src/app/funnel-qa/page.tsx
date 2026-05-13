@@ -39,6 +39,7 @@ export default function FunnelQaPage() {
       present: tracked.has(name),
     }));
   }, [events]);
+  const coverageCompleted = coverage.filter(item => item.present).length;
 
   const exportFilteredEvents = () => {
     const data = JSON.stringify(filteredEvents, null, 2);
@@ -97,8 +98,13 @@ export default function FunnelQaPage() {
         </Glass>
 
         <Glass radius={14} style={{ padding: 12 }}>
-          <div style={{ fontSize: 12, color: 'var(--ink-500)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 8 }}>
-            Cobertura de eventos
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
+            <div style={{ fontSize: 12, color: 'var(--ink-500)', fontWeight: 700, textTransform: 'uppercase' }}>
+              Cobertura de eventos
+            </div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-700)' }}>
+              {coverageCompleted}/{coverage.length}
+            </div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8 }}>
             {coverage.map(item => (
