@@ -91,7 +91,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ role = 'patient', activeId }) 
   }));
 
   const fallbackName = user?.email ? user.email.split('@')[0] : 'Usuario';
-  const displayName = user?.name?.trim() || fallbackName;
+  const normalizedUserName = (user?.name ?? '').trim();
+  const isLikelyMockName = ['maria rodriguez', 'maría rodríguez', 'usuario demo', 'test user']
+    .includes(normalizedUserName.toLowerCase());
+  const displayName = normalizedUserName && !isLikelyMockName ? normalizedUserName : fallbackName;
   const initials = displayName
     .split(' ')
     .filter(Boolean)

@@ -20,6 +20,29 @@ const MENU_ITEMS: { id: Section; icon: string; label: string; sub: string }[] = 
 
 interface University { id: string | number; name: string; }
 
+function isProfileComplete(profile: Record<string, string>, role?: string) {
+  if (role === 'student') {
+    const required = [
+      !!(profile.full_name || profile.name),
+      !!(profile.university_id || profile.university),
+      !!(profile.university_location || profile.location),
+      !!(profile.career_year || profile.year),
+      !!(profile.certifications || '').trim(),
+      ((profile.bio || '').trim().length >= 20),
+    ];
+    return required.every(Boolean);
+  }
+
+  const required = [
+    !!(profile.name || profile.full_name),
+    !!profile.phone,
+    !!(profile.birthdate || profile.birth_date),
+    !!profile.gender,
+    !!(profile.address || profile.location),
+  ];
+  return required.every(Boolean);
+}
+
 function AvatarBadge({ initials, role }: { initials: string; role?: string }) {
   return (
     <div style={{ width: 72, height: 72, borderRadius: 999, flexShrink: 0, background: role === 'student' ? 'linear-gradient(135deg, #C7D2FE, #818CF8)' : 'linear-gradient(135deg, #10A9C6 0%, #4F46E5 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 700, color: '#fff', boxShadow: '0 6px 16px rgba(10,22,40,0.12)' }}>
@@ -330,7 +353,9 @@ function PerfilDesktop() {
             </div>
           </Glass>
 
-          <ProfileCompleteness profile={merged} role={user?.role === 'student' ? 'student' : 'patient'} onEdit={() => setSection('datos')} />
+          {!isProfileComplete(merged, user?.role) && (
+            <ProfileCompleteness profile={merged} role={user?.role === 'student' ? 'student' : 'patient'} onEdit={() => setSection('datos')} />
+          )}
 
           <Glass radius={16} style={{ padding: 8, display: 'flex', flexDirection: 'column', gap: 2 }}>
             {menuItems.map(item => (
@@ -426,7 +451,9 @@ export default function PerfilPage() {
       </div>
 
       <div style={{ padding: '0 20px 16px' }}>
-        <ProfileCompleteness profile={merged} role={user?.role === 'student' ? 'student' : 'patient'} onEdit={() => setSection('datos')} />
+        {!isProfileComplete(merged, user?.role) && (
+          <ProfileCompleteness profile={merged} role={user?.role === 'student' ? 'student' : 'patient'} onEdit={() => setSection('datos')} />
+        )}
       </div>
 
       <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>

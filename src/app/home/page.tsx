@@ -134,7 +134,9 @@ function HomeDesktop() {
   const { next, upcoming, loading } = useAppointments('patient');
   const { needsOnboarding, selectedUniversity, completeOnboarding } = usePatientOnboarding();
   const { featuredServices, featuredStudents, loading: catalogLoading, loadError } = useUniversityHighlights(selectedUniversity?.id);
-  const displayName = user?.name?.trim() || (user?.email ? user.email.split('@')[0] : 'Usuario');
+  const rawName = (user?.name ?? '').trim();
+  const isLikelyMockName = ['maria rodriguez', 'maría rodríguez', 'usuario demo', 'test user'].includes(rawName.toLowerCase());
+  const displayName = rawName && !isLikelyMockName ? rawName : (user?.email ? user.email.split('@')[0] : 'Usuario');
   const firstName = displayName.split(' ')[0] || 'Usuario';
 
   if (needsOnboarding) return <PatientOnboarding onComplete={completeOnboarding} />;
@@ -298,7 +300,9 @@ export default function HomePage() {
   if (isDesktop) return <HomeDesktop />;
   if (needsOnboarding) return <PatientOnboarding onComplete={completeOnboarding} />;
 
-  const displayName = user?.name?.trim() || (user?.email ? user.email.split('@')[0] : 'Usuario');
+  const rawName = (user?.name ?? '').trim();
+  const isLikelyMockName = ['maria rodriguez', 'maría rodríguez', 'usuario demo', 'test user'].includes(rawName.toLowerCase());
+  const displayName = rawName && !isLikelyMockName ? rawName : (user?.email ? user.email.split('@')[0] : 'Usuario');
   const firstName = displayName.split(' ')[0] || 'Usuario';
   const initials = displayName.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'U';
 
