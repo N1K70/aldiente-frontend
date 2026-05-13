@@ -24,6 +24,19 @@ export interface Profile {
   supervisor_title?: string;
 }
 
+function normalizeProfilePayload(data: Partial<Profile>): Record<string, unknown> {
+  const payload: Record<string, unknown> = { ...data };
+  const getString = (value: unknown) => (typeof value === 'string' ? value.trim() : value);
+
+  if (data.full_name != null) payload.name = getString(data.full_name);
+  if (data.name != null) payload.full_name = getString(data.name);
+  if (data.birthdate != null) payload.birth_date = data.birthdate;
+  if (data.career_year != null) payload.year = data.career_year;
+  if (data.university_id != null) payload.university = data.university_id;
+
+  return payload;
+}
+
 export function useProfile(role?: 'patient' | 'student') {
   const [profile, setProfile] = useState<Profile>({});
   const [loading, setLoading] = useState(true);
@@ -53,12 +66,14 @@ export function useProfile(role?: 'patient' | 'student') {
   const save = useCallback(async (data: Partial<Profile>) => {
     setSaving(true);
     try {
-      const res = await api.put(endpoint, data);
-      // Always apply what was sent; additionally merge any profile fields from the API response
-      const fromApi = res.data?.profile ?? (
-        res.data && typeof res.data === 'object' && !('message' in res.data) ? res.data : null
-      );
-      setProfile(prev => ({ ...prev, ...data, ...(fromApi ?? {}) }));
+      const payload = normalizeProfilePayload(data);
+      await api.put(endpoint, payload);
+      await api.get(endpoint).then(res => {
+        const raw = res.data?.profile ?? res.data ?? {};
+        setProfile(raw);
+        const name = raw.name ?? raw.full_name ?? raw.fullName;
+        if (name) updateUser({ name });
+      });
       setError(null);
       return true;
     } catch (err: unknown) {
@@ -68,7 +83,7 @@ export function useProfile(role?: 'patient' | 'student') {
     } finally {
       setSaving(false);
     }
-  }, [endpoint]);
+  }, [endpoint, updateUser]);
 
   return { profile, loading, saving, error, save, reload: load };
 }

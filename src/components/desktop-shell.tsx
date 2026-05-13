@@ -90,7 +90,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ role = 'patient', activeId }) 
          : undefined,
   }));
 
-  const initials = user?.name ? user.name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase() : role === 'student' ? 'SM' : 'MR';
+  const fallbackName = user?.email ? user.email.split('@')[0] : 'Usuario';
+  const displayName = user?.name?.trim() || fallbackName;
+  const initials = displayName
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(w => w[0])
+    .join('')
+    .toUpperCase() || 'U';
 
   return (
     <aside style={{
@@ -156,7 +164,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role = 'patient', activeId }) 
         }}>{initials}</div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink-900)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {user?.name ?? (role === 'student' ? 'Sofía Méndez' : 'María Rodríguez')}
+            {displayName}
           </div>
           <div style={{ fontSize: 11, color: 'var(--ink-500)' }}>
             {role === 'student' ? '5º año · UCh' : role === 'admin' ? 'Supervisora' : 'Paciente'}

@@ -70,13 +70,21 @@ function UploadModal({ isStudent, onClose, onUploaded }: { isStudent: boolean; o
     if (!canSubmit || !file) return;
     setSubmitting(true); setError('');
     try {
-      const form = new FormData();
-      form.append('file', file);
-      form.append('title', title);
-      form.append('category', category);
-      if (desc) form.append('description', desc);
-      if (year) form.append('year', String(year));
-      await api.post('/api/documents', form);
+      const upload = new FormData();
+      upload.append('file', file);
+      const uploadRes = await api.post('/api/files/upload', upload);
+      const fileUrl = uploadRes.data?.url ?? uploadRes.data?.file_url;
+      if (!fileUrl) throw new Error('No se obtuvo URL del archivo subido');
+
+      await api.post('/api/documents', {
+        title,
+        category,
+        description: desc || undefined,
+        year: year || undefined,
+        file_url: fileUrl,
+        file_name: file.name,
+        file_size: file.size,
+      });
       onUploaded();
       onClose();
     } catch (e: any) {
