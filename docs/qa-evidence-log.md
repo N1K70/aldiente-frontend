@@ -176,3 +176,45 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 - Motivo: Evidencia funcional en verde para rutas y role redirects.
 
 ---
+
+## Evidencia E2E lista para completar - Adjuntos chat (backend real)
+
+### Fecha
+- `YYYY-MM-DD`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit:
+
+### Scope del cambio
+- Validacion E2E de contrato de adjuntos chat con backend real (historial + realtime).
+
+### Casos
+1. Envio de adjunto desde chat
+- Resultado: `PASS | FAIL`
+- Evidencia (Network/log):
+- Payload enviado contiene: `content`, `attachment.file_url`, `attachment.file_name`, `attachment.file_size`, `attachment.file_mime`.
+
+2. Persistencia en historial (`GET /api/appointments/:id/messages`)
+- Resultado: `PASS | FAIL`
+- Evidencia (response):
+- Attachment recibido cumple contrato: `file_url` + `file_name`.
+
+3. Realtime (`chat:message`)
+- Resultado: `PASS | FAIL`
+- Evidencia (socket/log):
+- Attachment recibido cumple contrato: `file_url` + `file_name`.
+
+4. Render frontend
+- Resultado: `PASS | FAIL`
+- Evidencia (UI):
+- Link y nombre de adjunto visibles y descargables.
+
+5. Fallback defensivo
+- Resultado: `PASS | FAIL`
+- Evidencia:
+- Si llega adjunto invalido, UI no rompe y se reporta warning `mapMsgAttachmentContractValidation`.
+
+### Decision
+- `DONE | FOLLOW-UP`
+- Notas:
