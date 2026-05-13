@@ -78,3 +78,7 @@ Uso con fixture backend real:
 `npm run qa:chat:attachment-contract -- path/to/messages.json`
 
 El fixture debe ser un array JSON de mensajes con campo `attachment`.
+
+Fixture versionado para pruebas tipo backend real:
+
+`npm run qa:chat:attachment-contract:fixture`
