@@ -41,6 +41,7 @@ Crear `.env.local` a partir de `.env.example`.
 ```env
 NEXT_PUBLIC_BACKEND_URL=http://localhost:3001
 NEXT_PUBLIC_CHAT_URL=http://localhost:3005
+NEXT_PUBLIC_FRONTEND_EVENTS_ENDPOINT=/api/telemetry
 ```
 
 En Vercel, confirmar estas variables para produccion:
@@ -48,6 +49,7 @@ En Vercel, confirmar estas variables para produccion:
 ```env
 NEXT_PUBLIC_BACKEND_URL=https://<backend-railway>
 NEXT_PUBLIC_CHAT_URL=https://<chat-railway>
+NEXT_PUBLIC_FRONTEND_EVENTS_ENDPOINT=https://<telemetry-endpoint>
 ```
 
 ## Servicios externos
