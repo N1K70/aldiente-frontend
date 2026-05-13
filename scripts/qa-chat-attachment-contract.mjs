@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+
 const REQUIRED = ['file_url', 'file_name'];
 
 function isValidUrlLike(value) {
@@ -22,6 +24,17 @@ function validateAttachment(attachment) {
     return { ok: false, reason: 'invalid file_url' };
   }
   return { ok: true };
+}
+
+function getCasesFromArgs() {
+  const fixturePath = process.argv[2];
+  if (!fixturePath) return null;
+  const raw = fs.readFileSync(fixturePath, 'utf8');
+  const parsed = JSON.parse(raw);
+  if (!Array.isArray(parsed)) {
+    throw new Error('Fixture must be an array of messages');
+  }
+  return parsed;
 }
 
 function main() {
@@ -51,17 +64,25 @@ function main() {
     },
   ];
 
+  const cases = getCasesFromArgs() ?? sample;
+  const strictSampleMode = !process.argv[2];
+
   let failed = 0;
-  for (const msg of sample) {
+  for (const msg of cases) {
     const result = validateAttachment(msg.attachment);
-    if (msg.id.startsWith('ok') && !result.ok) {
+    if (strictSampleMode && msg.id?.startsWith('ok') && !result.ok) {
       failed++;
       console.error(`FAIL ${msg.id}: expected valid, got ${result.reason}`);
-    } else if (msg.id.startsWith('bad') && result.ok) {
+    } else if (strictSampleMode && msg.id?.startsWith('bad') && result.ok) {
       failed++;
       console.error(`FAIL ${msg.id}: expected invalid`);
     } else {
-      console.log(`PASS ${msg.id}`);
+      if (!strictSampleMode) {
+        console.log(`${result.ok ? 'PASS' : 'FAIL'} ${msg.id ?? 'message'}${result.ok ? '' : `: ${result.reason}`}`);
+        if (!result.ok) failed++;
+      } else {
+        console.log(`PASS ${msg.id}`);
+      }
     }
   }
 
