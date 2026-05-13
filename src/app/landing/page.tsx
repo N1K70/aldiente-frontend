@@ -161,6 +161,47 @@ function LandingDesktop({ stats }: { stats: PlatformStats }) {
         </div>
       </div>
 
+      {/* FAQ + Trust */}
+      <div style={{ padding: '20px 60px 70px' }}>
+        <div style={{ maxWidth: 1160, margin: '0 auto', display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 20 }}>
+          <Glass hi radius={24} style={{ padding: 28 }}>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 30, fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--ink-900)', marginBottom: 14 }}>
+              Preguntas frecuentes
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {[
+                ['Como funciona la supervision?', 'Cada atencion es realizada por estudiantes avanzados y supervisada por docentes odontologos durante el procedimiento.'],
+                ['Cuando y como pago?', 'El pago se realiza en la clinica al confirmar tu cita. Antes de reservar, ves precio estimado y duracion.'],
+                ['Puedo reagendar o cancelar?', 'Si. Puedes gestionar cambios desde tu perfil y chat de cita segun la disponibilidad.'],
+              ].map(([q, a]) => (
+                <div key={q} style={{ padding: 16, borderRadius: 14, background: 'rgba(255,255,255,0.66)', border: '1px solid rgba(255,255,255,0.9)' }}>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink-900)', marginBottom: 4 }}>{q}</div>
+                  <div style={{ fontSize: 14, color: 'var(--ink-600)', lineHeight: 1.45 }}>{a}</div>
+                </div>
+              ))}
+            </div>
+          </Glass>
+          <Glass radius={24} style={{ padding: 24 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-500)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
+              Senales de confianza
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[
+                'Validacion de perfil de estudiante y universidad',
+                'Supervision docente en procedimientos clinicos',
+                'Historial de citas y chat por atencion',
+                'Transparencia de precio antes de reservar',
+              ].map(item => (
+                <div key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 14, color: 'var(--ink-700)', lineHeight: 1.4 }}>
+                  <Icon name="check" size={14} color="var(--success-600)" />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+          </Glass>
+        </div>
+      </div>
+
       {/* CTA */}
       <div style={{ padding: '80px 60px', textAlign: 'center' }}>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 48, fontWeight: 700, letterSpacing: '-0.035em', lineHeight: 1.05, marginBottom: 14, color: 'var(--ink-900)' }}>
@@ -463,6 +504,44 @@ export default function LandingPage() {
               <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink-900)' }}>María Rivas</div>
               <div style={{ fontSize: 13, color: 'var(--ink-500)' }}>Paciente · Santiago</div>
             </div>
+          </div>
+        </Glass>
+      </section>
+
+      {/* FAQ + Trust */}
+      <section style={{ position: 'relative', zIndex: 1, padding: '8px 24px 40px' }}>
+        <Glass hi radius={26} style={{ padding: 22, maxWidth: 480, marginBottom: 12 }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--ink-900)', marginBottom: 12 }}>
+            Preguntas frecuentes
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {[
+              ['Hay supervision?', 'Si. Cada atencion considera supervision docente clinica.'],
+              ['Como pago?', 'El pago se realiza en clinica. Puedes ver precio antes de reservar.'],
+              ['Puedo reagendar?', 'Si, desde Citas o directamente desde el chat de la atencion.'],
+            ].map(([q, a]) => (
+              <div key={q} style={{ padding: 14, borderRadius: 14, background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.9)' }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink-900)', marginBottom: 2 }}>{q}</div>
+                <div style={{ fontSize: 13, color: 'var(--ink-600)', lineHeight: 1.4 }}>{a}</div>
+              </div>
+            ))}
+          </div>
+        </Glass>
+        <Glass radius={22} style={{ padding: 18, maxWidth: 480 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-500)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+            Confianza
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {[
+              'Perfiles verificados por universidad',
+              'Citas supervisadas por docentes',
+              'Precio visible antes de reservar',
+            ].map(item => (
+              <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--ink-700)' }}>
+                <Icon name="check" size={13} color="var(--success-600)" />
+                <span>{item}</span>
+              </div>
+            ))}
           </div>
         </Glass>
       </section>
