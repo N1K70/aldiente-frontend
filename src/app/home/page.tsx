@@ -120,7 +120,8 @@ function HomeDesktop() {
   const { next, upcoming, loading } = useAppointments('patient');
   const { needsOnboarding, selectedUniversity, completeOnboarding } = usePatientOnboarding();
   const { featuredServices, featuredStudents, loading: catalogLoading } = useUniversityHighlights(selectedUniversity?.id);
-  const firstName = user?.name?.split(' ')[0] ?? 'tú';
+  const displayName = user?.name?.trim() || (user?.email ? user.email.split('@')[0] : 'Usuario');
+  const firstName = displayName.split(' ')[0] || 'Usuario';
 
   if (needsOnboarding) return <PatientOnboarding onComplete={completeOnboarding} />;
 
@@ -277,8 +278,9 @@ export default function HomePage() {
   if (isDesktop) return <HomeDesktop />;
   if (needsOnboarding) return <PatientOnboarding onComplete={completeOnboarding} />;
 
-  const firstName = user?.name?.split(' ')[0] ?? 'tú';
-  const initials = user?.name ? user.name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase() : 'U';
+  const displayName = user?.name?.trim() || (user?.email ? user.email.split('@')[0] : 'Usuario');
+  const firstName = displayName.split(' ')[0] || 'Usuario';
+  const initials = displayName.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'U';
 
   const apptDate = next?.date ? next.date.split(/[\s/-]/).slice(0, 2).join(' ') : '';
   const apptTitle = next ? `${next.service || 'Cita'}${next.student?.name ? ` · Clínica` : ''}` : '';

@@ -37,6 +37,21 @@ function normalizeProfilePayload(data: Partial<Profile>): Record<string, unknown
   return payload;
 }
 
+function normalizeProfileResponse(raw: Record<string, unknown>): Profile {
+  const normalized: Profile = { ...(raw as Profile) };
+
+  normalized.birthdate = (raw.birthdate ?? raw.birth_date ?? '') as string;
+  normalized.full_name = (raw.full_name ?? raw.fullName ?? raw.name ?? '') as string;
+  normalized.name = (raw.name ?? raw.full_name ?? raw.fullName ?? '') as string;
+  normalized.career_year = (raw.career_year ?? raw.careerYear ?? raw.year ?? '') as string;
+  normalized.university_id = (raw.university_id ?? raw.university ?? '') as string;
+  normalized.university_location = (raw.university_location ?? raw.location ?? '') as string;
+  normalized.alternative_location = (raw.alternative_location ?? '') as string;
+  normalized.address = (raw.address ?? raw.location ?? '') as string;
+
+  return normalized;
+}
+
 export function useProfile(role?: 'patient' | 'student') {
   const [profile, setProfile] = useState<Profile>({});
   const [loading, setLoading] = useState(true);
@@ -51,10 +66,11 @@ export function useProfile(role?: 'patient' | 'student') {
     api.get(endpoint)
       .then(res => {
         const raw = res.data?.profile ?? res.data ?? {};
-        setProfile(raw);
+        const normalized = normalizeProfileResponse(raw);
+        setProfile(normalized);
         setError(null);
         // Sync name to AuthContext so greeting shows correct name
-        const name = raw.name ?? raw.full_name ?? raw.fullName;
+        const name = normalized.name ?? normalized.full_name;
         if (name) updateUser({ name });
       })
       .catch(err => setError(err?.response?.data?.message ?? err.message))
@@ -68,10 +84,13 @@ export function useProfile(role?: 'patient' | 'student') {
     try {
       const payload = normalizeProfilePayload(data);
       await api.put(endpoint, payload);
+      const optimisticName = (data.name ?? data.full_name ?? '').trim();
+      if (optimisticName) updateUser({ name: optimisticName });
       await api.get(endpoint).then(res => {
         const raw = res.data?.profile ?? res.data ?? {};
-        setProfile(raw);
-        const name = raw.name ?? raw.full_name ?? raw.fullName;
+        const normalized = normalizeProfileResponse(raw);
+        setProfile(normalized);
+        const name = normalized.name ?? normalized.full_name;
         if (name) updateUser({ name });
       });
       setError(null);
