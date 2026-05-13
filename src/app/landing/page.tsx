@@ -191,6 +191,8 @@ function LandingDesktop({ stats }: { stats: PlatformStats }) {
                 'Supervision docente en procedimientos clinicos',
                 'Historial de citas y chat por atencion',
                 'Transparencia de precio antes de reservar',
+                'Soporte por correo para dudas pre y post cita',
+                'Flujo de pago con confirmacion y trazabilidad de reserva',
               ].map(item => (
                 <div key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 14, color: 'var(--ink-700)', lineHeight: 1.4 }}>
                   <Icon name="check" size={14} color="var(--success-600)" />
@@ -536,6 +538,8 @@ export default function LandingPage() {
               'Perfiles verificados por universidad',
               'Citas supervisadas por docentes',
               'Precio visible antes de reservar',
+              'Soporte para pacientes por correo',
+              'Confirmacion de reserva y pago registrado',
             ].map(item => (
               <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--ink-700)' }}>
                 <Icon name="check" size={13} color="var(--success-600)" />
