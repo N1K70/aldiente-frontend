@@ -31,6 +31,16 @@ type Thread = {
   appointmentId: string;
 };
 
+const FALLBACK_THREAD: Omit<Thread, 'appointmentId'> = {
+  id: 'direct-chat',
+  name: 'Conversacion',
+  lastMsg: '',
+  time: '',
+  unread: 0,
+  gradient: AVATAR_GRADIENTS[0],
+  inits: 'CH',
+};
+
 function initials(name: string) {
   return name
     .split(' ')
@@ -313,32 +323,40 @@ function ChatInner() {
   const role: AppRole = user?.role === 'student' ? 'student' : 'patient';
   const homeHref = role === 'student' ? '/dashboard' : '/home';
   const { appointments, loading: appointmentsLoading } = useAppointments(role);
+  const requestedAppointmentId = searchParams.get('appointmentId');
   const threads = useMemo(() => buildThreads(appointments, role), [appointments, role]);
+  const threadsWithFallback = useMemo(() => {
+    if (!requestedAppointmentId) return threads;
+    if (threads.some(thread => thread.appointmentId === requestedAppointmentId)) return threads;
+    return [{ ...FALLBACK_THREAD, appointmentId: requestedAppointmentId }, ...threads];
+  }, [requestedAppointmentId, threads]);
   const [activeApptIdx, setActiveApptIdx] = useState(0);
   const [input, setInput] = useState('');
   const [uploadingFile, setUploadingFile] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const requestedAppointmentId = searchParams.get('appointmentId');
 
   useEffect(() => {
-    if (threads.length === 0) {
+    if (threadsWithFallback.length === 0) {
       setActiveApptIdx(0);
       return;
     }
 
     if (requestedAppointmentId) {
-      const requestedIndex = threads.findIndex(thread => thread.appointmentId === requestedAppointmentId);
+      const requestedIndex = threadsWithFallback.findIndex(thread => thread.appointmentId === requestedAppointmentId);
       if (requestedIndex >= 0) {
         setActiveApptIdx(requestedIndex);
         return;
       }
     }
 
-    if (activeApptIdx >= threads.length) setActiveApptIdx(0);
-  }, [activeApptIdx, requestedAppointmentId, threads]);
+    if (activeApptIdx >= threadsWithFallback.length) setActiveApptIdx(0);
+  }, [activeApptIdx, requestedAppointmentId, threadsWithFallback]);
 
-  const activeThread = threads[activeApptIdx];
-  const activeAppointment = appointments[activeApptIdx];
+  const activeThread = threadsWithFallback[activeApptIdx];
+  const activeAppointment = useMemo(
+    () => appointments.find(appointment => appointment.id === activeThread?.appointmentId),
+    [activeThread?.appointmentId, appointments],
+  );
   const { messages, connected, sendMessage, sendFile } = useChat(activeThread?.appointmentId ?? null);
 
   useEffect(() => {
@@ -383,9 +401,9 @@ function ChatInner() {
 
   if (isDesktop) {
     return (
-      <ChatDesktop
-        role={role}
-        threads={threads}
+        <ChatDesktop
+          role={role}
+          threads={threadsWithFallback}
         activeIdx={activeApptIdx}
         onSelectThread={setActiveApptIdx}
         messages={messages}
@@ -444,7 +462,7 @@ function ChatInner() {
 
       {appointmentsLoading ? (
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ink-400)', fontSize: 14 }}>Cargando...</div>
-      ) : threads.length === 0 ? (
+      ) : threadsWithFallback.length === 0 ? (
         <EmptyChatState role={role} />
       ) : (
         <>
