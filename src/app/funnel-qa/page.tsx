@@ -41,6 +41,10 @@ export default function FunnelQaPage() {
   }, [events]);
   const coverageCompleted = coverage.filter(item => item.present).length;
   const missingEvents = coverage.filter(item => !item.present).map(item => item.name);
+  const [copied, setCopied] = useState(false);
+  const coverageSummary = missingEvents.length === 0
+    ? `Cobertura completa (${coverageCompleted}/${coverage.length})`
+    : `Cobertura ${coverageCompleted}/${coverage.length}. Faltan: ${missingEvents.join(', ')}`;
 
   const exportFilteredEvents = () => {
     const data = JSON.stringify(filteredEvents, null, 2);
@@ -132,9 +136,24 @@ export default function FunnelQaPage() {
             ))}
           </div>
           <div style={{ marginTop: 10, fontSize: 12, color: 'var(--ink-600)' }}>
-            {missingEvents.length === 0
-              ? 'Cobertura completa en esta sesion.'
-              : `Faltan: ${missingEvents.join(', ')}`}
+            {missingEvents.length === 0 ? 'Cobertura completa en esta sesion.' : `Faltan: ${missingEvents.join(', ')}`}
+          </div>
+          <div style={{ marginTop: 8, display: 'flex', justifyContent: 'flex-end' }}>
+            <Button
+              size="sm"
+              variant="glass"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(coverageSummary);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 1200);
+                } catch {
+                  // Ignore clipboard restrictions in some browsers.
+                }
+              }}
+            >
+              {copied ? 'Copiado' : 'Copiar resumen'}
+            </Button>
           </div>
         </Glass>
 
