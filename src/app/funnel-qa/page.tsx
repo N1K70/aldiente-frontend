@@ -35,10 +35,14 @@ export default function FunnelQaPage() {
   }, [eventFilter, events]);
 
   const coverage = useMemo(() => {
-    const tracked = new Set(events.map(event => event.name));
+    const counts = events.reduce<Record<string, number>>((acc, event) => {
+      acc[event.name] = (acc[event.name] ?? 0) + 1;
+      return acc;
+    }, {});
     return EVENT_FILTERS.filter(item => item !== 'all').map(name => ({
       name,
-      present: tracked.has(name),
+      present: Boolean(counts[name]),
+      count: counts[name] ?? 0,
     }));
   }, [events]);
   const coverageCompleted = coverage.filter(item => item.present).length;
@@ -156,7 +160,7 @@ export default function FunnelQaPage() {
               >
                 <span>{item.name}</span>
                 <b style={{ color: item.present ? 'var(--success-700)' : 'var(--warning-700)' }}>
-                  {item.present ? 'OK' : 'FALTA'}
+                  {item.present ? `OK (${item.count})` : 'FALTA'}
                 </b>
               </div>
             ))}
