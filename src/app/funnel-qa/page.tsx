@@ -173,6 +173,20 @@ export default function FunnelQaPage() {
               <Button
                 size="sm"
                 variant="ghost"
+                disabled={missingEvents.length === 0}
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(missingEvents.join(', '));
+                  } catch {
+                    // Ignore clipboard restrictions.
+                  }
+                }}
+              >
+                Copiar faltantes
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
                 onClick={() => setEventFilter('all')}
                 disabled={eventFilter === 'all'}
               >
