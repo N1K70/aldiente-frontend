@@ -150,6 +150,14 @@ export default function FunnelQaPage() {
               <Button
                 size="sm"
                 variant="ghost"
+                onClick={() => setEventFilter('all')}
+                disabled={eventFilter === 'all'}
+              >
+                Ver todos
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
                 onClick={() => {
                   if (missingEvents.length > 0) setEventFilter(missingEvents[0] as (typeof EVENT_FILTERS)[number]);
                 }}
