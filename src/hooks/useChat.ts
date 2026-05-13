@@ -89,6 +89,13 @@ async function uploadChatFile(file: File) {
   };
 }
 
+function hasValidAttachmentContract(attachment: {
+  file_url?: string;
+  file_name?: string;
+}) {
+  return Boolean(attachment.file_url && attachment.file_name);
+}
+
 // ── Hook ───────────────────────────────────────────────────────
 
 export function useChat(appointmentId: string | null) {
@@ -218,6 +225,16 @@ export function useChat(appointmentId: string | null) {
   const sendFile = useCallback(async (file: File) => {
     if (!appointmentId) return;
     const attachment = await uploadChatFile(file);
+    if (!hasValidAttachmentContract(attachment)) {
+      reportFrontendError({
+        module: 'chat',
+        action: 'sendFileContractValidation',
+        message: 'Adjunto no cumple contrato minimo antes de enviar',
+        details: { appointmentId, fileName: file.name, attachment },
+      });
+      return;
+    }
+
     const content = `[Archivo] ${attachment.file_name}`;
     const optimistic: ChatMessage = { from: 'me', text: content, time: fmt(), attachment };
     setMessages(prev => [...prev, optimistic]);
