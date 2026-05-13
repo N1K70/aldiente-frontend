@@ -78,3 +78,4 @@ NEXT_PUBLIC_CHAT_URL=https://<chat-railway>
 - [Release Checklist](docs/release-checklist.md)
 - [Rollback Vercel/Railway](docs/rollback-vercel-railway.md)
 - [Monitoreo de Errores Frontend](docs/frontend-monitoring.md)
+- [Modelo Operativo de Archivos y Adjuntos](docs/file-attachments-model.md)
