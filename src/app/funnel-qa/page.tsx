@@ -32,6 +32,14 @@ export default function FunnelQaPage() {
     return events.filter(event => event.name === eventFilter);
   }, [eventFilter, events]);
 
+  const coverage = useMemo(() => {
+    const tracked = new Set(events.map(event => event.name));
+    return EVENT_FILTERS.filter(item => item !== 'all').map(name => ({
+      name,
+      present: tracked.has(name),
+    }));
+  }, [events]);
+
   const exportFilteredEvents = () => {
     const data = JSON.stringify(filteredEvents, null, 2);
     const blob = new Blob([data], { type: 'application/json' });
@@ -85,6 +93,36 @@ export default function FunnelQaPage() {
                 </option>
               ))}
             </select>
+          </div>
+        </Glass>
+
+        <Glass radius={14} style={{ padding: 12 }}>
+          <div style={{ fontSize: 12, color: 'var(--ink-500)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 8 }}>
+            Cobertura de eventos
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8 }}>
+            {coverage.map(item => (
+              <div
+                key={item.name}
+                style={{
+                  borderRadius: 10,
+                  padding: '8px 10px',
+                  background: item.present ? 'rgba(16,185,129,0.12)' : 'rgba(245,158,11,0.12)',
+                  border: `1px solid ${item.present ? 'rgba(16,185,129,0.28)' : 'rgba(245,158,11,0.28)'}`,
+                  fontSize: 12,
+                  color: 'var(--ink-800)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 8,
+                }}
+              >
+                <span>{item.name}</span>
+                <b style={{ color: item.present ? 'var(--success-700)' : 'var(--warning-700)' }}>
+                  {item.present ? 'OK' : 'FALTA'}
+                </b>
+              </div>
+            ))}
           </div>
         </Glass>
 
