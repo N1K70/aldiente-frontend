@@ -40,6 +40,7 @@ export default function FunnelQaPage() {
     }));
   }, [events]);
   const coverageCompleted = coverage.filter(item => item.present).length;
+  const missingEvents = coverage.filter(item => !item.present).map(item => item.name);
 
   const exportFilteredEvents = () => {
     const data = JSON.stringify(filteredEvents, null, 2);
@@ -129,6 +130,11 @@ export default function FunnelQaPage() {
                 </b>
               </div>
             ))}
+          </div>
+          <div style={{ marginTop: 10, fontSize: 12, color: 'var(--ink-600)' }}>
+            {missingEvents.length === 0
+              ? 'Cobertura completa en esta sesion.'
+              : `Faltan: ${missingEvents.join(', ')}`}
           </div>
         </Glass>
 
