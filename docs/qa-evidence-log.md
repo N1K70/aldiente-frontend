@@ -118,3 +118,26 @@ Usa este bloque por cada ronda de validación.
 - Motivo: cambios alineados a P0, gate técnico en verde y manejo de errores más robusto.
 
 ---
+
+## Checklist E2E - Adjuntos Chat (Contrato Backend)
+
+Usar este checklist cuando se valide el item `[P1] Validar contrato backend de adjuntos en chat`.
+
+1. Subir archivo en `/chat` (pdf o imagen <= 10MB).
+2. Confirmar que frontend envia `content` + `attachment` con:
+- `file_url`
+- `file_name`
+- `file_size`
+- `file_mime` (opcional)
+3. Confirmar persistencia en historial (`GET /api/appointments/:id/messages`).
+4. Confirmar evento realtime con el mismo contrato (socket `chat:message`).
+5. Verificar render en chat:
+- Link de descarga visible.
+- Nombre de archivo correcto.
+6. Verificar fallback seguro:
+- Si backend devuelve adjunto incompleto, frontend no rompe UI.
+- Se reporta warning `mapMsgAttachmentContractValidation`.
+7. Registrar evidencia:
+- request/response (Network o logs)
+- appointmentId usado
+- commit validado
