@@ -35,7 +35,7 @@ jobs:
         run: npm run build
 
       - name: Chat attachment contract smoke
-        run: npm run qa:chat:attachment-contract
+        run: npm run qa:chat:attachment-contract:all
 
       - name: Start app for smoke tests
         run: |
