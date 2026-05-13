@@ -35,6 +35,7 @@ type RegisterData = {
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const PATIENT_ONBOARDING_KEY = 'aldiente_patient_onboarding_completed';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -110,6 +111,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
       localStorage.setItem('authUser', JSON.stringify(u));
       if (u.role) document.cookie = `authRole=${u.role}; path=/; SameSite=Lax`;
+      if (u.role === 'patient') {
+        localStorage.setItem(`${PATIENT_ONBOARDING_KEY}:${u.id || u.email}`, 'true');
+      }
       setUser(u);
       window.dispatchEvent(new Event('auth:changed'));
     } finally {
