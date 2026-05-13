@@ -317,9 +317,14 @@ export default function HomePage() {
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           {canOpenFunnelQa && (
-            <button onClick={() => router.push('/funnel-qa')} style={{ width: 44, height: 44, borderRadius: 999, background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.9)', cursor: 'pointer', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(10,22,40,0.05)' }}>
-              <Icon name="chart" size={20} color="var(--ink-700)" />
-            </button>
+            <>
+              <button onClick={() => router.push('/funnel-qa')} style={{ width: 44, height: 44, borderRadius: 999, background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.9)', cursor: 'pointer', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(10,22,40,0.05)' }}>
+                <Icon name="chart" size={20} color="var(--ink-700)" />
+              </button>
+              <button onClick={() => router.push('/telemetry-qa')} style={{ width: 44, height: 44, borderRadius: 999, background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.9)', cursor: 'pointer', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(10,22,40,0.05)' }}>
+                <Icon name="bar_chart" size={20} color="var(--ink-700)" />
+              </button>
+            </>
           )}
           <button onClick={() => router.push('/notificaciones')} style={{ width: 44, height: 44, borderRadius: 999, background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.9)', cursor: 'pointer', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(10,22,40,0.05)' }}>
             <Icon name="bell" size={20} color="var(--ink-700)" />
