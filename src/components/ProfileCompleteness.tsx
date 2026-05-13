@@ -17,9 +17,12 @@ interface Props {
   documentsCount?: number;
   role?: 'patient' | 'student';
   onEdit?: () => void;
+  loading?: boolean;
 }
 
-export default function ProfileCompleteness({ profile, documentsCount = 0, role = 'patient', onEdit }: Props) {
+export default function ProfileCompleteness({ profile, documentsCount = 0, role = 'patient', onEdit, loading = false }: Props) {
+  if (loading) return null;
+
   const items = useMemo<Item[]>(() => {
     if (role === 'student') {
       return [
@@ -50,7 +53,7 @@ export default function ProfileCompleteness({ profile, documentsCount = 0, role 
   const barColor = pct >= 80 ? 'var(--success-500,#22c55e)' : pct >= 50 ? 'var(--warning-500,#F59E0B)' : 'var(--danger-500,#ef4444)';
   const msg      = pct === 100 ? '¡Perfil completo!' : pct >= 80 ? 'Casi completo' : pct >= 50 ? 'Buen progreso' : 'Completa tu perfil';
 
-  if (allRequiredDone || pct >= 100) return null;
+  if (allRequiredDone || pct >= 100 || done === required.length) return null;
 
   return (
     <Glass radius={20} style={{ padding: 20 }}>

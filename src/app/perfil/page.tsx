@@ -354,7 +354,7 @@ function PerfilDesktop() {
           </Glass>
 
           {!loading && !isProfileComplete(merged, user?.role) && (
-            <ProfileCompleteness profile={merged} role={user?.role === 'student' ? 'student' : 'patient'} onEdit={() => setSection('datos')} />
+            <ProfileCompleteness loading={loading} profile={merged} role={user?.role === 'student' ? 'student' : 'patient'} onEdit={() => setSection('datos')} />
           )}
 
           <Glass radius={16} style={{ padding: 8, display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -452,7 +452,7 @@ export default function PerfilPage() {
 
       <div style={{ padding: '0 20px 16px' }}>
         {!loading && !isProfileComplete(merged, user?.role) && (
-          <ProfileCompleteness profile={merged} role={user?.role === 'student' ? 'student' : 'patient'} onEdit={() => setSection('datos')} />
+          <ProfileCompleteness loading={loading} profile={merged} role={user?.role === 'student' ? 'student' : 'patient'} onEdit={() => setSection('datos')} />
         )}
       </div>
 

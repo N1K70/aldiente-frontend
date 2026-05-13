@@ -36,6 +36,15 @@ type RegisterData = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const PATIENT_ONBOARDING_KEY = 'aldiente_patient_onboarding_completed';
+const MOCK_NAMES = new Set(['maria rodriguez', 'maría rodríguez', 'usuario demo', 'test user']);
+
+function normalizeName(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -79,7 +88,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const raw = data?.profile ?? data ?? {};
         const profileName = [raw?.name, raw?.full_name, raw?.fullName]
           .find((value: unknown) => typeof value === 'string' && value.trim().length > 0) as string | undefined;
-        if (profileName && profileName !== user.name) {
+        const normalizedProfileName = profileName ? normalizeName(profileName) : '';
+        if (profileName && !MOCK_NAMES.has(normalizedProfileName) && profileName !== user.name) {
           setUser(prev => {
             if (!prev) return prev;
             const updated = { ...prev, name: profileName };

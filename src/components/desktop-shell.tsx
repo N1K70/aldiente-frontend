@@ -7,6 +7,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
 
 export const DESKTOP_BP = 1024;
+const MOCK_NAMES = new Set(['maria rodriguez', 'maría rodríguez', 'usuario demo', 'test user']);
+
+function normalizeName(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
 
 export function useIsDesktop() {
   const [isDesktop, setIsDesktop] = useState(false);
@@ -92,8 +101,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role = 'patient', activeId }) 
 
   const fallbackName = user?.email ? user.email.split('@')[0] : 'Usuario';
   const normalizedUserName = (user?.name ?? '').trim();
-  const isLikelyMockName = ['maria rodriguez', 'maría rodríguez', 'usuario demo', 'test user']
-    .includes(normalizedUserName.toLowerCase());
+  const isLikelyMockName = normalizedUserName ? MOCK_NAMES.has(normalizeName(normalizedUserName)) : false;
   const displayName = normalizedUserName && !isLikelyMockName ? normalizedUserName : fallbackName;
   const initials = displayName
     .split(' ')
