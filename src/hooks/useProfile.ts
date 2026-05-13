@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
+import { reportFrontendError } from '@/lib/frontend-observability';
 
 export interface Profile {
   name?: string;
@@ -84,15 +85,29 @@ export function useProfile(role?: 'patient' | 'student') {
     try {
       const payload = normalizeProfilePayload(data);
       await api.put(endpoint, payload);
+      // Optimistic update so UI reflects persisted changes even if reload fails.
+      setProfile(prev => ({ ...prev, ...data }));
       const optimisticName = (data.name ?? data.full_name ?? '').trim();
       if (optimisticName) updateUser({ name: optimisticName });
-      await api.get(endpoint).then(res => {
+      try {
+        const res = await api.get(endpoint);
         const raw = res.data?.profile ?? res.data ?? {};
         const normalized = normalizeProfileResponse(raw);
         setProfile(normalized);
         const name = normalized.name ?? normalized.full_name;
         if (name) updateUser({ name });
-      });
+      } catch (reloadErr: unknown) {
+        reportFrontendError({
+          module: 'profile',
+          action: 'reloadAfterSave',
+          severity: 'warning',
+          message: 'Perfil guardado, pero fallo la recarga posterior',
+          details: {
+            endpoint,
+            status: (reloadErr as { response?: { status?: number } })?.response?.status ?? null,
+          },
+        });
+      }
       setError(null);
       return true;
     } catch (err: unknown) {
