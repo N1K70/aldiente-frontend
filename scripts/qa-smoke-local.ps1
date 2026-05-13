@@ -6,7 +6,12 @@ Param(
 $pidFile = ".tmp_smoke_pid"
 
 try {
-  $proc = Start-Process -FilePath "npm" -ArgumentList @("run", "start", "--", "--hostname", $HostName, "--port", "$Port") -PassThru -WindowStyle Hidden
+  $npmCmd = Get-Command npm.cmd -ErrorAction SilentlyContinue
+  if (-not $npmCmd) {
+    throw "npm.cmd no esta disponible en PATH"
+  }
+
+  $proc = Start-Process -FilePath $npmCmd.Source -ArgumentList @("run", "start", "--", "--hostname", $HostName, "--port", "$Port") -PassThru -WindowStyle Hidden
   $proc.Id | Set-Content $pidFile
 
   $ready = $false
