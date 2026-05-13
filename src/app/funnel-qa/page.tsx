@@ -87,6 +87,18 @@ export default function FunnelQaPage() {
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <Button size="sm" variant="glass" onClick={reload}>Recargar</Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                clearStoredFunnelEvents();
+                setEvents([]);
+                setEventFilter('all');
+                setLastReloadAt(new Date().toISOString());
+              }}
+            >
+              Limpiar y recargar
+            </Button>
             <Button size="sm" variant="glass" onClick={exportFilteredEvents} disabled={filteredEvents.length === 0}>Exportar JSON</Button>
             <Button
               size="sm"
@@ -108,6 +120,8 @@ export default function FunnelQaPage() {
               onClick={() => {
                 clearStoredFunnelEvents();
                 setEvents([]);
+                setEventFilter('all');
+                setLastReloadAt(new Date().toISOString());
               }}
             >
               Limpiar
