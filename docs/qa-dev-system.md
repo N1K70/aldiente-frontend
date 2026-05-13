@@ -56,3 +56,7 @@ Usar `docs/qa-evidence-log.md` para registrar:
 Para ejecutar smokes locales con app auto-levantada en Windows:
 
 `powershell -ExecutionPolicy Bypass -File scripts/qa-smoke-local.ps1`
+
+Tambien disponible como script npm:
+
+`npm run qa:smoke:local`
