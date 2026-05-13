@@ -37,18 +37,38 @@ function mapMsg(m: Record<string, unknown>): ChatMessage {
     ? rawAttachment as Record<string, unknown>
     : null;
 
+  const normalizedAttachment = attachment ? {
+    file_url: String(attachment.file_url ?? attachment.url ?? ''),
+    file_name: String(attachment.file_name ?? attachment.name ?? 'Archivo'),
+    file_size: Number(attachment.file_size ?? attachment.size ?? 0) || undefined,
+    file_mime: String(attachment.file_mime ?? attachment.mime ?? ''),
+  } : undefined;
+
+  const safeAttachment = normalizedAttachment && hasValidAttachmentContract(normalizedAttachment)
+    ? normalizedAttachment
+    : undefined;
+
+  if (normalizedAttachment && !safeAttachment) {
+    reportFrontendError({
+      module: 'chat',
+      action: 'mapMsgAttachmentContractValidation',
+      severity: 'warning',
+      message: 'Adjunto recibido no cumple contrato minimo',
+      details: {
+        messageId: String(m.id ?? ''),
+        hasFileUrl: Boolean(normalizedAttachment.file_url),
+        hasFileName: Boolean(normalizedAttachment.file_name),
+      },
+    });
+  }
+
   return {
     id: String(m.id ?? ''),
     from: String(m.senderId ?? m.sender_id ?? '') === String(userId) ? 'me' : 'them',
     text: String(m.content ?? m.text ?? m.message ?? ''),
     time: fmt(String(m.sentAt ?? m.sent_at ?? m.createdAt ?? m.created_at ?? '')),
     senderName: String(m.senderName ?? m.sender_name ?? ''),
-    attachment: attachment ? {
-      file_url: String(attachment.file_url ?? attachment.url ?? ''),
-      file_name: String(attachment.file_name ?? attachment.name ?? 'Archivo'),
-      file_size: Number(attachment.file_size ?? attachment.size ?? 0) || undefined,
-      file_mime: String(attachment.file_mime ?? attachment.mime ?? ''),
-    } : undefined,
+    attachment: safeAttachment,
   };
 }
 
