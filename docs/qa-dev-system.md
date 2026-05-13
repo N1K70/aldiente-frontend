@@ -67,6 +67,10 @@ Si la app ya esta levantada, puedes ejecutar ambos smokes con:
 
 `npm run qa:smoke:all`
 
+Para corrida local de pre-release en un solo paso:
+
+`npm run qa:release:local`
+
 ## Contrato de adjuntos (chat)
 
 Para validar contrato de payload de adjuntos en chat antes de E2E backend:

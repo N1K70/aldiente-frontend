@@ -26,9 +26,9 @@ Fecha base: 2026-04-29
 ## P1 - Confianza y conversion
 
 - [ ] Revisar copy de landing/home.
-- [ ] Agregar FAQ orientada a pacientes y estudiantes.
-- [ ] Agregar senales de confianza: universidades, condiciones de atencion, soporte y seguridad de pagos.
-- [ ] Definir eventos de funnel: visita, registro, servicio visto, reserva iniciada, pago iniciado y pago completado.
+- [x] Agregar FAQ orientada a pacientes y estudiantes.
+- [x] Agregar senales de confianza: universidades, condiciones de atencion, soporte y seguridad de pagos.
+- [x] Definir eventos de funnel: visita, registro, servicio visto, reserva iniciada, pago iniciado y pago completado.
 - [x] Instrumentar errores criticos: auth, pagos, chat, documentos.
 
 ## P2 - Operacion
