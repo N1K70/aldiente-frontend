@@ -87,3 +87,14 @@ El fixture debe ser un array JSON de mensajes con campo `attachment`.
 Fixture versionado para pruebas tipo backend real:
 
 `npm run qa:chat:attachment-contract:fixture`
+
+## Contrato de eventos de funnel
+
+Para validar estructura base de eventos de funnel:
+
+`npm run qa:funnel:event-contract`
+
+Chequea que cada evento tenga:
+- `name` dentro del set permitido de funnel.
+- `timestamp` no vacio.
+- `payload` como objeto.
