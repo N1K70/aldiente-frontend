@@ -141,3 +141,38 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 - request/response (Network o logs)
 - appointmentId usado
 - commit validado
+
+### Fecha
+- `2026-05-13`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit: `c19ec70` (base de la ronda)
+
+### Scope del cambio
+- Verificacion funcional de rutas y redirecciones por rol despues de integrar smoke tests en CI.
+
+### Gate tecnico
+- `npm run typecheck`: `PASS`
+- `npm run build`: `PASS`
+
+### QA funcional ejecutado
+1. Flujo: Smoke de rutas criticas
+   - Resultado: `PASS`
+   - Evidencia: `npm run qa:smoke:routes`
+   - Notas: Rutas publicas/protegidas respondieron con redirects esperados en `http://localhost:3000`.
+2. Flujo: Redirecciones por rol
+   - Resultado: `PASS`
+   - Evidencia: `npm run qa:smoke:roles`
+   - Notas: Reglas student/patient/unauthenticated consistentes con middleware actual.
+
+### Hallazgos
+- Severidad: `N/A`
+- Descripcion: Sin bloqueantes funcionales en smokes.
+- Ticket Notion: `[P1] QA funcional del funnel completo con evidencia`
+
+### Decision
+- `MERGE`
+- Motivo: Evidencia funcional en verde para rutas y role redirects.
+
+---
