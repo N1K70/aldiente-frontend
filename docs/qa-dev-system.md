@@ -66,3 +66,9 @@ Tambien disponible como script npm:
 Si la app ya esta levantada, puedes ejecutar ambos smokes con:
 
 `npm run qa:smoke:all`
+
+## Contrato de adjuntos (chat)
+
+Para validar contrato de payload de adjuntos en chat antes de E2E backend:
+
+`npm run qa:chat:attachment-contract`
