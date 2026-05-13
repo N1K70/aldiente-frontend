@@ -218,3 +218,44 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 ### Decision
 - `DONE | FOLLOW-UP`
 - Notas:
+
+---
+
+### Fecha
+- `2026-05-13`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit: `f4c0d59`, `608cd41`, `ba74392`
+
+### Scope del cambio
+- Chat accesible por `appointmentId` aun cuando la cita no aparezca en el listado local.
+- Landing con seccion FAQ + senales de confianza (desktop/mobile).
+- Home con bloque "Confianza y ayuda" para reforzar supervision y acceso rapido a chat/FAQ.
+
+### Gate tecnico
+- `npm run typecheck`: `PASS`
+- `npm run build`: `PASS`
+
+### QA funcional ejecutado
+1. Flujo: Acceso a chat desde URL con `appointmentId`
+   - Resultado: `PASS`
+   - Evidencia: `npm run qa:gate` posterior al cambio `f4c0d59`
+   - Notas: Se crea thread fallback y no depende de que la cita este en la lista local.
+2. Flujo: Landing con FAQ y confianza
+   - Resultado: `PASS`
+   - Evidencia: `npm run qa:gate` posterior al cambio `608cd41`
+   - Notas: Secciones visibles en desktop y mobile.
+3. Flujo: Home con "Confianza y ayuda"
+   - Resultado: `PASS`
+   - Evidencia: `npm run qa:gate` posterior al cambio `ba74392`
+   - Notas: Accesos rapidos a chat y FAQ activos.
+
+### Hallazgos
+- Severidad: `Minor`
+- Descripcion: Persisten textos con encoding roto (mojibake) en algunas pantallas; no bloquea flujo, pero afecta calidad visual/copy.
+- Ticket Notion: Backlog P1 (copy y conversion)
+
+### Decision
+- `MERGE`
+- Motivo: Cambios funcionales y de confianza validados con gate tecnico en verde.
