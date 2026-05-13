@@ -87,6 +87,20 @@ export default function FunnelQaPage() {
             <Button
               size="sm"
               variant="ghost"
+              disabled={eventFilter === 'all'}
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(JSON.stringify(filteredEvents, null, 2));
+                } catch {
+                  // Ignore clipboard restrictions.
+                }
+              }}
+            >
+              Copiar filtrado
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
               onClick={() => {
                 clearStoredFunnelEvents();
                 setEvents([]);
