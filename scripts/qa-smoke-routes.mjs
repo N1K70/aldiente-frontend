@@ -10,6 +10,7 @@ const routes = [
   '/citas',
   '/chat',
   '/perfil',
+  '/funnel-qa',
 ];
 
 async function checkRoute(path) {

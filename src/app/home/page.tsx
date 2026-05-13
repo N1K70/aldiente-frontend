@@ -14,6 +14,7 @@ import { reportFrontendError } from '@/lib/frontend-observability';
 
 const STATUS_LABEL: Record<string, string> = { confirmed: 'Confirmada', pending: 'Pendiente', completed: 'Completada', cancelled: 'Cancelada' };
 const SERVICE_TONES = ['#10A9C6', '#6366F1', '#F59E0B', '#EC4899'] as const;
+const FUNNEL_QA_ENABLED = process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_ENABLE_FUNNEL_QA === 'true';
 const STUDENT_GRADIENTS = [
   'linear-gradient(135deg, #C7D2FE, #818CF8)',
   'linear-gradient(135deg, #A7F3D0, #10B981)',
@@ -292,6 +293,7 @@ export default function HomePage() {
   const { unreadCount } = useNotifications();
   const { needsOnboarding, selectedUniversity, completeOnboarding } = usePatientOnboarding();
   const { featuredServices, featuredStudents, loading: catalogLoading, loadError } = useUniversityHighlights(selectedUniversity?.id);
+  const canOpenFunnelQa = user?.role === 'admin' || FUNNEL_QA_ENABLED;
 
   if (isDesktop) return <HomeDesktop />;
   if (needsOnboarding) return <PatientOnboarding onComplete={completeOnboarding} />;
@@ -314,9 +316,11 @@ export default function HomePage() {
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={() => router.push('/funnel-qa')} style={{ width: 44, height: 44, borderRadius: 999, background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.9)', cursor: 'pointer', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(10,22,40,0.05)' }}>
-            <Icon name="chart" size={20} color="var(--ink-700)" />
-          </button>
+          {canOpenFunnelQa && (
+            <button onClick={() => router.push('/funnel-qa')} style={{ width: 44, height: 44, borderRadius: 999, background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.9)', cursor: 'pointer', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(10,22,40,0.05)' }}>
+              <Icon name="chart" size={20} color="var(--ink-700)" />
+            </button>
+          )}
           <button onClick={() => router.push('/notificaciones')} style={{ width: 44, height: 44, borderRadius: 999, background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.9)', cursor: 'pointer', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(10,22,40,0.05)' }}>
             <Icon name="bell" size={20} color="var(--ink-700)" />
             {unreadCount > 0 && <span style={{ position: 'absolute', top: 9, right: 10, width: 9, height: 9, borderRadius: '50%', background: 'var(--danger-500)', border: '2px solid #fff' }}/>}
