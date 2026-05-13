@@ -281,6 +281,33 @@ function HomeDesktop() {
           )}
         </div>
       </div>
+
+      <div style={{ marginTop: 24 }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--ink-900)', marginBottom: 12 }}>
+          Confianza y ayuda
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <Glass radius={18} style={{ padding: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <Icon name="shield" size={16} color="var(--success-600)" />
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink-900)' }}>Atencion supervisada</div>
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--ink-600)', lineHeight: 1.4 }}>
+              Cada procedimiento incluye supervision docente clinica.
+            </div>
+          </Glass>
+          <Glass radius={18} style={{ padding: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <Icon name="chat" size={16} color="var(--brand-700)" />
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink-900)' }}>Dudas antes de reservar</div>
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--ink-600)', lineHeight: 1.4, marginBottom: 10 }}>
+              Conversa con tu estudiante directamente desde el chat.
+            </div>
+            <Button size="sm" variant="glass" onClick={() => router.push('/chat')}>Ir a chat</Button>
+          </Glass>
+        </div>
+      </div>
     </DesktopShell>
   );
 }
@@ -492,6 +519,33 @@ export default function HomePage() {
               <div style={{ fontSize: 14, color: 'var(--ink-500)' }}>Aun no hay estudiantes visibles en este momento.</div>
             </Glass>
           )}
+        </div>
+      </div>
+
+      <div style={{ padding: '8px 20px 20px' }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, color: 'var(--ink-900)', letterSpacing: '-0.02em', marginBottom: 12 }}>
+          Confianza y ayuda
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <Glass radius={20} style={{ padding: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <Icon name="shield" size={16} color="var(--success-600)" />
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink-900)' }}>Atencion supervisada</div>
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--ink-600)', lineHeight: 1.4 }}>
+              Las atenciones son realizadas por estudiantes avanzados con supervision docente.
+            </div>
+          </Glass>
+          <Glass radius={20} style={{ padding: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <Icon name="help" size={16} color="var(--brand-700)" />
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink-900)' }}>Preguntas frecuentes</div>
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--ink-600)', lineHeight: 1.4, marginBottom: 10 }}>
+              Puedes revisar detalles de reserva, pagos y cambios desde landing o durante tu flujo.
+            </div>
+            <Button size="sm" variant="glass" onClick={() => router.push('/landing')}>Ver FAQ</Button>
+          </Glass>
         </div>
       </div>
 
