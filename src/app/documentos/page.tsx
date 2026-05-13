@@ -91,7 +91,7 @@ function UploadModal({ isStudent, onClose, onUploaded }: { isStudent: boolean; o
         title: title.trim(),
         category,
         description: desc.trim() || undefined,
-        year,
+        year: year || undefined,
         file_url: fileUrl,
         file_name: file.name,
         file_size: file.size,

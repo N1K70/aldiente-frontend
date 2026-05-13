@@ -24,6 +24,34 @@ export interface Profile {
   supervisor_title?: string;
 }
 
+function normalizeProfilePayload(data: Partial<Profile>): Record<string, unknown> {
+  const payload: Record<string, unknown> = { ...data };
+  const getString = (value: unknown) => (typeof value === 'string' ? value.trim() : value);
+
+  if (data.full_name != null) payload.name = getString(data.full_name);
+  if (data.name != null) payload.full_name = getString(data.name);
+  if (data.birthdate != null) payload.birth_date = data.birthdate;
+  if (data.career_year != null) payload.year = data.career_year;
+  if (data.university_id != null) payload.university = data.university_id;
+
+  return payload;
+}
+
+function normalizeProfileResponse(raw: Record<string, unknown>): Profile {
+  const normalized: Profile = { ...(raw as Profile) };
+
+  normalized.birthdate = (raw.birthdate ?? raw.birth_date ?? '') as string;
+  normalized.full_name = (raw.full_name ?? raw.fullName ?? raw.name ?? '') as string;
+  normalized.name = (raw.name ?? raw.full_name ?? raw.fullName ?? '') as string;
+  normalized.career_year = (raw.career_year ?? raw.careerYear ?? raw.year ?? '') as string;
+  normalized.university_id = (raw.university_id ?? raw.university ?? '') as string;
+  normalized.university_location = (raw.university_location ?? raw.location ?? '') as string;
+  normalized.alternative_location = (raw.alternative_location ?? '') as string;
+  normalized.address = (raw.address ?? raw.location ?? '') as string;
+
+  return normalized;
+}
+
 export function useProfile(role?: 'patient' | 'student') {
   const [profile, setProfile] = useState<Profile>({});
   const [loading, setLoading] = useState(true);
@@ -38,10 +66,11 @@ export function useProfile(role?: 'patient' | 'student') {
     api.get(endpoint)
       .then(res => {
         const raw = res.data?.profile ?? res.data ?? {};
-        setProfile(raw);
+        const normalized = normalizeProfileResponse(raw);
+        setProfile(normalized);
         setError(null);
         // Sync name to AuthContext so greeting shows correct name
-        const name = raw.name ?? raw.full_name ?? raw.fullName;
+        const name = normalized.name ?? normalized.full_name;
         if (name) updateUser({ name });
       })
       .catch(err => setError(err?.response?.data?.message ?? err.message))
@@ -53,12 +82,17 @@ export function useProfile(role?: 'patient' | 'student') {
   const save = useCallback(async (data: Partial<Profile>) => {
     setSaving(true);
     try {
-      const res = await api.put(endpoint, data);
-      // Always apply what was sent; additionally merge any profile fields from the API response
-      const fromApi = res.data?.profile ?? (
-        res.data && typeof res.data === 'object' && !('message' in res.data) ? res.data : null
-      );
-      setProfile(prev => ({ ...prev, ...data, ...(fromApi ?? {}) }));
+      const payload = normalizeProfilePayload(data);
+      await api.put(endpoint, payload);
+      const optimisticName = (data.name ?? data.full_name ?? '').trim();
+      if (optimisticName) updateUser({ name: optimisticName });
+      await api.get(endpoint).then(res => {
+        const raw = res.data?.profile ?? res.data ?? {};
+        const normalized = normalizeProfileResponse(raw);
+        setProfile(normalized);
+        const name = normalized.name ?? normalized.full_name;
+        if (name) updateUser({ name });
+      });
       setError(null);
       return true;
     } catch (err: unknown) {
@@ -68,7 +102,7 @@ export function useProfile(role?: 'patient' | 'student') {
     } finally {
       setSaving(false);
     }
-  }, [endpoint]);
+  }, [endpoint, updateUser]);
 
   return { profile, loading, saving, error, save, reload: load };
 }
