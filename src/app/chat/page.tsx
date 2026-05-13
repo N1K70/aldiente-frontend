@@ -8,6 +8,7 @@ import { DesktopShell, useIsDesktop } from '@/components/desktop-shell';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useChat } from '@/hooks/useChat';
 import { useAuth } from '@/contexts/AuthContext';
+import { reportFrontendError } from '@/lib/frontend-observability';
 
 const AVATAR_GRADIENTS = [
   'linear-gradient(135deg, #C7D2FE, #818CF8)',
@@ -15,6 +16,8 @@ const AVATAR_GRADIENTS = [
   'linear-gradient(135deg, #BFDBFE, #3B82F6)',
   'linear-gradient(135deg, #1BB9D6, #6366F1)',
 ];
+const CHAT_FILE_ACCEPT = 'image/*,application/pdf,.doc,.docx';
+const CHAT_FILE_LIMIT_BYTES = 10 * 1024 * 1024;
 
 type AppRole = 'patient' | 'student';
 type Thread = {
@@ -88,6 +91,17 @@ function MessageList({
               }}
             >
               {message.text}
+              {message.attachment?.file_url && (
+                <a
+                  href={message.attachment.file_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ marginTop: 8, padding: '8px 10px', borderRadius: 12, background: mine ? 'rgba(255,255,255,0.18)' : 'rgba(16,169,198,0.08)', color: mine ? '#fff' : 'var(--brand-700)', display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', fontSize: 13, fontWeight: 700 }}
+                >
+                  <Icon name="file" size={14} color={mine ? '#fff' : 'var(--brand-700)'} />
+                  {message.attachment.file_name}
+                </a>
+              )}
               <div style={{ fontSize: 10, opacity: 0.6, marginTop: 3, textAlign: 'right' }}>{message.time}</div>
             </div>
           </div>
@@ -101,14 +115,32 @@ function Composer({
   value,
   onChange,
   onSend,
+  onFile,
+  uploadingFile,
 }: {
   value: string;
   onChange: (value: string) => void;
   onSend: () => void;
+  onFile: (file: File) => void;
+  uploadingFile: boolean;
 }) {
   return (
     <div style={{ padding: '8px 16px 32px', flexShrink: 0 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 6, borderRadius: 999, background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.9)', boxShadow: '0 8px 20px rgba(10,22,40,0.08)' }}>
+        <label style={{ width: 40, height: 40, borderRadius: 999, flexShrink: 0, background: 'rgba(16,169,198,0.1)', border: 'none', cursor: uploadingFile ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Icon name="file" size={18} color="var(--brand-700)" />
+          <input
+            type="file"
+            accept={CHAT_FILE_ACCEPT}
+            disabled={uploadingFile}
+            onChange={event => {
+              const file = event.target.files?.[0];
+              if (file) onFile(file);
+              event.target.value = '';
+            }}
+            style={{ display: 'none' }}
+          />
+        </label>
         <input
           value={value}
           onChange={event => onChange(event.target.value)}
@@ -116,7 +148,7 @@ function Composer({
           placeholder="Escribe un mensaje..."
           style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', padding: '0 14px', fontFamily: 'var(--font-body)', fontSize: 15, color: 'var(--ink-900)' }}
         />
-        <button onClick={onSend} style={{ width: 44, height: 44, borderRadius: 999, flexShrink: 0, background: 'linear-gradient(180deg, #1BB9D6, #0E8AA5)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(14,138,165,0.3)' }}>
+        <button onClick={onSend} disabled={uploadingFile} style={{ width: 44, height: 44, borderRadius: 999, flexShrink: 0, background: 'linear-gradient(180deg, #1BB9D6, #0E8AA5)', border: 'none', cursor: uploadingFile ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(14,138,165,0.3)' }}>
           <Icon name="arrow_right" size={20} color="#fff" stroke={2.4} />
         </button>
       </div>
@@ -149,6 +181,8 @@ function ChatDesktop({
   input,
   setInput,
   send,
+  sendFile,
+  uploadingFile,
   scrollRef,
   connected,
   onViewAppointment,
@@ -161,6 +195,8 @@ function ChatDesktop({
   input: string;
   setInput: (value: string) => void;
   send: () => void;
+  sendFile: (file: File) => void;
+  uploadingFile: boolean;
   scrollRef: React.RefObject<HTMLDivElement | null>;
   connected: boolean;
   onViewAppointment: () => void;
@@ -222,6 +258,17 @@ function ChatDesktop({
                     <div key={message.id || index} style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start' }}>
                       <div style={{ maxWidth: '62%', padding: '10px 14px', borderRadius: 18, background: mine ? 'linear-gradient(135deg, #1BB9D6, #0E8AA5)' : '#fff', color: mine ? '#fff' : 'var(--ink-900)', borderBottomRightRadius: mine ? 6 : 18, borderBottomLeftRadius: mine ? 18 : 6, boxShadow: mine ? '0 4px 10px rgba(14,138,165,0.2)' : '0 2px 4px rgba(10,22,40,0.04)', border: mine ? 'none' : '1px solid rgba(10,22,40,0.04)', fontSize: 14, lineHeight: 1.4 }}>
                         {message.text}
+                        {message.attachment?.file_url && (
+                          <a
+                            href={message.attachment.file_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ marginTop: 8, padding: '8px 10px', borderRadius: 12, background: mine ? 'rgba(255,255,255,0.18)' : 'rgba(16,169,198,0.08)', color: mine ? '#fff' : 'var(--brand-700)', display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', fontSize: 13, fontWeight: 700 }}
+                          >
+                            <Icon name="file" size={14} color={mine ? '#fff' : 'var(--brand-700)'} />
+                            {message.attachment.file_name}
+                          </a>
+                        )}
                         <div style={{ fontSize: 10, opacity: 0.6, marginTop: 3, textAlign: 'right' }}>{message.time}</div>
                       </div>
                     </div>
@@ -230,8 +277,22 @@ function ChatDesktop({
               </div>
               <div style={{ padding: 16, borderTop: '1px solid rgba(10,22,40,0.06)' }}>
                 <div style={{ display: 'flex', gap: 8, padding: 6, borderRadius: 999, background: '#fff', border: '1px solid rgba(10,22,40,0.06)', alignItems: 'center' }}>
+                  <label style={{ width: 38, height: 38, borderRadius: 999, background: 'rgba(16,169,198,0.1)', cursor: uploadingFile ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Icon name="file" size={16} color="var(--brand-700)" />
+                    <input
+                      type="file"
+                      accept={CHAT_FILE_ACCEPT}
+                      disabled={uploadingFile}
+                      onChange={event => {
+                        const file = event.target.files?.[0];
+                        if (file) sendFile(file);
+                        event.target.value = '';
+                      }}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
                   <input value={input} onChange={event => setInput(event.target.value)} onKeyDown={event => event.key === 'Enter' && send()} placeholder="Escribe un mensaje..." style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', padding: '0 14px', fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--ink-900)' }} />
-                  <button onClick={send} style={{ width: 38, height: 38, borderRadius: 999, background: 'linear-gradient(180deg, #1BB9D6, #0E8AA5)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <button onClick={send} disabled={uploadingFile} style={{ width: 38, height: 38, borderRadius: 999, background: 'linear-gradient(180deg, #1BB9D6, #0E8AA5)', border: 'none', cursor: uploadingFile ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Icon name="arrow_right" size={17} color="#fff" stroke={2.4} />
                   </button>
                 </div>
@@ -255,6 +316,7 @@ function ChatInner() {
   const threads = useMemo(() => buildThreads(appointments, role), [appointments, role]);
   const [activeApptIdx, setActiveApptIdx] = useState(0);
   const [input, setInput] = useState('');
+  const [uploadingFile, setUploadingFile] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const requestedAppointmentId = searchParams.get('appointmentId');
 
@@ -277,7 +339,7 @@ function ChatInner() {
 
   const activeThread = threads[activeApptIdx];
   const activeAppointment = appointments[activeApptIdx];
-  const { messages, connected, sendMessage } = useChat(activeThread?.appointmentId ?? null);
+  const { messages, connected, sendMessage, sendFile } = useChat(activeThread?.appointmentId ?? null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 99999 });
@@ -287,6 +349,32 @@ function ChatInner() {
     if (!input.trim()) return;
     sendMessage(input);
     setInput('');
+  };
+
+  const handleFile = async (file: File) => {
+    if (file.size > CHAT_FILE_LIMIT_BYTES) {
+      reportFrontendError({
+        module: 'chat',
+        action: 'uploadAttachment',
+        message: 'Adjunto de chat excede el limite permitido',
+        details: { fileName: file.name, fileSize: file.size },
+      });
+      return;
+    }
+
+    setUploadingFile(true);
+    try {
+      await sendFile(file);
+    } catch (e: any) {
+      reportFrontendError({
+        module: 'chat',
+        action: 'uploadAttachment',
+        message: 'Error subiendo adjunto de chat',
+        details: { status: e?.response?.status ?? null, fileName: file.name },
+      });
+    } finally {
+      setUploadingFile(false);
+    }
   };
 
   const openAppointment = () => {
@@ -304,6 +392,8 @@ function ChatInner() {
         input={input}
         setInput={setInput}
         send={send}
+        sendFile={handleFile}
+        uploadingFile={uploadingFile}
         scrollRef={scrollRef}
         connected={connected}
         onViewAppointment={openAppointment}
@@ -359,7 +449,7 @@ function ChatInner() {
       ) : (
         <>
           <MessageList messages={messages} scrollRef={scrollRef} />
-          <Composer value={input} onChange={setInput} onSend={send} />
+          <Composer value={input} onChange={setInput} onSend={send} onFile={handleFile} uploadingFile={uploadingFile} />
         </>
       )}
     </div>

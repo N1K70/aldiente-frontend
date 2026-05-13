@@ -13,6 +13,12 @@ export interface ChatMessage {
   text: string;
   time: string;
   senderName?: string;
+  attachment?: {
+    file_url: string;
+    file_name: string;
+    file_size?: number;
+    file_mime?: string;
+  };
 }
 
 function getUserId(): string {
@@ -26,12 +32,23 @@ function fmt(iso?: string) {
 
 function mapMsg(m: Record<string, unknown>): ChatMessage {
   const userId = getUserId();
+  const rawAttachment = m.attachment ?? m.file ?? null;
+  const attachment = rawAttachment && typeof rawAttachment === 'object'
+    ? rawAttachment as Record<string, unknown>
+    : null;
+
   return {
     id: String(m.id ?? ''),
     from: String(m.senderId ?? m.sender_id ?? '') === String(userId) ? 'me' : 'them',
     text: String(m.content ?? m.text ?? m.message ?? ''),
     time: fmt(String(m.sentAt ?? m.sent_at ?? m.createdAt ?? m.created_at ?? '')),
     senderName: String(m.senderName ?? m.sender_name ?? ''),
+    attachment: attachment ? {
+      file_url: String(attachment.file_url ?? attachment.url ?? ''),
+      file_name: String(attachment.file_name ?? attachment.name ?? 'Archivo'),
+      file_size: Number(attachment.file_size ?? attachment.size ?? 0) || undefined,
+      file_mime: String(attachment.file_mime ?? attachment.mime ?? ''),
+    } : undefined,
   };
 }
 
@@ -55,6 +72,21 @@ async function fetchHistory(appointmentId: string): Promise<ChatMessage[]> {
 
 async function postMessage(appointmentId: string, content: string): Promise<void> {
   await api.post(`/api/appointments/${appointmentId}/messages`, { content });
+}
+
+async function uploadChatFile(file: File) {
+  const form = new FormData();
+  form.append('file', file);
+  const uploadRes = await api.post('/api/files/upload', form);
+  const fileUrl = uploadRes.data?.url ?? uploadRes.data?.file_url;
+  if (!fileUrl) throw new Error('No se recibio URL del archivo');
+
+  return {
+    file_url: fileUrl,
+    file_name: file.name,
+    file_size: file.size,
+    file_mime: file.type || undefined,
+  };
 }
 
 // ── Hook ───────────────────────────────────────────────────────
@@ -183,5 +215,30 @@ export function useChat(appointmentId: string | null) {
     }
   }, [appointmentId]);
 
-  return { messages, connected, sendMessage };
+  const sendFile = useCallback(async (file: File) => {
+    if (!appointmentId) return;
+    const attachment = await uploadChatFile(file);
+    const content = `[Archivo] ${attachment.file_name}`;
+    const optimistic: ChatMessage = { from: 'me', text: content, time: fmt(), attachment };
+    setMessages(prev => [...prev, optimistic]);
+
+    const payload = { appointmentId, content, attachment };
+    if (modeRef.current === 'socket' && socketRef.current?.connected) {
+      socketRef.current.emit('chat:message', payload);
+    } else {
+      api.post(`/api/appointments/${appointmentId}/messages`, {
+        content,
+        attachment,
+      }).catch((e: any) => {
+        reportFrontendError({
+          module: 'chat',
+          action: 'sendFile',
+          message: 'Error enviando archivo por fallback HTTP',
+          details: { appointmentId, status: e?.response?.status ?? null, fileName: file.name },
+        });
+      });
+    }
+  }, [appointmentId]);
+
+  return { messages, connected, sendMessage, sendFile };
 }
