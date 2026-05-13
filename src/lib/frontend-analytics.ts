@@ -1,3 +1,5 @@
+import { sendTelemetry } from '@/lib/frontend-telemetry';
+
 export type FunnelEventName =
   | 'funnel_visit'
   | 'funnel_signup_completed'
@@ -47,6 +49,11 @@ export function trackFunnelEvent(name: FunnelEventName, payload: FunnelEventPayl
   }
 
   console.info('[frontend-event]', event);
+  void sendTelemetry('funnel_event', {
+    timestamp: event.timestamp,
+    route: event.route,
+    data: event,
+  });
 }
 
 export function getStoredFunnelEvents(): FunnelEvent[] {
