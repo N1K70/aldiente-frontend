@@ -16,6 +16,7 @@ interface UserDocument {
   category: string;
   year?: number;
   file_url: string;
+  file_name?: string;
   file_size?: number;
   created_at: string;
 }
@@ -73,26 +74,28 @@ function UploadModal({ isStudent, onClose, onUploaded }: { isStudent: boolean; o
     setFile(f);
   };
 
-  const canSubmit = title && category && file && !(isStudent && category === 'alumno_regular' && year !== currentYear);
+  const canSubmit = title.trim() && category && file && !(isStudent && category === 'alumno_regular' && year !== currentYear);
 
   const handleSubmit = async () => {
     if (!canSubmit || !file) return;
     setSubmitting(true); setError('');
     try {
-      const upload = new FormData();
-      upload.append('file', file);
-      const uploadRes = await api.post('/api/files/upload', upload);
+      const form = new FormData();
+      form.append('file', file);
+      const uploadRes = await api.post('/api/files/upload', form);
       const fileUrl = uploadRes.data?.url ?? uploadRes.data?.file_url;
-      if (!fileUrl) throw new Error('No se obtuvo URL del archivo subido');
+
+      if (!fileUrl) throw new Error('No se recibio URL del archivo');
 
       await api.post('/api/documents', {
-        title,
+        title: title.trim(),
         category,
-        description: desc || undefined,
+        description: desc.trim() || undefined,
         year: year || undefined,
         file_url: fileUrl,
         file_name: file.name,
         file_size: file.size,
+        file_mime: file.type || undefined,
       });
       onUploaded();
       onClose();
@@ -101,7 +104,7 @@ function UploadModal({ isStudent, onClose, onUploaded }: { isStudent: boolean; o
         module: 'documentos',
         action: 'upload',
         message: 'Error subiendo documento',
-        details: { status: e?.response?.status ?? null, category },
+        details: { status: e?.response?.status ?? null, category, hasFile: Boolean(file) },
       });
       setError(e?.response?.data?.message ?? 'Error al subir el documento');
     } finally {
