@@ -113,7 +113,15 @@ function hasValidAttachmentContract(attachment: {
   file_url?: string;
   file_name?: string;
 }) {
-  return Boolean(attachment.file_url && attachment.file_name);
+  if (!attachment.file_url || !attachment.file_name) return false;
+  try {
+    // Accept absolute URLs and backend-origin-relative URLs.
+    if (attachment.file_url.startsWith('/')) return true;
+    const parsed = new URL(attachment.file_url);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
 }
 
 // ── Hook ───────────────────────────────────────────────────────
