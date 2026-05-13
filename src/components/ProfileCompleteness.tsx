@@ -44,12 +44,13 @@ export default function ProfileCompleteness({ profile, documentsCount = 0, role 
 
   const required = items.filter(i => !i.optional);
   const done     = required.filter(i => i.done).length;
+  const allRequiredDone = required.length > 0 && done >= required.length;
   const pct      = Math.round((done / required.length) * 100);
 
   const barColor = pct >= 80 ? 'var(--success-500,#22c55e)' : pct >= 50 ? 'var(--warning-500,#F59E0B)' : 'var(--danger-500,#ef4444)';
   const msg      = pct === 100 ? '¡Perfil completo!' : pct >= 80 ? 'Casi completo' : pct >= 50 ? 'Buen progreso' : 'Completa tu perfil';
 
-  if (pct >= 100) return null;
+  if (allRequiredDone || pct >= 100) return null;
 
   return (
     <Glass radius={20} style={{ padding: 20 }}>
