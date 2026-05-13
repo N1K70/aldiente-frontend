@@ -24,3 +24,8 @@ export function pushTelemetry(envelope: TelemetryEnvelope) {
 export function readTelemetry() {
   return [...getGlobalStore()].reverse();
 }
+
+export function clearTelemetry() {
+  const store = getGlobalStore();
+  store.splice(0, store.length);
+}

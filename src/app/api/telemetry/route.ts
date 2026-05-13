@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { pushTelemetry, readTelemetry, type TelemetryEnvelope } from '@/lib/telemetry-store';
+import { pushTelemetry, readTelemetry, clearTelemetry, type TelemetryEnvelope } from '@/lib/telemetry-store';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,4 +14,9 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   return NextResponse.json({ ok: true, events: readTelemetry() });
+}
+
+export async function DELETE() {
+  clearTelemetry();
+  return NextResponse.json({ ok: true });
 }

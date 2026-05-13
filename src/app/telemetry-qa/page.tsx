@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { DesktopShell } from '@/components/desktop-shell';
 import { Glass, Icon } from '@/components/ui';
 
@@ -26,6 +27,11 @@ export default function TelemetryQaPage() {
     }
   };
 
+  const clear = async () => {
+    await fetch('/api/telemetry', { method: 'DELETE' });
+    await load();
+  };
+
   useEffect(() => {
     void load();
   }, []);
@@ -38,9 +44,17 @@ export default function TelemetryQaPage() {
             <Icon name="bar_chart" size={18} color="var(--brand-700)" />
             <strong>Total: {events.length}</strong>
           </div>
-          <button onClick={() => void load()} style={{ border: 'none', borderRadius: 12, padding: '8px 12px', background: 'var(--brand-500)', color: '#fff', cursor: 'pointer' }}>
-            Recargar
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Link href="/funnel-qa" style={{ fontSize: 13, color: 'var(--brand-700)', textDecoration: 'none', fontWeight: 700 }}>
+              Ver Funnel QA
+            </Link>
+            <button onClick={() => void load()} style={{ border: 'none', borderRadius: 12, padding: '8px 12px', background: 'var(--brand-500)', color: '#fff', cursor: 'pointer' }}>
+              Recargar
+            </button>
+            <button onClick={() => void clear()} style={{ border: '1px solid rgba(10,22,40,0.14)', borderRadius: 12, padding: '8px 12px', background: '#fff', color: 'var(--ink-800)', cursor: 'pointer' }}>
+              Limpiar
+            </button>
+          </div>
         </Glass>
 
         <Glass radius={18} style={{ padding: 12 }}>
