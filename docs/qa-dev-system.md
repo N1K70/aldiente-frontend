@@ -60,3 +60,9 @@ Para ejecutar smokes locales con app auto-levantada en Windows:
 Tambien disponible como script npm:
 
 `npm run qa:smoke:local`
+
+## Comando consolidado
+
+Si la app ya esta levantada, puedes ejecutar ambos smokes con:
+
+`npm run qa:smoke:all`

@@ -10,6 +10,7 @@
     "qa:gate": "npm run typecheck && npm run build",
     "qa:smoke:routes": "node scripts/qa-smoke-routes.mjs",
     "qa:smoke:roles": "node scripts/qa-smoke-role-redirects.mjs",
+    "qa:smoke:all": "npm run qa:smoke:routes && npm run qa:smoke:roles",
     "qa:smoke:local": "powershell -ExecutionPolicy Bypass -File scripts/qa-smoke-local.ps1"
   },
   "dependencies": {
