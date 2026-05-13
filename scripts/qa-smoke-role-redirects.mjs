@@ -42,6 +42,11 @@ async function main() {
       role: 'student',
       expectLocationPrefix: '/dashboard',
     },
+    {
+      name: 'unauthenticated from /funnel-qa -> /welcome',
+      path: '/funnel-qa',
+      expectLocationPrefix: '/welcome',
+    },
   ];
 
   const results = await Promise.all(checks.map(check));
