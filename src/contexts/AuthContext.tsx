@@ -63,6 +63,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => window.removeEventListener('auth:changed', onChanged);
   }, [loadFromStorage]);
 
+  useEffect(() => {
+    if (!user?.id || !user?.role || user.role === 'admin') return;
+
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+
+    let cancelled = false;
+    const endpoint = user.role === 'student' ? '/api/students/profile' : '/api/patients/profile';
+
+    api.get(endpoint)
+      .then(({ data }) => {
+        if (cancelled) return;
+        const raw = data?.profile ?? data ?? {};
+        const profileName = [raw?.name, raw?.full_name, raw?.fullName]
+          .find((value: unknown) => typeof value === 'string' && value.trim().length > 0) as string | undefined;
+        if (profileName && profileName !== user.name) {
+          setUser(prev => {
+            if (!prev) return prev;
+            const updated = { ...prev, name: profileName };
+            localStorage.setItem('authUser', JSON.stringify(updated));
+            return updated;
+          });
+        }
+      })
+      .catch(() => {});
+
+    return () => { cancelled = true; };
+  }, [user?.id, user?.role, user?.name]);
+
   const login = useCallback(async (email: string, password: string) => {
     setLoading(true);
     try {

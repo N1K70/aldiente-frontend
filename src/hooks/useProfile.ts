@@ -28,11 +28,39 @@ function normalizeProfilePayload(data: Partial<Profile>): Record<string, unknown
   const payload: Record<string, unknown> = { ...data };
   const getString = (value: unknown) => (typeof value === 'string' ? value.trim() : value);
 
-  if (data.full_name != null) payload.name = getString(data.full_name);
-  if (data.name != null) payload.full_name = getString(data.name);
-  if (data.birthdate != null) payload.birth_date = data.birthdate;
-  if (data.career_year != null) payload.year = data.career_year;
-  if (data.university_id != null) payload.university = data.university_id;
+  const normalizedName = getString(data.full_name ?? data.name);
+  if (normalizedName != null) {
+    payload.name = normalizedName;
+    payload.full_name = normalizedName;
+    payload.fullName = normalizedName;
+  }
+
+  const normalizedBirthdate = data.birthdate;
+  if (normalizedBirthdate != null) {
+    payload.birthdate = normalizedBirthdate;
+    payload.birth_date = normalizedBirthdate;
+    payload.birthDate = normalizedBirthdate;
+  }
+
+  const normalizedAddress = getString(data.address ?? data.university_location);
+  if (normalizedAddress != null) {
+    payload.address = normalizedAddress;
+    payload.location = normalizedAddress;
+    payload.university_location = normalizedAddress;
+  }
+
+  const normalizedYear = getString(data.career_year);
+  if (normalizedYear != null) {
+    payload.career_year = normalizedYear;
+    payload.year = normalizedYear;
+    payload.careerYear = normalizedYear;
+  }
+
+  const normalizedUniversity = getString(data.university_id);
+  if (normalizedUniversity != null) {
+    payload.university_id = normalizedUniversity;
+    payload.university = normalizedUniversity;
+  }
 
   return payload;
 }
