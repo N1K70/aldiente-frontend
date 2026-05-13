@@ -72,3 +72,9 @@ Si la app ya esta levantada, puedes ejecutar ambos smokes con:
 Para validar contrato de payload de adjuntos en chat antes de E2E backend:
 
 `npm run qa:chat:attachment-contract`
+
+Uso con fixture backend real:
+
+`npm run qa:chat:attachment-contract -- path/to/messages.json`
+
+El fixture debe ser un array JSON de mensajes con campo `attachment`.
