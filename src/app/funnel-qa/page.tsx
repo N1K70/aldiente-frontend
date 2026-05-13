@@ -17,10 +17,12 @@ const EVENT_FILTERS = [
 export default function FunnelQaPage() {
   const [events, setEvents] = useState<FunnelEvent[]>([]);
   const [eventFilter, setEventFilter] = useState<(typeof EVENT_FILTERS)[number]>('all');
+  const [lastReloadAt, setLastReloadAt] = useState<string>('');
 
   const reload = () => {
     const stored = getStoredFunnelEvents();
     setEvents(stored.slice().reverse());
+    setLastReloadAt(new Date().toISOString());
   };
 
   useEffect(() => {
@@ -68,6 +70,11 @@ export default function FunnelQaPage() {
             <div style={{ fontSize: 13, color: 'var(--ink-500)', marginTop: 4 }}>
               {filteredEvents.length} de {events.length} evento(s)
             </div>
+            {lastReloadAt && (
+              <div style={{ fontSize: 12, color: 'var(--ink-500)', marginTop: 2 }}>
+                Ultima recarga: {new Date(lastReloadAt).toLocaleString('es-CL')}
+              </div>
+            )}
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <Button size="sm" variant="glass" onClick={reload}>Recargar</Button>
