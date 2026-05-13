@@ -50,3 +50,9 @@ Usar `docs/qa-evidence-log.md` para registrar:
 5. Evidencia (captura/video/log)
 6. Severidad si aplica
 7. Acción siguiente
+
+## Helper Windows
+
+Para ejecutar smokes locales con app auto-levantada en Windows:
+
+`powershell -ExecutionPolicy Bypass -File scripts/qa-smoke-local.ps1`
