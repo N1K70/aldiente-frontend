@@ -32,6 +32,7 @@ Si el cambio toca autenticacion, navegacion o reservas, validar al menos:
 3. Explorar -> Reserva -> Confirmacion.
 4. Acceso a chat segun estado de cita.
 5. Documentos y reagendamiento (si el cambio afecta citas/perfil).
+6. Funnel QA: revisar `/funnel-qa` y confirmar eventos esperados (`visit`, `signup_completed`, `service_viewed`, `booking_started`, `payment_started`, `payment_completed`).
 
 ## Politica de severidad
 
