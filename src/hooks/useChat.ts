@@ -3,7 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import { api } from '@/lib/api';
 import { reportFrontendError } from '@/lib/frontend-observability';
 
-const CHAT_URL = process.env.NEXT_PUBLIC_CHAT_URL || '';
+const CHAT_URL = process.env.NEXT_PUBLIC_CHAT_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3005');
 const SOCKET_CONNECT_TIMEOUT = 4000;
 const POLL_INTERVAL = 5000;
 
@@ -134,6 +134,7 @@ export function useChat(appointmentId: string | null) {
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastCountRef = useRef(0);
+  const missingChatConfigReportedRef = useRef(false);
 
   const stopPoll = useCallback(() => {
     if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
@@ -170,7 +171,20 @@ export function useChat(appointmentId: string | null) {
     if (!token) { startHttpMode(appointmentId); return; }
 
     // No socket server configured → go straight to HTTP
-    if (!CHAT_URL) { startHttpMode(appointmentId); return; }
+    if (!CHAT_URL) {
+      if (process.env.NODE_ENV === 'production' && !missingChatConfigReportedRef.current) {
+        missingChatConfigReportedRef.current = true;
+        reportFrontendError({
+          module: 'chat',
+          action: 'missingChatConfig',
+          severity: 'warning',
+          message: 'NEXT_PUBLIC_CHAT_URL no configurado en produccion; usando fallback HTTP',
+          details: { appointmentId },
+        });
+      }
+      startHttpMode(appointmentId);
+      return;
+    }
 
     // Try socket, fall back to HTTP after timeout
     const socket = io(CHAT_URL, {
