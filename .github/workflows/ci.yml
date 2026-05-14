@@ -28,6 +28,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Production env contract
+        if: ${{ vars.NEXT_PUBLIC_BACKEND_URL != '' && vars.NEXT_PUBLIC_CHAT_URL != '' }}
+        env:
+          NEXT_PUBLIC_BACKEND_URL: ${{ vars.NEXT_PUBLIC_BACKEND_URL }}
+          NEXT_PUBLIC_CHAT_URL: ${{ vars.NEXT_PUBLIC_CHAT_URL }}
+        run: npm run qa:env:production
+
       - name: Typecheck
         run: npm run typecheck
 
