@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001');
 
 export const api = axios.create({
-  baseURL: BACKEND_URL,
+  ...(BACKEND_URL ? { baseURL: BACKEND_URL } : {}),
   timeout: 10000,
 });
 
