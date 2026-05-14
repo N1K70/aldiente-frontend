@@ -4,6 +4,7 @@ const required = [
   'NEXT_PUBLIC_BACKEND_URL',
   'NEXT_PUBLIC_CHAT_URL',
 ];
+const optionalWithContract = ['NEXT_PUBLIC_FRONTEND_EVENTS_ENDPOINT'];
 
 function isValidProductionUrl(value) {
   if (typeof value !== 'string' || !value.trim()) return false;
@@ -28,6 +29,17 @@ function main() {
     }
     if (!isValidProductionUrl(value)) {
       failures.push(`${key} must be a valid https URL and not localhost (got: ${value})`);
+    }
+  }
+
+  for (const key of optionalWithContract) {
+    const value = process.env[key];
+    if (!value) continue;
+    const trimmed = value.trim();
+    const isRelativePath = trimmed.startsWith('/api/');
+    const isValidAbsolute = isValidProductionUrl(trimmed);
+    if (!isRelativePath && !isValidAbsolute) {
+      failures.push(`${key} must be either /api/... or a valid https URL (got: ${value})`);
     }
   }
 
