@@ -57,20 +57,28 @@ export default function ReservasPage() {
   const router = useRouter();
   const isDesktop = useIsDesktop();
   const { user } = useAuth();
+  const role = user?.role === 'student' ? 'student' : 'patient';
   const [rows, setRows] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterKey>('all');
   const [paying, setPaying] = useState('');
 
   useEffect(() => {
-    api.get('/api/appointments')
+    if (!user?.id) {
+      setRows([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    api.get('/api/appointments', { params: { role } })
       .then(r => {
         const d = r.data;
         setRows(Array.isArray(d) ? d : (d?.appointments ?? d?.data ?? []));
       })
       .catch(() => setRows([]))
       .finally(() => setLoading(false));
-  }, []);
+  }, [role, user?.id]);
 
   const now = Date.now();
 

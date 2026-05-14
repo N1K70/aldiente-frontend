@@ -8,6 +8,7 @@ import { DesktopShell, useIsDesktop } from '@/components/desktop-shell';
 import { useProfile } from '@/hooks/useProfile';
 import { api } from '@/lib/api';
 import ProfileCompleteness from '@/components/ProfileCompleteness';
+import { getInitials, resolveDisplayName } from '@/lib/user-display';
 
 type Section = 'datos' | 'seguridad' | 'notificaciones' | 'salud';
 
@@ -325,11 +326,13 @@ function SectionContent({ section, role, profile, saving, onSave }: { section: S
 function PerfilDesktop() {
   const router = useRouter();
   const { user, logout } = useAuth();
-  const { profile, loading, saving, save } = useProfile(user?.role === 'student' ? 'student' : 'patient');
+  const { profile, loading, saving, loaded, save } = useProfile(user?.role === 'student' ? 'student' : 'patient');
   const [section, setSection] = useState<Section>('datos');
 
-  const initials = user?.name ? user.name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase() : '?';
+  const displayName = resolveDisplayName(user?.name, user?.email);
+  const initials = getInitials(displayName, '?');
   const merged = { name: user?.name ?? '', email: user?.email ?? '', ...profile } as Record<string, string>;
+  const showCompleteness = loaded && !loading && !isProfileComplete(merged, user?.role);
   const sectionMeta = MENU_ITEMS.find(m => m.id === section)!;
 
   const menuItems = user?.role === 'student'
@@ -344,7 +347,7 @@ function PerfilDesktop() {
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
               <AvatarBadge initials={initials} role={user?.role} />
             </div>
-            <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--ink-900)' }}>{user?.name ?? '—'}</div>
+            <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--ink-900)' }}>{displayName}</div>
             <div style={{ fontSize: 13, color: 'var(--ink-500)', marginTop: 2 }}>{user?.email ?? ''}</div>
             <div style={{ marginTop: 10 }}>
               <span style={{ fontSize: 12, fontWeight: 600, color: user?.role === 'student' ? 'var(--accent-700)' : 'var(--brand-700)', background: user?.role === 'student' ? 'var(--accent-100)' : 'var(--brand-100)', padding: '3px 10px', borderRadius: 999 }}>
@@ -353,7 +356,7 @@ function PerfilDesktop() {
             </div>
           </Glass>
 
-          {!loading && !isProfileComplete(merged, user?.role) && (
+          {showCompleteness && (
             <ProfileCompleteness loading={loading} profile={merged} role={user?.role === 'student' ? 'student' : 'patient'} onEdit={() => setSection('datos')} />
           )}
 
@@ -393,13 +396,15 @@ export default function PerfilPage() {
   const isDesktop = useIsDesktop();
   const router = useRouter();
   const { user, logout } = useAuth();
-  const { profile, loading, saving, save } = useProfile(user?.role === 'student' ? 'student' : 'patient');
+  const { profile, loading, saving, loaded, save } = useProfile(user?.role === 'student' ? 'student' : 'patient');
   const [section, setSection] = useState<Section | null>(null);
 
   if (isDesktop) return <PerfilDesktop />;
 
-  const initials = user?.name ? user.name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase() : '?';
+  const displayName = resolveDisplayName(user?.name, user?.email);
+  const initials = getInitials(displayName, '?');
   const merged = { name: user?.name ?? '', email: user?.email ?? '', ...profile } as Record<string, string>;
+  const showCompleteness = loaded && !loading && !isProfileComplete(merged, user?.role);
 
   const menuItems = user?.role === 'student'
     ? MENU_ITEMS.filter(m => m.id !== 'salud')
@@ -436,7 +441,7 @@ export default function PerfilPage() {
         <div style={{ padding: 20, borderRadius: 24, background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.9)', boxShadow: '0 4px 24px rgba(10,22,40,0.07)', display: 'flex', alignItems: 'center', gap: 16 }}>
           <AvatarBadge initials={initials} role={user?.role} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink-900)', marginBottom: 2 }}>{user?.name ?? 'Usuario'}</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink-900)', marginBottom: 2 }}>{displayName}</div>
             <div style={{ fontSize: 14, color: 'var(--ink-500)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email ?? ''}</div>
             <div style={{ marginTop: 8 }}>
               <span style={{ fontSize: 12, fontWeight: 600, color: user?.role === 'student' ? 'var(--accent-700)' : 'var(--brand-700)', background: user?.role === 'student' ? 'var(--accent-100)' : 'var(--brand-100)', padding: '3px 10px', borderRadius: 999 }}>
@@ -451,7 +456,7 @@ export default function PerfilPage() {
       </div>
 
       <div style={{ padding: '0 20px 16px' }}>
-        {!loading && !isProfileComplete(merged, user?.role) && (
+        {showCompleteness && (
           <ProfileCompleteness loading={loading} profile={merged} role={user?.role === 'student' ? 'student' : 'patient'} onEdit={() => setSection('datos')} />
         )}
       </div>

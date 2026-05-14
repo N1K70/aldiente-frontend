@@ -86,6 +86,7 @@ export function useProfile(role?: 'patient' | 'student') {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const { updateUser } = useAuth();
 
   const endpoint = role === 'student' ? '/api/students/profile' : '/api/patients/profile';
@@ -98,6 +99,7 @@ export function useProfile(role?: 'patient' | 'student') {
         const normalized = normalizeProfileResponse(raw);
         setProfile(normalized);
         setError(null);
+        setLoaded(true);
         // Sync name to AuthContext so greeting shows correct name
         const name = normalized.name ?? normalized.full_name;
         if (name) updateUser({ name });
@@ -122,6 +124,7 @@ export function useProfile(role?: 'patient' | 'student') {
         const raw = res.data?.profile ?? res.data ?? {};
         const normalized = normalizeProfileResponse(raw);
         setProfile(normalized);
+        setLoaded(true);
         const name = normalized.name ?? normalized.full_name;
         if (name) updateUser({ name });
       } catch (reloadErr: unknown) {
@@ -147,5 +150,5 @@ export function useProfile(role?: 'patient' | 'student') {
     }
   }, [endpoint, updateUser]);
 
-  return { profile, loading, saving, error, save, reload: load };
+  return { profile, loading, saving, loaded, error, save, reload: load };
 }

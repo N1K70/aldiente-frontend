@@ -11,6 +11,7 @@ import { useNotifications } from '@/hooks/useNotifications';
 import PatientOnboarding, { usePatientOnboarding } from '@/components/PatientOnboarding';
 import { fetchUniversityServices, normalizeText, PublicServiceItem } from '@/lib/public-services';
 import { reportFrontendError } from '@/lib/frontend-observability';
+import { getFirstName, getInitials, resolveDisplayName } from '@/lib/user-display';
 
 const STATUS_LABEL: Record<string, string> = { confirmed: 'Confirmada', pending: 'Pendiente', completed: 'Completada', cancelled: 'Cancelada' };
 const SERVICE_TONES = ['#10A9C6', '#6366F1', '#F59E0B', '#EC4899'] as const;
@@ -20,15 +21,6 @@ const STUDENT_GRADIENTS = [
   'linear-gradient(135deg, #A7F3D0, #10B981)',
   'linear-gradient(135deg, #FECACA, #EF4444)',
 ] as const;
-const MOCK_NAMES = new Set(['maria rodriguez', 'maría rodríguez', 'usuario demo', 'test user']);
-
-function normalizeName(value: string) {
-  return value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim();
-}
 
 type FeaturedStudent = {
   id: string;
@@ -143,10 +135,8 @@ function HomeDesktop() {
   const { next, upcoming, loading } = useAppointments('patient');
   const { needsOnboarding, selectedUniversity, completeOnboarding } = usePatientOnboarding();
   const { featuredServices, featuredStudents, loading: catalogLoading, loadError } = useUniversityHighlights(selectedUniversity?.id);
-  const rawName = (user?.name ?? '').trim();
-  const isLikelyMockName = rawName ? MOCK_NAMES.has(normalizeName(rawName)) : false;
-  const displayName = rawName && !isLikelyMockName ? rawName : (user?.email ? user.email.split('@')[0] : 'Usuario');
-  const firstName = displayName.split(' ')[0] || 'Usuario';
+  const displayName = resolveDisplayName(user?.name, user?.email);
+  const firstName = getFirstName(displayName);
 
   if (needsOnboarding) return <PatientOnboarding onComplete={completeOnboarding} />;
 
@@ -309,11 +299,9 @@ export default function HomePage() {
   if (isDesktop) return <HomeDesktop />;
   if (needsOnboarding) return <PatientOnboarding onComplete={completeOnboarding} />;
 
-  const rawName = (user?.name ?? '').trim();
-  const isLikelyMockName = rawName ? MOCK_NAMES.has(normalizeName(rawName)) : false;
-  const displayName = rawName && !isLikelyMockName ? rawName : (user?.email ? user.email.split('@')[0] : 'Usuario');
-  const firstName = displayName.split(' ')[0] || 'Usuario';
-  const initials = displayName.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'U';
+  const displayName = resolveDisplayName(user?.name, user?.email);
+  const firstName = getFirstName(displayName);
+  const initials = getInitials(displayName);
 
   const apptDate = next?.date ? next.date.split(/[\s/-]/).slice(0, 2).join(' ') : '';
   const apptTitle = next ? `${next.service || 'Cita'}${next.student?.name ? ` · Clínica` : ''}` : '';

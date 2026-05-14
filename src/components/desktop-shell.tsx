@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Icon, Button, Glass } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
+import { getInitials, resolveDisplayName } from '@/lib/user-display';
 
 export const DESKTOP_BP = 1024;
 const MOCK_NAMES = new Set(['maria rodriguez', 'maría rodríguez', 'usuario demo', 'test user']);
@@ -99,17 +100,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ role = 'patient', activeId }) 
          : undefined,
   }));
 
-  const fallbackName = user?.email ? user.email.split('@')[0] : 'Usuario';
-  const normalizedUserName = (user?.name ?? '').trim();
-  const isLikelyMockName = normalizedUserName ? MOCK_NAMES.has(normalizeName(normalizedUserName)) : false;
-  const displayName = normalizedUserName && !isLikelyMockName ? normalizedUserName : fallbackName;
-  const initials = displayName
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map(w => w[0])
-    .join('')
-    .toUpperCase() || 'U';
+  const displayName = resolveDisplayName(user?.name, user?.email);
+  const initials = getInitials(displayName);
 
   return (
     <aside style={{
