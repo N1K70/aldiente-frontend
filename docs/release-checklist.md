@@ -15,6 +15,7 @@ Estandarizar cada salida a produccion de frontend para reducir regresiones y ace
 - [ ] Smoke rutas en verde (`npm run qa:smoke:routes`).
 - [ ] Smoke roles en verde (`npm run qa:smoke:roles`) si hubo cambios en auth/proxy.
 - [ ] Variables de entorno verificadas en Vercel (`NEXT_PUBLIC_BACKEND_URL`, `NEXT_PUBLIC_CHAT_URL`).
+- [ ] Check automatico de env productivo en verde (`npm run qa:env:production`).
 - [ ] No hay fallbacks mock activos en flujos criticos.
 - [ ] Evidencia QA agregada en `docs/qa-evidence-log.md`.
 
