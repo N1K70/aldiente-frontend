@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Glass, Icon, Button } from '@/components/ui';
 import { DesktopShell, useIsDesktop } from '@/components/desktop-shell';
 import { useAppointments } from '@/hooks/useAppointments';
+import { useAuth } from '@/contexts/AuthContext';
 
 type Tone = 'success' | 'warning' | 'ink';
 
@@ -27,10 +28,10 @@ function StatusBadge({ status }: { status: string }) {
   return <span style={{ fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 999, background: tones[tone].bg, color: tones[tone].fg }}>{label}</span>;
 }
 
-function AppointmentsDesktop() {
+function AppointmentsDesktop({ role }: { role: 'patient' | 'student' }) {
   const router = useRouter();
   const [dtab, setDtab] = useState<0|1|2>(0);
-  const { appointments, upcoming, past, loading } = useAppointments('patient');
+  const { appointments, upcoming, past, loading } = useAppointments(role);
 
   const displayed = dtab === 0 ? appointments : dtab === 1 ? upcoming : past;
 
@@ -82,16 +83,19 @@ export default function AppointmentsPage() {
   const isDesktop = useIsDesktop();
   const router = useRouter();
   const [tab, setTab] = useState<'next' | 'past'>('next');
-  const { upcoming, past, loading } = useAppointments('patient');
+  const { user } = useAuth();
+  const role: 'patient' | 'student' = user?.role === 'student' ? 'student' : 'patient';
+  const homeHref = role === 'student' ? '/dashboard' : '/home';
+  const { upcoming, past, loading } = useAppointments(role);
 
-  if (isDesktop) return <AppointmentsDesktop />;
+  if (isDesktop) return <AppointmentsDesktop role={role} />;
 
   const items = tab === 'next' ? upcoming : past;
 
   return (
     <div className="app-scroll" style={{ minHeight: '100dvh', overflowY: 'auto', background: 'var(--bg-aurora)', paddingBottom: 40 }}>
       <div style={{ padding: '56px 20px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
-        <Link href="/home">
+        <Link href={homeHref}>
           <button style={{ width: 44, height: 44, borderRadius: 999, background: 'rgba(255,255,255,0.78)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.9)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Icon name="arrow_left" size={20} />
           </button>

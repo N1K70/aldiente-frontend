@@ -7,6 +7,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
 
 export const DESKTOP_BP = 1024;
+const MOCK_NAMES = new Set(['maria rodriguez', 'maría rodríguez', 'usuario demo', 'test user']);
+
+function normalizeName(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
 
 export function useIsDesktop() {
   const [isDesktop, setIsDesktop] = useState(false);
@@ -25,9 +34,9 @@ export function useIsDesktop() {
 const PATIENT_LINKS = [
   { id: 'home',    icon: 'home',     label: 'Inicio',             href: '/home' },
   { id: 'search',  icon: 'search',   label: 'Buscar estudiantes', href: '/explorar' },
-  { id: 'appts',   icon: 'calendar', label: 'Mis citas',          href: '/citas',   badge: '2' },
-  { id: 'chat',    icon: 'chat',     label: 'Mensajes',           href: '/chat',    badge: '3' },
-  { id: 'docs',    icon: 'shield',   label: 'Documentos',         href: '/perfil' },
+  { id: 'appts',   icon: 'calendar', label: 'Mis citas',          href: '/citas' },
+  { id: 'chat',    icon: 'chat',     label: 'Mensajes',           href: '/chat' },
+  { id: 'docs',    icon: 'shield',   label: 'Documentos',         href: '/documentos' },
   { id: 'profile', icon: 'user',     label: 'Perfil',             href: '/perfil' },
 ];
 
@@ -76,8 +85,31 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({ icon, label, href, active, ba
 interface SidebarProps { role?: 'patient' | 'student' | 'admin'; activeId?: string; }
 export const Sidebar: React.FC<SidebarProps> = ({ role = 'patient', activeId }) => {
   const { user } = useAuth();
-  const links = role === 'student' ? STUDENT_LINKS : role === 'admin' ? ADMIN_LINKS : PATIENT_LINKS;
-  const initials = user?.name ? user.name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase() : role === 'student' ? 'SM' : 'MR';
+  const { notifications } = useNotifications();
+
+  const unread = notifications.filter(n => !n.read);
+  const citasBadge = unread.filter(n => ['appointment', 'reservation'].includes(n.type)).length || undefined;
+  const chatBadge  = unread.filter(n => ['chat', 'message'].includes(n.type)).length || undefined;
+
+  const baseLinks = role === 'student' ? STUDENT_LINKS : role === 'admin' ? ADMIN_LINKS : PATIENT_LINKS;
+  const links = baseLinks.map(l => ({
+    ...l,
+    badge: l.id === 'appts' ? (citasBadge ? String(citasBadge) : undefined)
+         : l.id === 'chat'  ? (chatBadge  ? String(chatBadge)  : undefined)
+         : undefined,
+  }));
+
+  const fallbackName = user?.email ? user.email.split('@')[0] : 'Usuario';
+  const normalizedUserName = (user?.name ?? '').trim();
+  const isLikelyMockName = normalizedUserName ? MOCK_NAMES.has(normalizeName(normalizedUserName)) : false;
+  const displayName = normalizedUserName && !isLikelyMockName ? normalizedUserName : fallbackName;
+  const initials = displayName
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(w => w[0])
+    .join('')
+    .toUpperCase() || 'U';
 
   return (
     <aside style={{
@@ -146,7 +178,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role = 'patient', activeId }) 
         }}>{initials}</div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink-900)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {user?.name ?? (role === 'student' ? 'Sofía Méndez' : 'María Rodríguez')}
+            {displayName}
           </div>
           <div style={{ fontSize: 11, color: 'var(--ink-500)' }}>
             {role === 'student' ? '5º año · UCh' : role === 'admin' ? 'Supervisora' : 'Paciente'}

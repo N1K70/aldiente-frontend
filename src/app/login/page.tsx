@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Button, Icon, TextField, Glass } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsDesktop } from '@/components/desktop-shell';
+import { reportFrontendError } from '@/lib/frontend-observability';
 
 function roleHome() {
   try {
@@ -29,7 +30,7 @@ function MailOnlyNotice() {
         lineHeight: 1.5,
       }}
     >
-      Acceso habilitado solo con correo y contrasena.
+      Acceso habilitado solo con correo y contraseña.
     </div>
   );
 }
@@ -47,11 +48,24 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedPw = pw.trim();
+    if (!normalizedEmail || !normalizedPw) {
+      setError('Ingresa correo y contraseña.');
+      return;
+    }
     setLoading(true);
     try {
-      await login(email, pw);
+      await login(normalizedEmail, normalizedPw);
       router.push(roleHome());
     } catch {
+      reportFrontendError({
+        module: 'login',
+        action: 'submit',
+        severity: 'warning',
+        message: 'Error de autenticación en login',
+        details: { emailDomain: normalizedEmail.split('@')[1] ?? null },
+      });
       setError('Correo o contrasena incorrectos.');
     } finally {
       setLoading(false);
@@ -89,9 +103,9 @@ export default function LoginPage() {
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 60 }}>
           <Glass hi radius={24} style={{ padding: 40, width: '100%', maxWidth: 440 }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 6, color: 'var(--ink-900)' }}>Inicia sesion</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 6, color: 'var(--ink-900)' }}>Inicia sesión</div>
             <div style={{ fontSize: 14, color: 'var(--ink-600)', marginBottom: 28 }}>
-              ¿Aun no tienes cuenta?{' '}
+              ¿Aún no tienes cuenta?{' '}
               <Link href="/signup" style={{ color: 'var(--brand-700)', fontWeight: 600, textDecoration: 'none' }}>
                 Crea una →
               </Link>
@@ -100,7 +114,7 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <TextField label="Correo electronico" icon="mail" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="tu@correo.cl" />
               <TextField
-                label="Contrasena"
+                label="Contraseña"
                 icon="lock"
                 type={showPw ? 'text' : 'password'}
                 value={pw}
@@ -114,12 +128,12 @@ export default function LoginPage() {
               />
               <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <button type="button" onClick={() => router.push('/recuperar')} style={{ background: 'none', border: 'none', color: 'var(--brand-700)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
-                  ¿Olvidaste tu contrasena?
+                  ¿Olvidaste tu contraseña?
                 </button>
               </div>
               {error && <div style={{ padding: '12px 16px', borderRadius: 12, background: 'var(--danger-100)', color: 'var(--danger-600)', fontSize: 14, fontWeight: 500 }}>{error}</div>}
               <Button size="lg" full type="submit" disabled={loading}>
-                {loading ? 'Ingresando...' : 'Iniciar sesion'}
+                {loading ? 'Ingresando...' : 'Iniciar sesión'}
               </Button>
             </form>
 
@@ -153,7 +167,7 @@ export default function LoginPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 20 }}>
           <TextField label="Correo electronico" icon="mail" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="tu@correo.cl" />
           <TextField
-            label="Contrasena"
+            label="Contraseña"
             icon="lock"
             type={showPw ? 'text' : 'password'}
             value={pw}
@@ -167,7 +181,7 @@ export default function LoginPage() {
           />
           <div style={{ textAlign: 'right', marginTop: -4 }}>
             <button type="button" onClick={() => router.push('/recuperar')} style={{ background: 'none', border: 'none', color: 'var(--brand-700)', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
-              ¿Olvidaste tu contrasena?
+              ¿Olvidaste tu contraseña?
             </button>
           </div>
         </div>

@@ -16,6 +16,7 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<void>;
   register: (data: RegisterData) => Promise<{ role?: User['role']; authenticated: boolean }>;
   logout: () => void;
+  updateUser: (patch: Partial<User>) => void;
 };
 
 type RegisterData = {
@@ -34,6 +35,16 @@ type RegisterData = {
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const PATIENT_ONBOARDING_KEY = 'aldiente_patient_onboarding_completed';
+const MOCK_NAMES = new Set(['maria rodriguez', 'maria rodriguez', 'usuario demo', 'test user']);
+
+function normalizeName(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -62,12 +73,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => window.removeEventListener('auth:changed', onChanged);
   }, [loadFromStorage]);
 
+  useEffect(() => {
+    if (!user?.id || !user?.role || user.role === 'admin') return;
+
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+
+    let cancelled = false;
+    const endpoint = user.role === 'student' ? '/api/students/profile' : '/api/patients/profile';
+
+    api.get(endpoint)
+      .then(({ data }) => {
+        if (cancelled) return;
+        const raw = data?.profile ?? data ?? {};
+        const profileName = [raw?.name, raw?.full_name, raw?.fullName]
+          .find((value: unknown) => typeof value === 'string' && value.trim().length > 0) as string | undefined;
+        const normalizedProfileName = profileName ? normalizeName(profileName) : '';
+        if (profileName && !MOCK_NAMES.has(normalizedProfileName) && profileName !== user.name) {
+          setUser(prev => {
+            if (!prev) return prev;
+            const updated = { ...prev, name: profileName };
+            localStorage.setItem('authUser', JSON.stringify(updated));
+            return updated;
+          });
+        }
+      })
+      .catch(() => {});
+
+    return () => { cancelled = true; };
+  }, [user?.id, user?.role, user?.name]);
+
   const login = useCallback(async (email: string, password: string) => {
     setLoading(true);
     try {
       const { data } = await api.post('/api/login', { email, password });
       const token = data.token || data.accessToken || data.jwt;
-      if (!token) throw new Error('No se recibió token');
+      if (!token) throw new Error('No se recibio token');
       localStorage.setItem('authToken', token);
       document.cookie = `authToken=${token}; path=/; SameSite=Lax`;
       if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
@@ -76,9 +117,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id: String(data?.user?.id ?? data?.userId ?? data?.id ?? ''),
         email: data?.user?.email ?? data?.email ?? email,
         role: data?.user?.role ?? data?.role,
-        name: data?.user?.name ?? data?.name,
+        name: data?.user?.name ?? data?.user?.fullName ?? data?.user?.full_name ?? data?.name ?? data?.fullName ?? data?.full_name,
       };
       localStorage.setItem('authUser', JSON.stringify(u));
+      if (u.role) document.cookie = `authRole=${u.role}; path=/; SameSite=Lax`;
+      if (u.role === 'patient') {
+        localStorage.setItem(`${PATIENT_ONBOARDING_KEY}:${u.id || u.email}`, 'true');
+      }
       setUser(u);
       window.dispatchEvent(new Event('auth:changed'));
     } finally {
@@ -102,7 +147,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         university: registerData.university,
         careerYear: registerData.careerYear,
       });
-      const token = data.token || data.accessToken || data.jwt;
+
+      let token = data.token || data.accessToken || data.jwt;
+      if (!token) {
+        const loginRes = await api.post('/api/login', {
+          email: registerData.email,
+          password: registerData.password,
+        });
+        token = loginRes.data.token || loginRes.data.accessToken || loginRes.data.jwt;
+        if (!token) throw new Error('No se recibio token');
+        Object.assign(data, loginRes.data);
+      }
+
+      localStorage.setItem('authToken', token);
+      document.cookie = `authToken=${token}; path=/; SameSite=Lax`;
+      if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
 
       const u: User = {
         id: String(data?.user?.id ?? data?.id ?? ''),
@@ -111,19 +170,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         name: data?.user?.name ?? registerData.fullName ?? `${registerData.name} ${registerData.lastname}`.trim(),
       };
 
-      if (token) {
-        localStorage.setItem('authToken', token);
-        document.cookie = `authToken=${token}; path=/; SameSite=Lax`;
-        if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
-        localStorage.setItem('authUser', JSON.stringify(u));
-        setUser(u);
-        window.dispatchEvent(new Event('auth:changed'));
-      }
-
+      localStorage.setItem('authUser', JSON.stringify(u));
+      if (u.role) document.cookie = `authRole=${u.role}; path=/; SameSite=Lax`;
+      setUser(u);
+      window.dispatchEvent(new Event('auth:changed'));
       return { role: u.role, authenticated: Boolean(token) };
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  const updateUser = useCallback((patch: Partial<User>) => {
+    setUser(prev => {
+      if (!prev) return prev;
+      const updated = { ...prev, ...patch };
+      localStorage.setItem('authUser', JSON.stringify(updated));
+      return updated;
+    });
   }, []);
 
   const logout = useCallback(() => {
@@ -131,12 +194,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('authUser');
     document.cookie = 'authToken=; path=/; max-age=0';
+    document.cookie = 'authRole=; path=/; max-age=0';
     setUser(null);
     window.dispatchEvent(new Event('auth:changed'));
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

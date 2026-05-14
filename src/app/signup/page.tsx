@@ -6,7 +6,10 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Button, Icon, TextField } from '@/components/ui';
 import TermsModal from '@/components/TermsModal';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsDesktop } from '@/components/desktop-shell';
 import { formatRutOnInput, validateAndFormatRut } from '@/lib/rut';
+import { reportFrontendError } from '@/lib/frontend-observability';
+import { trackFunnelEvent } from '@/lib/frontend-analytics';
 
 type Role = 'patient' | 'student';
 
@@ -137,7 +140,7 @@ function SignupInner() {
 
   const steps = [
     { title: copy[role].title, sub: copy[role].sub },
-    { title: 'Credenciales de acceso', sub: 'Tu cuenta quedara asociada solo a correo y contrasena.' },
+    { title: 'Credenciales de acceso', sub: 'Tu cuenta quedará asociada solo a correo y contraseña.' },
   ];
 
   const validateStepOne = () => {
@@ -152,7 +155,7 @@ function SignupInner() {
     }
 
     if (!data.fullName || !data.university || !data.careerYear) {
-      return 'Completa nombre completo, universidad y ano de carrera.';
+      return 'Completa nombre completo, universidad y año de carrera.';
     }
 
     return '';
@@ -161,16 +164,48 @@ function SignupInner() {
   const validateAll = () => {
     const baseError = validateStepOne();
     if (baseError) return baseError;
-    if (!data.email || !data.pw) return 'Completa correo y contrasena.';
-    if (data.pw.length < 6) return 'La contrasena debe tener al menos 6 caracteres.';
-    if (data.pw !== data.confirmPw) return 'Las contrasenas no coinciden.';
-    if (!acceptTerms) return 'Debes aceptar los terminos y condiciones.';
+    if (!data.email || !data.pw) return 'Completa correo y contraseña.';
+    if (data.pw.length < 6) return 'La contraseña debe tener al menos 6 caracteres.';
+    if (data.pw !== data.confirmPw) return 'Las contraseñas no coinciden.';
+    if (!acceptTerms) return 'Debes aceptar los términos y condiciones.';
     return '';
   };
 
+  const isDesktop = useIsDesktop();
+
+  type IconName = Parameters<typeof Icon>[0]['name'];
+  const brandFeatures: { icon: IconName; text: string }[] = [
+    { icon: 'shield', text: 'Estudiantes verificados con supervisión docente' },
+    { icon: 'star',   text: 'Precios accesibles sin sacrificar calidad' },
+    { icon: 'check',  text: 'Agenda, paga y gestiona todo en un solo lugar' },
+  ];
+
   return (
-    <div style={{ minHeight: '100dvh', overflow: 'auto', background: 'var(--bg-aurora)' }}>
-      <div style={{ padding: '60px 24px 40px', minHeight: '100dvh', display: 'flex', flexDirection: 'column', maxWidth: 520, margin: '0 auto' }}>
+    <div style={{ minHeight: '100dvh', background: 'var(--bg-aurora)', display: isDesktop ? 'flex' : 'block', fontFamily: 'var(--font-body)' }}>
+      {isDesktop && (
+        <div style={{ width: 420, flexShrink: 0, background: 'linear-gradient(160deg, #0E8AA5 0%, #4F46E5 100%)', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '64px 48px', color: '#fff' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 48 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>A</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, letterSpacing: '-0.03em' }}>ALDIENTE</div>
+          </div>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 34, fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1.15, margin: '0 0 16px' }}>
+            Odontología de calidad, accesible para todos
+          </h2>
+          <p style={{ fontSize: 15, opacity: 0.85, lineHeight: 1.6, margin: '0 0 40px' }}>
+            Conectamos pacientes con estudiantes de odontología supervisados.
+          </p>
+          {brandFeatures.map(f => (
+            <div key={f.text} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 16 }}>
+              <div style={{ width: 32, height: 32, borderRadius: 10, background: 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
+                <Icon name={f.icon} size={16} color="#fff" />
+              </div>
+              <span style={{ fontSize: 14, opacity: 0.9, lineHeight: 1.5 }}>{f.text}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      <div style={{ flex: 1, overflowY: isDesktop ? 'auto' : undefined, display: isDesktop ? 'flex' : 'block', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ padding: isDesktop ? '48px 48px 40px' : '60px 24px 40px', minHeight: isDesktop ? undefined : '100dvh', display: 'flex', flexDirection: 'column', width: '100%', maxWidth: isDesktop ? 520 : undefined, margin: isDesktop ? undefined : '0 auto' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
           <button
             type="button"
@@ -222,10 +257,10 @@ function SignupInner() {
         {step === 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 24 }}>
             {role === 'patient' ? (
-              <>
+              <React.Fragment>
                 <TextField label="Nombre" icon="user" value={data.name} onChange={e => upd('name', e.target.value)} placeholder="Maria" autoFocus />
                 <TextField label="Apellido" value={data.lastname} onChange={e => upd('lastname', e.target.value)} placeholder="Rivas" />
-              </>
+              </React.Fragment>
             ) : (
               <TextField label="Nombre completo" icon="user" value={data.fullName} onChange={e => upd('fullName', e.target.value)} placeholder="Sofia Mendez" autoFocus />
             )}
@@ -233,7 +268,7 @@ function SignupInner() {
             <TextField label="RUT" icon="shield" value={data.rut} onChange={e => upd('rut', formatRutOnInput(e.target.value))} placeholder="12.345.678-9" />
 
             {role === 'patient' ? (
-              <>
+              <React.Fragment>
                 <TextField label="Fecha de nacimiento" icon="calendar" type="date" value={data.birthDate} onChange={e => upd('birthDate', e.target.value)} />
                 <SelectField
                   label="Genero (opcional)"
@@ -247,12 +282,12 @@ function SignupInner() {
                     { value: 'prefer_not_to_say', label: 'Prefiero no decirlo' },
                   ]}
                 />
-              </>
+              </React.Fragment>
             ) : (
-              <>
+              <React.Fragment>
                 <TextField label="Universidad" icon="graduation" value={data.university} onChange={e => upd('university', e.target.value)} placeholder="Universidad de Chile" />
                 <TextField label="Ano de carrera" icon="calendar" value={data.careerYear} onChange={e => upd('careerYear', e.target.value.replace(/[^\d]/g, ''))} placeholder="5" />
-              </>
+              </React.Fragment>
             )}
 
             <TextField label="Ciudad" icon="home" value={data.location} onChange={e => upd('location', e.target.value)} placeholder="Santiago" />
@@ -262,8 +297,8 @@ function SignupInner() {
         {step === 1 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 24 }}>
             <TextField label="Correo electronico" icon="mail" type="email" value={data.email} onChange={e => upd('email', e.target.value)} placeholder={role === 'student' ? 'tu@universidad.cl' : 'tu@correo.cl'} autoFocus />
-            <TextField label="Contrasena" icon="lock" type="password" value={data.pw} onChange={e => upd('pw', e.target.value)} placeholder="Minimo 6 caracteres" help="Usa al menos 6 caracteres." />
-            <TextField label="Confirmar contrasena" icon="lock" type="password" value={data.confirmPw} onChange={e => upd('confirmPw', e.target.value)} placeholder="Repite tu contrasena" />
+            <TextField label="Contraseña" icon="lock" type="password" value={data.pw} onChange={e => upd('pw', e.target.value)} placeholder="Mínimo 6 caracteres" help="Usa al menos 6 caracteres." />
+            <TextField label="Confirmar contraseña" icon="lock" type="password" value={data.confirmPw} onChange={e => upd('confirmPw', e.target.value)} placeholder="Repite tu contraseña" />
 
             <label style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px', borderRadius: 16, background: 'rgba(255,255,255,0.72)', border: '1px solid rgba(10,22,40,0.08)', cursor: 'pointer' }}>
               <input type="checkbox" checked={acceptTerms} onChange={e => setAcceptTerms(e.target.checked)} style={{ width: 18, height: 18, marginTop: 2, accentColor: 'var(--brand-600)' }} />
@@ -277,14 +312,14 @@ function SignupInner() {
                   }}
                   style={{ border: 'none', background: 'none', padding: 0, color: 'var(--brand-700)', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-body)' }}
                 >
-                  terminos y condiciones
+                  términos y condiciones
                 </button>
-                {' '}y la politica de privacidad.
+                {' '}y la política de privacidad.
               </span>
             </label>
 
             <div style={{ padding: '14px 16px', borderRadius: 16, background: 'rgba(16,169,198,0.08)', border: '1px solid rgba(16,169,198,0.16)', fontSize: 13, color: 'var(--ink-700)', lineHeight: 1.5 }}>
-              El acceso queda habilitado solo por correo y contrasena.
+              El acceso queda habilitado solo por correo y contraseña.
             </div>
           </div>
         )}
@@ -321,31 +356,46 @@ function SignupInner() {
 
               setError('');
               setLoading(true);
+              const normalizedEmail = data.email.trim().toLowerCase();
               try {
                 const rutValidation = validateAndFormatRut(data.rut);
+                const normalizedName = data.name.trim();
+                const normalizedLastname = data.lastname.trim();
+                const normalizedFullName = data.fullName.trim();
+                const normalizedUniversity = data.university.trim();
+                const normalizedLocation = data.location.trim();
                 const result = await register({
-                  name: data.name,
-                  lastname: data.lastname,
-                  email: data.email,
+                  name: normalizedName,
+                  lastname: normalizedLastname,
+                  email: normalizedEmail,
                   password: data.pw,
                   role,
                   rut: rutValidation.formatted ?? undefined,
                   birthDate: data.birthDate || undefined,
                   gender: data.gender || undefined,
-                  location: data.location || undefined,
-                  fullName: data.fullName || undefined,
-                  university: data.university || undefined,
+                  location: normalizedLocation || undefined,
+                  fullName: normalizedFullName || undefined,
+                  university: normalizedUniversity || undefined,
                   careerYear: data.careerYear || undefined,
                 });
-
                 if (result.authenticated) {
                   const finalRole = result.role ?? role;
+                  trackFunnelEvent('funnel_signup_completed', {
+                    role: finalRole,
+                    emailDomain: normalizedEmail.split('@')[1] ?? null,
+                  });
                   router.push(finalRole === 'student' || finalRole === 'admin' ? '/dashboard' : '/quiz');
                   return;
                 }
 
                 router.push('/login?registered=1');
               } catch {
+                reportFrontendError({
+                  module: 'signup',
+                  action: 'register',
+                  message: 'Error creando cuenta en signup',
+                  details: { role, emailDomain: normalizedEmail.split('@')[1] ?? null },
+                });
                 setError('No se pudo crear la cuenta. Intenta nuevamente.');
               } finally {
                 setLoading(false);
@@ -363,7 +413,7 @@ function SignupInner() {
           </div>
         </div>
       </div>
-
+      </div>
       {showTerms && <TermsModal onClose={() => setShowTerms(false)} />}
     </div>
   );

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "real-ok-1",
+    "content": "[Archivo] radiografia.pdf",
+    "attachment": {
+      "file_url": "https://cdn.example.com/files/radiografia.pdf",
+      "file_name": "radiografia.pdf",
+      "file_size": 245760,
+      "file_mime": "application/pdf"
+    }
+  },
+  {
+    "id": "real-ok-2",
+    "content": "[Archivo] imagen-clinica.png",
+    "attachment": {
+      "file_url": "/uploads/imagen-clinica.png",
+      "file_name": "imagen-clinica.png"
+    }
+  }
+]

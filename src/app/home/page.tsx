@@ -10,14 +10,25 @@ import { useAppointments } from '@/hooks/useAppointments';
 import { useNotifications } from '@/hooks/useNotifications';
 import PatientOnboarding, { usePatientOnboarding } from '@/components/PatientOnboarding';
 import { fetchUniversityServices, normalizeText, PublicServiceItem } from '@/lib/public-services';
+import { reportFrontendError } from '@/lib/frontend-observability';
 
 const STATUS_LABEL: Record<string, string> = { confirmed: 'Confirmada', pending: 'Pendiente', completed: 'Completada', cancelled: 'Cancelada' };
 const SERVICE_TONES = ['#10A9C6', '#6366F1', '#F59E0B', '#EC4899'] as const;
+const FUNNEL_QA_ENABLED = process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_ENABLE_FUNNEL_QA === 'true';
 const STUDENT_GRADIENTS = [
   'linear-gradient(135deg, #C7D2FE, #818CF8)',
   'linear-gradient(135deg, #A7F3D0, #10B981)',
   'linear-gradient(135deg, #FECACA, #EF4444)',
 ] as const;
+const MOCK_NAMES = new Set(['maria rodriguez', 'maría rodríguez', 'usuario demo', 'test user']);
+
+function normalizeName(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
 
 type FeaturedStudent = {
   id: string;
@@ -48,22 +59,34 @@ function ApptDateBadge({ dateStr, time }: { dateStr: string; time?: string }) {
 function useUniversityHighlights(universityId?: string) {
   const [services, setServices] = useState<PublicServiceItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
     if (!universityId) {
       setServices([]);
+      setLoadError('');
       return;
     }
 
     let mounted = true;
     setLoading(true);
+    setLoadError('');
 
     fetchUniversityServices(universityId)
       .then(rows => {
         if (mounted) setServices(rows);
       })
       .catch(() => {
-        if (mounted) setServices([]);
+        if (mounted) {
+          reportFrontendError({
+            module: 'home',
+            action: 'fetchUniversityServices',
+            message: 'Error cargando highlights de universidad en Home',
+            details: { universityId },
+          });
+          setServices([]);
+          setLoadError('No pudimos cargar servicios de tu universidad en este momento.');
+        }
       })
       .finally(() => {
         if (mounted) setLoading(false);
@@ -111,7 +134,7 @@ function useUniversityHighlights(universityId?: string) {
     return Array.from(unique.values()).slice(0, 3);
   }, [services]);
 
-  return { featuredServices, featuredStudents, loading };
+  return { featuredServices, featuredStudents, loading, loadError };
 }
 
 function HomeDesktop() {
@@ -119,8 +142,11 @@ function HomeDesktop() {
   const { user } = useAuth();
   const { next, upcoming, loading } = useAppointments('patient');
   const { needsOnboarding, selectedUniversity, completeOnboarding } = usePatientOnboarding();
-  const { featuredServices, featuredStudents, loading: catalogLoading } = useUniversityHighlights(selectedUniversity?.id);
-  const firstName = user?.name?.split(' ')[0] ?? 'tú';
+  const { featuredServices, featuredStudents, loading: catalogLoading, loadError } = useUniversityHighlights(selectedUniversity?.id);
+  const rawName = (user?.name ?? '').trim();
+  const isLikelyMockName = rawName ? MOCK_NAMES.has(normalizeName(rawName)) : false;
+  const displayName = rawName && !isLikelyMockName ? rawName : (user?.email ? user.email.split('@')[0] : 'Usuario');
+  const firstName = displayName.split(' ')[0] || 'Usuario';
 
   if (needsOnboarding) return <PatientOnboarding onComplete={completeOnboarding} />;
 
@@ -139,6 +165,11 @@ function HomeDesktop() {
             <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink-900)', marginTop: 4 }}>{selectedUniversity.name}</div>
           </div>
           <Button size="md" variant="glass" onClick={() => router.push('/explorar')}>Explorar servicios</Button>
+        </Glass>
+      )}
+      {loadError && (
+        <Glass radius={14} style={{ padding: 12, marginBottom: 16, border: '1px solid rgba(245,158,11,0.28)', background: 'rgba(245,158,11,0.08)' }}>
+          <div style={{ fontSize: 13, color: 'var(--ink-700)' }}>{loadError}</div>
         </Glass>
       )}
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 20, marginBottom: 24 }}>
@@ -272,13 +303,17 @@ export default function HomePage() {
   const { next, upcoming, loading } = useAppointments('patient');
   const { unreadCount } = useNotifications();
   const { needsOnboarding, selectedUniversity, completeOnboarding } = usePatientOnboarding();
-  const { featuredServices, featuredStudents, loading: catalogLoading } = useUniversityHighlights(selectedUniversity?.id);
+  const { featuredServices, featuredStudents, loading: catalogLoading, loadError } = useUniversityHighlights(selectedUniversity?.id);
+  const canOpenFunnelQa = user?.role === 'admin' || FUNNEL_QA_ENABLED;
 
   if (isDesktop) return <HomeDesktop />;
   if (needsOnboarding) return <PatientOnboarding onComplete={completeOnboarding} />;
 
-  const firstName = user?.name?.split(' ')[0] ?? 'tú';
-  const initials = user?.name ? user.name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase() : 'U';
+  const rawName = (user?.name ?? '').trim();
+  const isLikelyMockName = rawName ? MOCK_NAMES.has(normalizeName(rawName)) : false;
+  const displayName = rawName && !isLikelyMockName ? rawName : (user?.email ? user.email.split('@')[0] : 'Usuario');
+  const firstName = displayName.split(' ')[0] || 'Usuario';
+  const initials = displayName.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'U';
 
   const apptDate = next?.date ? next.date.split(/[\s/-]/).slice(0, 2).join(' ') : '';
   const apptTitle = next ? `${next.service || 'Cita'}${next.student?.name ? ` · Clínica` : ''}` : '';
@@ -294,6 +329,16 @@ export default function HomePage() {
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
+          {canOpenFunnelQa && (
+            <>
+              <button onClick={() => router.push('/funnel-qa')} style={{ width: 44, height: 44, borderRadius: 999, background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.9)', cursor: 'pointer', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(10,22,40,0.05)' }}>
+                <Icon name="chart" size={20} color="var(--ink-700)" />
+              </button>
+              <button onClick={() => router.push('/telemetry-qa')} style={{ width: 44, height: 44, borderRadius: 999, background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.9)', cursor: 'pointer', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(10,22,40,0.05)' }}>
+                <Icon name="bar_chart" size={20} color="var(--ink-700)" />
+              </button>
+            </>
+          )}
           <button onClick={() => router.push('/notificaciones')} style={{ width: 44, height: 44, borderRadius: 999, background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.9)', cursor: 'pointer', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(10,22,40,0.05)' }}>
             <Icon name="bell" size={20} color="var(--ink-700)" />
             {unreadCount > 0 && <span style={{ position: 'absolute', top: 9, right: 10, width: 9, height: 9, borderRadius: '50%', background: 'var(--danger-500)', border: '2px solid #fff' }}/>}
@@ -308,6 +353,13 @@ export default function HomePage() {
             <Icon name="graduation" size={13} color="var(--brand-700)" />
             {selectedUniversity.name}
           </div>
+        </div>
+      )}
+      {loadError && (
+        <div style={{ padding: '0 20px 8px' }}>
+          <Glass radius={14} style={{ padding: 12, border: '1px solid rgba(245,158,11,0.28)', background: 'rgba(245,158,11,0.08)' }}>
+            <div style={{ fontSize: 13, color: 'var(--ink-700)' }}>{loadError}</div>
+          </Glass>
         </div>
       )}
 

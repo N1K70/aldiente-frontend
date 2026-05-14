@@ -17,16 +17,19 @@ interface Props {
   documentsCount?: number;
   role?: 'patient' | 'student';
   onEdit?: () => void;
+  loading?: boolean;
 }
 
-export default function ProfileCompleteness({ profile, documentsCount = 0, role = 'patient', onEdit }: Props) {
+export default function ProfileCompleteness({ profile, documentsCount = 0, role = 'patient', onEdit, loading = false }: Props) {
+  if (loading) return null;
+
   const items = useMemo<Item[]>(() => {
     if (role === 'student') {
       return [
         { id: 'name',      label: 'Nombre completo',           icon: 'user',     done: !!profile.full_name || !!profile.name,  description: 'Tu nombre visible para los pacientes' },
-        { id: 'uni',       label: 'Universidad',               icon: 'school',   done: !!profile.university_id,                description: 'Universidad donde estudias' },
-        { id: 'uniLoc',    label: 'Ubicación clínica',         icon: 'pin',      done: !!profile.university_location,           description: 'Dirección de tu clínica universitaria' },
-        { id: 'year',      label: 'Año de carrera',            icon: 'calendar', done: !!profile.career_year,                   description: 'Tu año actual en la carrera' },
+        { id: 'uni',       label: 'Universidad',               icon: 'school',   done: !!profile.university_id || !!profile.university,                description: 'Universidad donde estudias' },
+        { id: 'uniLoc',    label: 'Ubicación clínica',         icon: 'pin',      done: !!profile.university_location || !!profile.location,           description: 'Dirección de tu clínica universitaria' },
+        { id: 'year',      label: 'Año de carrera',            icon: 'calendar', done: !!profile.career_year || !!profile.year,                   description: 'Tu año actual en la carrera' },
         { id: 'certs',     label: 'Certificaciones',           icon: 'star',     done: !!(profile.certifications as string)?.trim(), description: 'Certificados o especialidades' },
         { id: 'bio',       label: 'Biografía',                 icon: 'edit',     done: ((profile.bio as string) ?? '').trim().length >= 20, description: 'Descripción profesional (mínimo 20 caracteres)' },
         { id: 'docs',      label: 'Documentos acreditativos',  icon: 'file',     done: documentsCount > 0,                      description: 'Sube al menos un documento de respaldo' },
@@ -34,20 +37,23 @@ export default function ProfileCompleteness({ profile, documentsCount = 0, role 
       ];
     }
     return [
-      { id: 'name',    label: 'Nombre completo',    icon: 'user',     done: !!profile.name,      description: 'Tu nombre en la plataforma' },
+      { id: 'name',    label: 'Nombre completo',    icon: 'user',     done: !!profile.name || !!profile.full_name,      description: 'Tu nombre en la plataforma' },
       { id: 'phone',   label: 'Teléfono',           icon: 'phone',    done: !!profile.phone,     description: 'Número de contacto' },
-      { id: 'birth',   label: 'Fecha de nacimiento',icon: 'calendar', done: !!profile.birthdate, description: 'Necesaria para ficha clínica' },
+      { id: 'birth',   label: 'Fecha de nacimiento',icon: 'calendar', done: !!profile.birthdate || !!profile.birth_date, description: 'Necesaria para ficha clínica' },
       { id: 'gender',  label: 'Género',             icon: 'user',     done: !!profile.gender,    description: 'Información para el estudiante' },
-      { id: 'address', label: 'Dirección',          icon: 'pin',      done: !!profile.address,   description: 'Para ubicar clínicas cercanas' },
+      { id: 'address', label: 'Dirección',          icon: 'pin',      done: !!profile.address || !!profile.location,   description: 'Para ubicar clínicas cercanas' },
     ];
   }, [profile, documentsCount, role]);
 
   const required = items.filter(i => !i.optional);
   const done     = required.filter(i => i.done).length;
+  const allRequiredDone = required.length > 0 && done >= required.length;
   const pct      = Math.round((done / required.length) * 100);
 
   const barColor = pct >= 80 ? 'var(--success-500,#22c55e)' : pct >= 50 ? 'var(--warning-500,#F59E0B)' : 'var(--danger-500,#ef4444)';
   const msg      = pct === 100 ? '¡Perfil completo!' : pct >= 80 ? 'Casi completo' : pct >= 50 ? 'Buen progreso' : 'Completa tu perfil';
+
+  if (allRequiredDone || pct >= 100 || done === required.length) return null;
 
   return (
     <Glass radius={20} style={{ padding: 20 }}>

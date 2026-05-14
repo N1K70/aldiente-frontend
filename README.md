@@ -1,59 +1,83 @@
-# ALDIENTE Frontend
+# ALDIENTE Web
 
-Frontend web de ALDIENTE (Next.js) con integración a:
+Frontend productivo de ALDIENTE. Este proyecto reemplaza al frontend legacy `aldiente-frontend`.
 
-- `aldiente-backend` (API REST)
-- `chatsvc` (Socket.IO)
-- PostgreSQL local para desarrollo
+## Estado del repositorio
 
-## Levantar todo con Docker Compose
+- Aplicacion actual: `aldiente-web`
+- Stack: Next.js, React, TypeScript, Tailwind CSS
+- Deploy frontend: Vercel
+- Servicios backend: Railway
+- Base de datos: Supabase/PostgreSQL
+- Frontend legacy: `aldiente-frontend` queda solo como referencia historica
 
-Desde `aldiente-frontend`:
-
-```bash
-docker compose up --build
-```
-
-Servicios expuestos:
-
-- Frontend: `http://localhost:3000`
-- Backend: `http://localhost:3001`
-- ChatSvc: `http://localhost:3002`
-- PostgreSQL: `localhost:5432`
-
-## Base de datos (volumen existente)
-
-Este setup usa el volumen Docker externo `aldiente-frontend_postgres_data` para reutilizar datos locales ya existentes.
-
-Para que backend/chatsvc conecten correctamente con ese volumen, las credenciales quedan alineadas a:
-
-- `DB_USER=postgres`
-- `DB_PASSWORD=postgres`
-- `DB_NAME=aldiente`
-
-Si tu volumen fue creado con otras credenciales, deberás ajustar variables en `docker-compose.yml` o recrear el volumen.
-
-Para apagar:
+## Desarrollo local
 
 ```bash
-docker compose down
+npm install
+npm run dev
 ```
 
-Para apagar y limpiar volúmenes (DB + node_modules en volúmenes):
+La aplicacion queda disponible en:
+
+```text
+http://localhost:3000
+```
+
+## Scripts
 
 ```bash
-docker compose down -v
+npm run dev
+npm run build
+npm run start
+npm run typecheck
+npm run qa:gate
 ```
 
-## Nota sobre dependencias locales
+## Variables de entorno
 
-Si no tienes `node`/`npm` instalados en tu máquina, puedes trabajar solo con Docker Compose.
+Crear `.env.local` a partir de `.env.example`.
 
-## Estructura esperada de carpetas
+```env
+NEXT_PUBLIC_BACKEND_URL=http://localhost:3001
+NEXT_PUBLIC_CHAT_URL=http://localhost:3005
+NEXT_PUBLIC_FRONTEND_EVENTS_ENDPOINT=/api/telemetry
+```
 
-Este compose asume estas rutas vecinas:
+En Vercel, confirmar estas variables para produccion:
 
-- `../aldiente-backend`
-- `../ALDIENTE/chatsvc`
+```env
+NEXT_PUBLIC_BACKEND_URL=https://<backend-railway>
+NEXT_PUBLIC_CHAT_URL=https://<chat-railway>
+NEXT_PUBLIC_FRONTEND_EVENTS_ENDPOINT=https://<telemetry-endpoint>
+```
 
-Si cambian, actualiza los `context` y `volumes` en `docker-compose.yml`.
+## Servicios externos
+
+- Backend API: Railway
+- Chat realtime: Railway + Socket.IO
+- Archivos: Railway, consumido por backend/API
+- Base de datos: Supabase/PostgreSQL
+- Hosting frontend: Vercel
+
+## Checklist antes de salir a mercado
+
+- Confirmar que Vercel despliega desde `aldiente-web`.
+- Validar que `NEXT_PUBLIC_BACKEND_URL` apunta al backend productivo.
+- Validar que `NEXT_PUBLIC_CHAT_URL` apunta al servicio productivo de chat.
+- Ejecutar build de produccion en CI o entorno compatible.
+- Probar flujos criticos: signup, login, perfil, explorar, reservar, pago, confirmacion, chat, documentos y reagendar.
+- Revisar que no aparezcan datos mock en produccion cuando falla la API.
+- Confirmar copy comercial, FAQ, senales de confianza y eventos de conversion.
+
+## Documentacion de salida a mercado
+
+- [Readiness frontend](docs/launch-readiness.md)
+- [Prompt agente investigador mercado](docs/market-research-prompt.md)
+- [Sistema QA + Desarrollo](docs/qa-dev-system.md)
+- [QA Evidence Log](docs/qa-evidence-log.md)
+- [Entorno Dev con Docker](docs/docker-dev.md)
+- [Release Checklist](docs/release-checklist.md)
+- [Rollback Vercel/Railway](docs/rollback-vercel-railway.md)
+- [Monitoreo de Errores Frontend](docs/frontend-monitoring.md)
+- [Modelo Operativo de Archivos y Adjuntos](docs/file-attachments-model.md)

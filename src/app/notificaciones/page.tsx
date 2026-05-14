@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Glass, Icon, Button } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
+import { useIsDesktop, DesktopShell } from '@/components/desktop-shell';
 
 interface Notification {
   id: string;
@@ -34,6 +35,7 @@ function notifRoute(n: Notification): string | null {
 
 export default function NotificacionesPage() {
   const router = useRouter();
+  const isDesktop = useIsDesktop();
   const { user } = useAuth();
   const [items, setItems] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,24 +82,33 @@ export default function NotificacionesPage() {
 
   if (!user) return null;
 
-  return (
+  const content = (
     <div className="app-scroll" style={{ minHeight: '100dvh', overflowY: 'auto', background: 'var(--bg-aurora)', fontFamily: 'var(--font-body)', paddingBottom: 60 }}>
-      <div style={{ padding: '56px 20px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
-        <button onClick={() => router.back()} style={{ width: 44, height: 44, borderRadius: 999, background: 'rgba(255,255,255,0.78)', backdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.9)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <Icon name="arrow_left" size={20} />
-        </button>
-        <div style={{ flex: 1 }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, letterSpacing: '-0.03em', margin: 0, color: 'var(--ink-900)' }}>Notificaciones</h1>
-          {unread > 0 && <p style={{ fontSize: 13, color: 'var(--brand-600)', margin: 0, fontWeight: 600 }}>{unread} nueva{unread > 1 ? 's' : ''}</p>}
+      {!isDesktop && (
+        <div style={{ padding: '56px 20px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button onClick={() => router.back()} style={{ width: 44, height: 44, borderRadius: 999, background: 'rgba(255,255,255,0.78)', backdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.9)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name="arrow_left" size={20} />
+          </button>
+          <div style={{ flex: 1 }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, letterSpacing: '-0.03em', margin: 0, color: 'var(--ink-900)' }}>Notificaciones</h1>
+            {unread > 0 && <p style={{ fontSize: 13, color: 'var(--brand-600)', margin: 0, fontWeight: 600 }}>{unread} nueva{unread > 1 ? 's' : ''}</p>}
+          </div>
+          {unread > 0 && (
+            <button onClick={markAllRead} style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand-600)', background: 'rgba(16,169,198,0.1)', border: 'none', borderRadius: 10, padding: '8px 12px', cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>
+              Marcar todo
+            </button>
+          )}
         </div>
-        {unread > 0 && (
+      )}
+      {isDesktop && unread > 0 && (
+        <div style={{ padding: '16px 20px 0', display: 'flex', justifyContent: 'flex-end' }}>
           <button onClick={markAllRead} style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand-600)', background: 'rgba(16,169,198,0.1)', border: 'none', borderRadius: 10, padding: '8px 12px', cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>
             Marcar todo
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
-      <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {loading ? (
           <div style={{ padding: 40, textAlign: 'center', color: 'var(--ink-400)', fontSize: 14 }}>Cargando…</div>
         ) : items.length === 0 ? (
@@ -129,4 +140,7 @@ export default function NotificacionesPage() {
       </div>
     </div>
   );
+
+  if (isDesktop) return <DesktopShell role="patient" activeId="notifications" title="Notificaciones">{content}</DesktopShell>;
+  return content;
 }

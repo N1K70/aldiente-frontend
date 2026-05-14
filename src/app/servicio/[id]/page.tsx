@@ -6,6 +6,7 @@ import { Button, Glass, Icon } from '@/components/ui';
 import { DesktopShell, useIsDesktop } from '@/components/desktop-shell';
 import BottomNav from '@/components/BottomNav';
 import { fetchProvidersForServiceName, fetchServiceById, ProviderItem, PublicServiceItem } from '@/lib/public-services';
+import { trackFunnelEvent } from '@/lib/frontend-analytics';
 
 function formatPrice(value?: number) {
   if (value == null) return 'Consultar';
@@ -102,6 +103,15 @@ export default function ServiceDetailPage() {
       active = false;
     };
   }, [serviceId]);
+
+  useEffect(() => {
+    if (!service) return;
+    trackFunnelEvent('funnel_service_viewed', {
+      serviceId: service.id,
+      serviceName: service.name,
+      category: service.category ?? null,
+    });
+  }, [service]);
 
   const content = loading ? (
     <Glass radius={20} style={{ padding: 48, textAlign: 'center', color: 'var(--ink-500)', fontSize: 14 }}>

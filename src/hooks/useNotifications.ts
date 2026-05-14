@@ -5,6 +5,8 @@ export interface Notification {
   id: string;
   title: string;
   body: string;
+  type: string;
+  relatedId?: string;
   read: boolean;
   createdAt: string;
 }
@@ -14,6 +16,8 @@ function normalize(raw: Record<string, unknown>): Notification {
     id: String(raw.id ?? ''),
     title: String(raw.title ?? raw.message ?? ''),
     body: String(raw.body ?? raw.description ?? raw.message ?? ''),
+    type: String(raw.type ?? ''),
+    relatedId: raw.related_id != null ? String(raw.related_id) : undefined,
     read: Boolean(raw.read ?? raw.isRead ?? false),
     createdAt: String(raw.createdAt ?? raw.created_at ?? raw.date ?? ''),
   };

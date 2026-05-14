@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -6,7 +6,8 @@ import { Button, Glass, Icon, TextField } from '@/components/ui';
 import BottomNav from '@/components/BottomNav';
 import { DesktopShell, useIsDesktop } from '@/components/desktop-shell';
 import PatientOnboarding, { usePatientOnboarding } from '@/components/PatientOnboarding';
-import { fetchUniversityServices, normalizeText, PublicServiceItem } from '@/lib/public-services';
+import { fetchUniversityServices, fetchAllServices, normalizeText, PublicServiceItem } from '@/lib/public-services';
+import { reportFrontendError } from '@/lib/frontend-observability';
 
 const CATEGORY_FILTERS = [
   { id: 'blanqueamiento', label: 'Blanqueamiento', icon: 'sun', tint: '#F59E0B' },
@@ -76,7 +77,10 @@ function ExploreContent({
   activeCategory,
   setActiveCategory,
   universityName,
+  showingAll,
   onChangeUniversity,
+  onClearUniversity,
+  loadWarning,
 }: {
   services: PublicServiceItem[];
   loading: boolean;
@@ -85,7 +89,10 @@ function ExploreContent({
   activeCategory: string;
   setActiveCategory: (value: string) => void;
   universityName: string;
+  showingAll: boolean;
   onChangeUniversity: () => void;
+  onClearUniversity: () => void;
+  loadWarning: string;
 }) {
   const router = useRouter();
 
@@ -104,15 +111,36 @@ function ExploreContent({
         <div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color: 'var(--ink-900)', letterSpacing: '-0.03em' }}>Servicios</div>
           <div style={{ fontSize: 14, color: 'var(--ink-600)', marginTop: 4 }}>
-            {loading ? 'Cargando servicios...' : `${filtered.length} resultado${filtered.length !== 1 ? 's' : ''} en ${universityName}`}
+            {loading ? 'Cargando servicios...' : `${filtered.length} resultado${filtered.length !== 1 ? 's' : ''}`}
           </div>
         </div>
         <Button size="md" variant="glass" onClick={onChangeUniversity}>Cambiar universidad</Button>
       </div>
 
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
+        {showingAll ? (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 999, fontSize: 12, fontWeight: 700, background: 'rgba(10,22,40,0.06)', color: 'var(--ink-600)', border: '1px solid rgba(10,22,40,0.08)' }}>
+            Todas las universidades
+          </span>
+        ) : (
+          <button
+            onClick={onClearUniversity}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 999, fontSize: 12, fontWeight: 700, background: 'rgba(16,169,198,0.1)', color: 'var(--brand-700)', border: '1px solid rgba(16,169,198,0.2)', cursor: 'pointer' }}
+          >
+            {universityName}
+            <span style={{ fontSize: 14, lineHeight: 1, fontWeight: 400 }}>×</span>
+          </button>
+        )}
+      </div>
+
       <div style={{ marginBottom: 16 }}>
         <TextField label="" icon="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar por nombre, categoria o estudiante..." />
       </div>
+      {loadWarning && (
+        <Glass radius={14} style={{ padding: 12, marginBottom: 14, border: '1px solid rgba(245,158,11,0.28)', background: 'rgba(245,158,11,0.08)' }}>
+          <div style={{ fontSize: 13, color: 'var(--ink-700)' }}>{loadWarning}</div>
+        </Glass>
+      )}
 
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
         {CATEGORY_FILTERS.map(filter => {
@@ -172,19 +200,75 @@ export default function ExplorarPage() {
   const [showUniversityFlow, setShowUniversityFlow] = useState(false);
   const [services, setServices] = useState<PublicServiceItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showingAll, setShowingAll] = useState(false);
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('');
+  const [loadWarning, setLoadWarning] = useState('');
 
   const showOnboarding = needsOnboarding || showUniversityFlow || !selectedUniversity;
 
   useEffect(() => {
     if (!selectedUniversity?.id) return;
     setLoading(true);
+    setShowingAll(false);
+    setLoadWarning('');
     fetchUniversityServices(selectedUniversity.id)
-      .then(setServices)
-      .catch(() => setServices([]))
+      .then(result => {
+        if (result.length === 0) {
+          return fetchAllServices().then(all => {
+            setServices(all);
+            setShowingAll(true);
+            setLoadWarning('No hay servicios publicados para esta universidad. Mostramos resultados de todas las universidades.');
+          });
+        }
+        setServices(result);
+        setShowingAll(false);
+      })
+      .catch(() => {
+        reportFrontendError({
+          module: 'explorar',
+          action: 'fetchUniversityServices',
+          message: 'Error cargando servicios de universidad seleccionada',
+          details: { universityId: selectedUniversity.id },
+        });
+        fetchAllServices()
+          .then(all => {
+            setServices(all);
+            setShowingAll(true);
+            setLoadWarning('No pudimos cargar servicios de tu universidad en este momento. Mostramos resultados generales.');
+          })
+          .catch(() => {
+            reportFrontendError({
+              module: 'explorar',
+              action: 'fetchAllServicesFallback',
+              message: 'Error cargando servicios generales como fallback',
+            });
+            setServices([]);
+            setLoadWarning('No pudimos cargar servicios en este momento. Intenta nuevamente.');
+          });
+      })
       .finally(() => setLoading(false));
   }, [selectedUniversity?.id]);
+
+  const loadAll = () => {
+    setLoading(true);
+    setLoadWarning('');
+    fetchAllServices()
+      .then(all => {
+        setServices(all);
+        setShowingAll(true);
+      })
+      .catch(() => {
+        reportFrontendError({
+          module: 'explorar',
+          action: 'loadAllServices',
+          message: 'Error cargando servicios generales',
+        });
+        setServices([]);
+        setLoadWarning('No pudimos cargar servicios en este momento. Intenta nuevamente.');
+      })
+      .finally(() => setLoading(false));
+  };
 
   const handleUniversitySelect = (university: Parameters<typeof completeOnboarding>[0]) => {
     if (needsOnboarding || !selectedUniversity) {
@@ -199,6 +283,8 @@ export default function ExplorarPage() {
     return <PatientOnboarding onComplete={handleUniversitySelect} />;
   }
 
+  const universityName = selectedUniversity?.short_name || selectedUniversity?.name || 'Mi universidad';
+
   const content = (
     <ExploreContent
       services={services}
@@ -207,14 +293,17 @@ export default function ExplorarPage() {
       setSearch={setSearch}
       activeCategory={activeCategory}
       setActiveCategory={setActiveCategory}
-      universityName={selectedUniversity?.short_name || selectedUniversity?.name || 'tu universidad'}
+      universityName={universityName}
+      showingAll={showingAll}
       onChangeUniversity={() => setShowUniversityFlow(true)}
+      onClearUniversity={loadAll}
+      loadWarning={loadWarning}
     />
   );
 
   if (isDesktop) {
     return (
-      <DesktopShell role="patient" activeId="search" title="Explorar servicios" subtitle={selectedUniversity?.name ? `Catalogo disponible en ${selectedUniversity.name}` : undefined}>
+      <DesktopShell role="patient" activeId="search" title="Explorar servicios" subtitle={showingAll ? 'Todas las universidades' : selectedUniversity?.name ? `Catalogo en ${selectedUniversity.name}` : undefined}>
         {content}
       </DesktopShell>
     );
@@ -227,3 +316,4 @@ export default function ExplorarPage() {
     </div>
   );
 }
+

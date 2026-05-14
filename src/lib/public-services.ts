@@ -92,11 +92,11 @@ export async function fetchUniversities(params?: { lat?: number; lng?: number })
 function mapServiceRow(row: Record<string, unknown>): PublicServiceItem {
   return {
     id: String(row.id ?? ''),
-    name: String(row.service_name ?? row.name ?? 'Servicio'),
+    name: String(row.service_name ?? row.base_name ?? row.name ?? 'Servicio'),
     category: String(row.categoria_general ?? row.category ?? row.base_name ?? ''),
-    description: String(row.description ?? ''),
+    description: String(row.description ?? row.base_description ?? ''),
     price: toNumber(row.price),
-    duration: toNumber(row.duration ?? row.estimated_duration),
+    duration: toNumber(row.duration ?? row.estimated_duration ?? row.base_estimated_duration),
     studentName: String(row.student_full_name ?? row.student_name ?? ''),
     studentId: String(row.student_id ?? ''),
     studentUniversity: String(row.student_university ?? row.university_name ?? ''),
@@ -127,15 +127,32 @@ export async function fetchPublicServicesByUniversityName(universityName: string
 }
 
 export async function fetchServiceById(serviceId: string) {
-  const res = await api.get(`/api/services/${serviceId}`);
-  const row = Array.isArray(res.data) ? res.data[0] : res.data;
-  return row ? mapServiceRow(row as Record<string, unknown>) : null;
+  try {
+    const res = await api.get(`/api/student-services/${serviceId}`);
+    const row = Array.isArray(res.data) ? res.data[0] : res.data;
+    if (row) return mapServiceRow(row as Record<string, unknown>);
+  } catch {
+    // fallback to catalog service id endpoint
+  }
+
+  try {
+    const res = await api.get(`/api/services/${serviceId}`);
+    const row = Array.isArray(res.data) ? res.data[0] : res.data;
+    return row ? mapServiceRow(row as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
 }
 
 export async function fetchAllStudentServices() {
   const res = await api.get('/api/student-services');
   const raw = res.data as { services?: Record<string, unknown>[]; data?: Record<string, unknown>[] } | Record<string, unknown>[];
   return Array.isArray(raw) ? raw : (raw.services ?? raw.data ?? []);
+}
+
+export async function fetchAllServices(): Promise<PublicServiceItem[]> {
+  const rows = await fetchAllStudentServices();
+  return (rows as Record<string, unknown>[]).map(mapServiceRow);
 }
 
 export async function fetchProvidersForServiceName(serviceName: string) {
@@ -309,3 +326,4 @@ export async function recommendServices(answers: QuizAnswers) {
     .sort((left, right) => right.matchScore - left.matchScore)
     .slice(0, 6);
 }
+

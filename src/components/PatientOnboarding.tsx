@@ -7,6 +7,21 @@ import { api } from '@/lib/api';
 const ONBOARDING_KEY = 'aldiente_patient_onboarding_completed';
 const SELECTED_UNIVERSITY_KEY = 'aldiente_selected_university';
 
+function getUserScope() {
+  try {
+    const raw = localStorage.getItem('authUser');
+    if (!raw) return 'anon';
+    const user = JSON.parse(raw) as { id?: string; email?: string };
+    return user.id || user.email || 'anon';
+  } catch {
+    return 'anon';
+  }
+}
+
+function getScopedKey(base: string) {
+  return `${base}:${getUserScope()}`;
+}
+
 export interface University {
   id: string; name: string; short_name?: string;
   address?: string; city: string;
@@ -19,13 +34,54 @@ export function usePatientOnboarding() {
   const [selectedUniversity, setSelectedUniversity] = useState<University | null>(null);
 
   useEffect(() => {
-    const done = localStorage.getItem(ONBOARDING_KEY);
-    const saved = localStorage.getItem(SELECTED_UNIVERSITY_KEY);
-    if (!done) { setNeedsOnboarding(true); return; }
-    if (saved) { try { setSelectedUniversity(JSON.parse(saved)); } catch {} }
+    const scopedDoneKey = getScopedKey(ONBOARDING_KEY);
+    const scopedUniKey = getScopedKey(SELECTED_UNIVERSITY_KEY);
+    const done = localStorage.getItem(scopedDoneKey) || localStorage.getItem(ONBOARDING_KEY);
+    const saved = localStorage.getItem(scopedUniKey) || localStorage.getItem(SELECTED_UNIVERSITY_KEY);
+
+    if (saved) {
+      try {
+        const uni = JSON.parse(saved);
+        setSelectedUniversity(uni);
+        localStorage.setItem(scopedUniKey, JSON.stringify(uni));
+      } catch {}
+    }
+
+    if (done) {
+      localStorage.setItem(scopedDoneKey, 'true');
+      setNeedsOnboarding(false);
+      return;
+    }
+
+    // Existing accounts should not be forced through onboarding on new devices.
+    api.get('/api/patients/profile')
+      .then(res => {
+        const profile = res.data?.profile ?? res.data ?? {};
+        const hasExistingProfile = Boolean(
+          profile.university_id ||
+          profile.university ||
+          profile.address ||
+          profile.phone ||
+          profile.birthdate ||
+          profile.birth_date,
+        );
+
+        if (hasExistingProfile) {
+          localStorage.setItem(scopedDoneKey, 'true');
+          setNeedsOnboarding(false);
+          return;
+        }
+
+        setNeedsOnboarding(true);
+      })
+      .catch(() => setNeedsOnboarding(true));
   }, []);
 
   const completeOnboarding = useCallback((uni: University) => {
+    const scopedDoneKey = getScopedKey(ONBOARDING_KEY);
+    const scopedUniKey = getScopedKey(SELECTED_UNIVERSITY_KEY);
+    localStorage.setItem(scopedDoneKey, 'true');
+    localStorage.setItem(scopedUniKey, JSON.stringify(uni));
     localStorage.setItem(ONBOARDING_KEY, 'true');
     localStorage.setItem(SELECTED_UNIVERSITY_KEY, JSON.stringify(uni));
     setSelectedUniversity(uni);
@@ -33,13 +89,17 @@ export function usePatientOnboarding() {
   }, []);
 
   const resetOnboarding = useCallback(() => {
-    localStorage.removeItem(ONBOARDING_KEY);
-    localStorage.removeItem(SELECTED_UNIVERSITY_KEY);
+    const scopedDoneKey = getScopedKey(ONBOARDING_KEY);
+    const scopedUniKey = getScopedKey(SELECTED_UNIVERSITY_KEY);
+    localStorage.removeItem(scopedDoneKey);
+    localStorage.removeItem(scopedUniKey);
     setSelectedUniversity(null);
     setNeedsOnboarding(true);
   }, []);
 
   const updateUniversity = useCallback((uni: University) => {
+    const scopedUniKey = getScopedKey(SELECTED_UNIVERSITY_KEY);
+    localStorage.setItem(scopedUniKey, JSON.stringify(uni));
     localStorage.setItem(SELECTED_UNIVERSITY_KEY, JSON.stringify(uni));
     setSelectedUniversity(uni);
   }, []);

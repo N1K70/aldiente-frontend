@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Glass, Icon, Button } from '@/components/ui';
 import { api } from '@/lib/api';
+import { useIsDesktop, DesktopShell } from '@/components/desktop-shell';
 
 interface AvailBlock { day_of_week: number; start_time: string; end_time: string; }
 
@@ -13,6 +14,7 @@ const MONTH_LABELS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct
 export default function RescheduleAppointmentPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const isDesktop = useIsDesktop();
 
   const [apptServiceId, setApptServiceId] = useState('');
   const [apptInfo, setApptInfo] = useState<{ service_name?: string; patient_name?: string; student_name?: string; scheduled_at?: string } | null>(null);
@@ -99,15 +101,16 @@ export default function RescheduleAppointmentPage() {
     }
   };
 
-  return (
+  const content = (
     <div className="app-scroll" style={{ minHeight: '100dvh', overflowY: 'auto', background: 'var(--bg-aurora)', fontFamily: 'var(--font-body)', paddingBottom: 100 }}>
-      {/* Header */}
-      <div style={{ padding: '56px 20px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
-        <button onClick={() => router.back()} style={{ width: 44, height: 44, borderRadius: 999, background: 'rgba(255,255,255,0.78)', backdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.9)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <Icon name="arrow_left" size={20} />
-        </button>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, letterSpacing: '-0.03em', margin: 0, color: 'var(--ink-900)' }}>Reagendar cita</h1>
-      </div>
+      {!isDesktop && (
+        <div style={{ padding: '56px 20px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button onClick={() => router.back()} style={{ width: 44, height: 44, borderRadius: 999, background: 'rgba(255,255,255,0.78)', backdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.9)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name="arrow_left" size={20} />
+          </button>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, letterSpacing: '-0.03em', margin: 0, color: 'var(--ink-900)' }}>Reagendar cita</h1>
+        </div>
+      )}
 
       <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 14 }}>
         {/* Current summary */}
@@ -182,4 +185,7 @@ export default function RescheduleAppointmentPage() {
       </div>
     </div>
   );
+
+  if (isDesktop) return <DesktopShell role="patient" activeId="appts" title="Reagendar cita">{content}</DesktopShell>;
+  return content;
 }
