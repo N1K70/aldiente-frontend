@@ -218,3 +218,44 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 ### Decision
 - `DONE | FOLLOW-UP`
 - Notas:
+
+---
+
+### Fecha
+- `2026-05-14`
+
+### Branch / Commit
+- Branch: `master`
+- Commit: `82e005a`
+
+### Scope del cambio
+- Merge de `dev -> master` y validación de smoke QA local.
+- Estandarización de comando de contrato de adjuntos chat (`qa-chat:contract`).
+
+### Gate técnico
+- `npm run qa:smoke:routes`: `PASS`
+- `npm run qa:smoke:roles`: `PASS`
+- `npm run qa-chat:contract`: `PASS`
+
+### QA funcional ejecutado
+1. Flujo: Smoke de rutas críticas (`/`, `/login`, `/home`, `/explorar`, `/reservar`, `/citas`, `/chat`, `/perfil`)
+   - Resultado: `PASS`
+   - Evidencia: `npm run qa:smoke:routes`
+   - Notas: Respuestas esperadas (200/307) en localhost.
+2. Flujo: Redirecciones por rol
+   - Resultado: `PASS`
+   - Evidencia: `npm run qa:smoke:roles`
+   - Notas: Patient/student/unauthenticated consistentes con middleware.
+3. Flujo: Contrato de adjuntos de chat
+   - Resultado: `PASS`
+   - Evidencia: `npm run qa-chat:contract`
+   - Notas: Casos `ok` y `bad` del smoke pasan correctamente.
+
+### Hallazgos
+- Severidad: `N/A`
+- Descripción: Sin bloqueantes en smoke local.
+- Ticket Notion: `[P0] Ejecutar smoke QA E2E de flujos críticos por rol (paciente/estudiante)`
+
+### Decisión
+- `FOLLOW-UP`
+- Motivo: Falta validación manual en ambiente productivo para cerrar P0.
