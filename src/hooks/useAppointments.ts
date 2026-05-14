@@ -24,15 +24,29 @@ function normalize(raw: Record<string, unknown>): Appointment {
     date = d.toLocaleDateString('es-CL', { day: '2-digit', month: 'short' }).toUpperCase();
     time = d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', hour12: false });
   }
+  const rawStudent = (raw.student ?? raw.studentProfile ?? {}) as Record<string, unknown>;
+  const rawPatient = (raw.patient ?? raw.patientProfile ?? {}) as Record<string, unknown>;
+  const studentName = (raw.student_name ?? raw.studentName ?? rawStudent.name ?? rawStudent.full_name ?? '') as string;
+  const patientName = (raw.patient_name ?? raw.patientName ?? rawPatient.name ?? rawPatient.full_name ?? '') as string;
+
   return {
     id: String(raw.id ?? ''),
     date,
     time,
     scheduledAt: scheduledAt,
     service: (raw.serviceName ?? raw.service ?? raw.service_name ?? '') as string,
+    serviceName: (raw.serviceName ?? raw.service_name ?? raw.service ?? '') as string,
     status: (raw.status ?? 'pending') as Appointment['status'],
-    student: (raw.student ?? raw.studentProfile ?? undefined) as Appointment['student'],
-    patient: (raw.patient ?? raw.patientProfile ?? undefined) as Appointment['patient'],
+    student: studentName || rawStudent.id ? {
+      ...(rawStudent as Appointment['student']),
+      id: String(raw.student_id ?? rawStudent.id ?? ''),
+      name: studentName || undefined,
+    } : undefined,
+    patient: patientName || rawPatient.id ? {
+      ...(rawPatient as Appointment['patient']),
+      id: String(raw.patient_id ?? rawPatient.id ?? ''),
+      name: patientName || undefined,
+    } : undefined,
     clinic: (raw.clinic ?? undefined) as Appointment['clinic'],
     price: (raw.price ?? raw.totalPrice ?? undefined) as number | undefined,
   };

@@ -31,7 +31,11 @@ export default function MisServiciosPage() {
     api.get(`/api/students/${user.id}/services`)
       .then(r => {
         const raw = r.data;
-        setServices(Array.isArray(raw) ? raw : (raw?.services ?? raw?.data ?? []));
+        const list: any[] = Array.isArray(raw) ? raw : (raw?.services ?? raw?.data ?? []);
+        setServices(list.map(item => ({
+          ...item,
+          service_name: item.service_name ?? item.base_name ?? item.name ?? 'Servicio',
+        })));
       })
       .catch(() => {})
       .finally(() => setLoading(false));
