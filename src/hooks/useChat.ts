@@ -21,6 +21,12 @@ export interface ChatMessage {
   };
 }
 
+interface ChatJoinAck {
+  ok?: boolean;
+  error?: string;
+  messages?: Record<string, unknown>[];
+}
+
 function getUserId(): string {
   try { return JSON.parse(localStorage.getItem('authUser') ?? '{}').id ?? ''; } catch { return ''; }
 }
@@ -191,7 +197,25 @@ export function useChat(appointmentId: string | null) {
       if (timeoutRef.current) { clearTimeout(timeoutRef.current); timeoutRef.current = null; }
       modeRef.current = 'socket';
       setConnected(true);
-      socket.emit('chat:join', { appointmentId });
+      socket.emit('chat:join', { appointmentId }, (ack?: ChatJoinAck) => {
+        if (!ack?.ok) {
+          reportFrontendError({
+            module: 'chat',
+            action: 'joinAck',
+            severity: 'warning',
+            message: 'No se pudo cargar historial por socket, usando fallback HTTP',
+            details: { appointmentId, reason: ack?.error ?? 'join_failed' },
+          });
+          socket.disconnect();
+          socketRef.current = null;
+          startHttpMode(appointmentId);
+          return;
+        }
+
+        const history = Array.isArray(ack.messages) ? ack.messages.map(mapMsg) : [];
+        setMessages(history);
+        lastCountRef.current = history.length;
+      });
     });
 
     socket.on('disconnect', () => {
