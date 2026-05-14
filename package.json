@@ -12,6 +12,7 @@
     "qa:smoke:roles": "node scripts/qa-smoke-role-redirects.mjs",
     "qa:smoke:all": "npm run qa:smoke:routes && npm run qa:smoke:roles",
     "qa:smoke:local": "powershell -ExecutionPolicy Bypass -File scripts/qa-smoke-local.ps1",
+    "qa-chat:contract": "npm run qa:chat:attachment-contract",
     "qa:chat:attachment-contract": "node scripts/qa-chat-attachment-contract.mjs",
     "qa:chat:attachment-contract:fixture": "node scripts/qa-chat-attachment-contract.mjs docs/fixtures/chat-attachments.sample.json",
     "qa:chat:attachment-contract:all": "npm run qa:chat:attachment-contract && npm run qa:chat:attachment-contract:fixture"
