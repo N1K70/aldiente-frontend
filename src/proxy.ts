@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const PROTECTED = ['/home', '/citas', '/chat', '/perfil', '/explorar', '/estudiante', '/reservar', '/confirmacion', '/dashboard', '/quiz', '/funnel-qa'];
+const PROTECTED = ['/home', '/citas', '/chat', '/perfil', '/explorar', '/estudiante', '/reservar', '/confirmacion', '/dashboard', '/quiz', '/funnel-qa', '/telemetry-qa'];
 const PUBLIC_ONLY = ['/login', '/signup', '/welcome'];
-const INTERNAL_TOOLS = ['/funnel-qa'];
+const INTERNAL_TOOLS = ['/funnel-qa', '/telemetry-qa'];
 
 function internalToolsEnabled() {
   return process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_ENABLE_FUNNEL_QA === 'true';

@@ -118,3 +118,103 @@ Usa este bloque por cada ronda de validación.
 - Motivo: cambios alineados a P0, gate técnico en verde y manejo de errores más robusto.
 
 ---
+
+## Checklist E2E - Adjuntos Chat (Contrato Backend)
+
+Usar este checklist cuando se valide el item `[P1] Validar contrato backend de adjuntos en chat`.
+
+1. Subir archivo en `/chat` (pdf o imagen <= 10MB).
+2. Confirmar que frontend envia `content` + `attachment` con:
+- `file_url`
+- `file_name`
+- `file_size`
+- `file_mime` (opcional)
+3. Confirmar persistencia en historial (`GET /api/appointments/:id/messages`).
+4. Confirmar evento realtime con el mismo contrato (socket `chat:message`).
+5. Verificar render en chat:
+- Link de descarga visible.
+- Nombre de archivo correcto.
+6. Verificar fallback seguro:
+- Si backend devuelve adjunto incompleto, frontend no rompe UI.
+- Se reporta warning `mapMsgAttachmentContractValidation`.
+7. Registrar evidencia:
+- request/response (Network o logs)
+- appointmentId usado
+- commit validado
+
+### Fecha
+- `2026-05-13`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit: `c19ec70` (base de la ronda)
+
+### Scope del cambio
+- Verificacion funcional de rutas y redirecciones por rol despues de integrar smoke tests en CI.
+
+### Gate tecnico
+- `npm run typecheck`: `PASS`
+- `npm run build`: `PASS`
+
+### QA funcional ejecutado
+1. Flujo: Smoke de rutas criticas
+   - Resultado: `PASS`
+   - Evidencia: `npm run qa:smoke:routes`
+   - Notas: Rutas publicas/protegidas respondieron con redirects esperados en `http://localhost:3000`.
+2. Flujo: Redirecciones por rol
+   - Resultado: `PASS`
+   - Evidencia: `npm run qa:smoke:roles`
+   - Notas: Reglas student/patient/unauthenticated consistentes con middleware actual.
+
+### Hallazgos
+- Severidad: `N/A`
+- Descripcion: Sin bloqueantes funcionales en smokes.
+- Ticket Notion: `[P1] QA funcional del funnel completo con evidencia`
+
+### Decision
+- `MERGE`
+- Motivo: Evidencia funcional en verde para rutas y role redirects.
+
+---
+
+## Evidencia E2E lista para completar - Adjuntos chat (backend real)
+
+### Fecha
+- `YYYY-MM-DD`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit:
+
+### Scope del cambio
+- Validacion E2E de contrato de adjuntos chat con backend real (historial + realtime).
+
+### Casos
+1. Envio de adjunto desde chat
+- Resultado: `PASS | FAIL`
+- Evidencia (Network/log):
+- Payload enviado contiene: `content`, `attachment.file_url`, `attachment.file_name`, `attachment.file_size`, `attachment.file_mime`.
+
+2. Persistencia en historial (`GET /api/appointments/:id/messages`)
+- Resultado: `PASS | FAIL`
+- Evidencia (response):
+- Attachment recibido cumple contrato: `file_url` + `file_name`.
+
+3. Realtime (`chat:message`)
+- Resultado: `PASS | FAIL`
+- Evidencia (socket/log):
+- Attachment recibido cumple contrato: `file_url` + `file_name`.
+
+4. Render frontend
+- Resultado: `PASS | FAIL`
+- Evidencia (UI):
+- Link y nombre de adjunto visibles y descargables.
+
+5. Fallback defensivo
+- Resultado: `PASS | FAIL`
+- Evidencia:
+- Si llega adjunto invalido, UI no rompe y se reporta warning `mapMsgAttachmentContractValidation`.
+
+### Decision
+- `DONE | FOLLOW-UP`
+- Notas:

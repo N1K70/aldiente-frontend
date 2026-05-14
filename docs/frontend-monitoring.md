@@ -1,6 +1,6 @@
 # ALDIENTE - Monitoreo de Errores Frontend
 
-Fecha base: 2026-04-29
+Fecha base: 2026-05-13
 
 ## Objetivo
 
@@ -15,34 +15,51 @@ El proyecto reporta errores con `reportFrontendError(...)` y los emite en consol
 
 Archivo base: `src/lib/frontend-observability.ts`.
 
-## Flujo operativo (sin backend)
+Adicionalmente, los eventos se envian via `sendTelemetry(...)` a:
+
+- `NEXT_PUBLIC_FRONTEND_EVENTS_ENDPOINT` (si esta definido), o
+- fallback interno `/api/telemetry` (desarrollo/QA).
+
+Archivos relacionados:
+
+- `src/lib/frontend-telemetry.ts`
+- `src/app/api/telemetry/route.ts`
+- `src/app/telemetry-qa/page.tsx`
+
+## Flujo operativo (desarrollo y QA)
 
 1. Reproducir flujo impactado en navegador.
 2. Abrir DevTools Console y filtrar por `[frontend-error]`.
-3. Copiar el evento con mayor severidad.
-4. Clasificar severidad:
+3. Abrir `/telemetry-qa` para confirmar recepcion centralizada.
+4. Copiar el evento con mayor severidad.
+5. Clasificar severidad:
 - `error`: flujo bloqueado o inconsistente.
-- `warning`: fallback activado o degradación parcial.
-- `info`: señal diagnóstica sin impacto funcional.
-5. Registrar en `docs/qa-evidence-log.md`:
+- `warning`: fallback activado o degradacion parcial.
+- `info`: senal diagnostica sin impacto funcional.
+6. Registrar en `docs/qa-evidence-log.md`:
 - ruta afectada
-- módulo/acción
+- modulo/accion
 - severidad
-- pasos de reproducción
+- pasos de reproduccion
 - estado (abierto/corregido)
 
 ## SLA sugerido
 
-- `error`: atención inmediata (mismo día).
+- `error`: atencion inmediata (mismo dia).
 - `warning`: priorizar en siguiente bloque de desarrollo.
-- `info`: agrupar y revisar en grooming técnico.
+- `info`: agrupar y revisar en grooming tecnico.
 
 ## Checklist post-release (primeros 30 minutos)
 
 - Revisar flujos: login, explorar, reservar, pago, chat, documentos.
 - Confirmar ausencia de nuevos `[frontend-error]` severidad `error`.
-- Si hay `error` repetido en flujo crítico: ejecutar rollback según `docs/rollback-vercel-railway.md`.
+- Si hay `error` repetido en flujo critico: ejecutar rollback segun `docs/rollback-vercel-railway.md`.
 
-## Próximo paso recomendado
+## Operacion de endpoint externo
 
-Cuando se habilite integración backend/tercero, reenviar este payload a un endpoint de ingesta (Sentry/Datadog/propio) sin cambiar la interfaz pública de `reportFrontendError(...)`.
+Cuando se use un endpoint externo (Sentry/Datadog/propio):
+
+1. Configurar `NEXT_PUBLIC_FRONTEND_EVENTS_ENDPOINT`.
+2. Validar recepcion de `kind=frontend_error` y `kind=funnel_event`.
+3. Confirmar redaccion de campos sensibles (`email`, `phone`, `rut`, `token`, `password`, `authorization`, `cookie`).
+4. Mantener `/api/telemetry` y `/telemetry-qa` como canal de QA local.

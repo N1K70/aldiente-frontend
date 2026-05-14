@@ -1,3 +1,5 @@
+import { sendTelemetry } from '@/lib/frontend-telemetry';
+
 type ErrorSeverity = 'info' | 'warning' | 'error';
 
 export type FrontendErrorPayload = {
@@ -45,4 +47,9 @@ export function reportFrontendError(payload: FrontendErrorPayload) {
   };
 
   console.error('[frontend-error]', normalized);
+  void sendTelemetry('frontend_error', {
+    timestamp: normalized.timestamp,
+    route: normalized.route,
+    data: normalized,
+  });
 }

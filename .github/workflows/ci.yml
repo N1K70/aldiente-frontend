@@ -33,3 +33,34 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Chat attachment contract smoke
+        run: npm run qa:chat:attachment-contract:all
+
+      - name: Start app for smoke tests
+        run: |
+          npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/app.log 2>&1 &
+          echo $! > /tmp/app.pid
+          for i in {1..60}; do
+            if curl -fsS http://127.0.0.1:3000/ > /dev/null; then
+              echo "App is up"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "App failed to start"
+          cat /tmp/app.log
+          exit 1
+
+      - name: Smoke routes
+        run: npm run qa:smoke:routes
+
+      - name: Smoke roles
+        run: npm run qa:smoke:roles
+
+      - name: Stop app
+        if: always()
+        run: |
+          if [ -f /tmp/app.pid ]; then
+            kill "$(cat /tmp/app.pid)" || true
+          fi
