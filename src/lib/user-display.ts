@@ -44,16 +44,23 @@ export function isLikelyMockName(name?: string | null) {
   if (MOCK_NAMES.includes(normalized as (typeof MOCK_NAMES)[number])) return true;
 
   if (normalized.includes('usuario demo') || normalized.includes('test user')) return true;
+  if (normalized.includes('maria') && (normalized.includes('rodrig') || normalized.includes('rodriguez'))) return true;
 
   // Tolerates mojibake variants like "MarÃ­a RodrÃ­guez" => "maraa rodraguez"
   const mariaDistance = levenshteinDistance(normalized, 'maria rodriguez');
-  return mariaDistance <= 3;
+  return mariaDistance <= 4;
 }
 
 export function resolveDisplayName(name?: string | null, email?: string | null, fallback = 'Usuario') {
   const trimmedName = (name ?? '').trim();
   if (trimmedName && !isLikelyMockName(trimmedName)) return trimmedName;
-  if (email && email.includes('@')) return email.split('@')[0];
+
+  if (email && email.includes('@')) {
+    const localPart = email.split('@')[0];
+    const normalizedLocalPart = normalizeNameForCompare(localPart.replace(/[._-]+/g, ' '));
+    if (normalizedLocalPart && !isLikelyMockName(normalizedLocalPart)) return localPart;
+  }
+
   return fallback;
 }
 

@@ -138,7 +138,19 @@ export async function fetchServiceById(serviceId: string) {
   try {
     const res = await api.get(`/api/services/${serviceId}`);
     const row = Array.isArray(res.data) ? res.data[0] : res.data;
-    return row ? mapServiceRow(row as Record<string, unknown>) : null;
+    if (row) return mapServiceRow(row as Record<string, unknown>);
+  } catch {
+    // fallback to local lookup in student-services list
+  }
+
+  try {
+    const rows = await fetchAllStudentServices();
+    const match = (rows as Record<string, unknown>[]).find((row) => {
+      const rowId = String(row.id ?? '');
+      const baseServiceId = String(row.service_id ?? row.serviceId ?? '');
+      return rowId === serviceId || baseServiceId === serviceId;
+    });
+    return match ? mapServiceRow(match) : null;
   } catch {
     return null;
   }

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Glass, Icon, Button } from '@/components/ui';
@@ -334,8 +334,21 @@ function ChatInner() {
       }
     }
 
+    if (!requestedAppointmentId && threads[0]?.appointmentId) {
+      router.replace(`/chat?appointmentId=${threads[0].appointmentId}`);
+      return;
+    }
+
     if (activeApptIdx >= threads.length) setActiveApptIdx(0);
-  }, [activeApptIdx, requestedAppointmentId, threads]);
+  }, [activeApptIdx, requestedAppointmentId, router, threads]);
+
+  const selectThread = useCallback((index: number) => {
+    setActiveApptIdx(index);
+    const appointmentId = threads[index]?.appointmentId;
+    if (!appointmentId) return;
+    if (requestedAppointmentId === appointmentId) return;
+    router.replace(`/chat?appointmentId=${appointmentId}`);
+  }, [requestedAppointmentId, router, threads]);
 
   const activeThread = threads[activeApptIdx];
   const activeAppointment = appointments[activeApptIdx];
@@ -387,7 +400,7 @@ function ChatInner() {
         role={role}
         threads={threads}
         activeIdx={activeApptIdx}
-        onSelectThread={setActiveApptIdx}
+        onSelectThread={selectThread}
         messages={messages}
         input={input}
         setInput={setInput}

@@ -48,9 +48,23 @@ function fmtDate(iso?: string) {
 }
 
 function needsWebpay(a: Appointment) {
-  const notes = a.notes ?? '';
-  const hasFlag = notes.toLowerCase().includes('pago: webpay');
-  return hasFlag && (!a.payment_status || a.payment_status === 'pending' || a.payment_status === 'rejected');
+  if (a.status === 'cancelled' || a.status === 'completed') return false;
+  return (a.payment_status || '').toLowerCase() !== 'approved';
+}
+
+function redirectToWebpay(url: string, token: string) {
+  if (!url || !token || typeof window === 'undefined') return;
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = url;
+  form.style.display = 'none';
+  const input = document.createElement('input');
+  input.type = 'hidden';
+  input.name = 'token_ws';
+  input.value = token;
+  form.appendChild(input);
+  document.body.appendChild(form);
+  form.submit();
 }
 
 export default function ReservasPage() {
@@ -105,8 +119,13 @@ export default function ReservasPage() {
     try {
       trackFunnelEvent('funnel_payment_started', { appointmentId: id, method: 'webpay' });
       const res = await api.post(`/api/appointments/${id}/payment/initiate`);
-      const url = res.data?.redirectUrl ?? res.data?.url;
-      if (url) window.location.href = url;
+      const url = res.data?.url;
+      const token = res.data?.token;
+      if (url && token) {
+        redirectToWebpay(url, token);
+        return;
+      }
+      setPaying('');
     } catch {
       setPaying('');
     }
@@ -138,7 +157,7 @@ export default function ReservasPage() {
         </div>
 
         <div style={{ display: 'flex', gap: 8 }}>
-          {needsWebpay(a) && (
+          {role === 'patient' && needsWebpay(a) && (
             <Button size="sm" disabled={paying === a.id} onClick={() => handlePay(a.id)} style={{ flex: 1 }}>
               {paying === a.id ? 'Procesando…' : 'Pagar con Webpay'}
             </Button>
