@@ -4,6 +4,8 @@ import { api } from '@/lib/api';
 import { reportFrontendError } from '@/lib/frontend-observability';
 
 const CHAT_URL = process.env.NEXT_PUBLIC_CHAT_URL || '';
+const CHAT_TRANSPORT = (process.env.NEXT_PUBLIC_CHAT_TRANSPORT || 'http').toLowerCase();
+const FORCE_HTTP_TRANSPORT = CHAT_TRANSPORT !== 'socket';
 const SOCKET_CONNECT_TIMEOUT = 4000;
 const POLL_INTERVAL = 5000;
 
@@ -141,6 +143,12 @@ function nextTempId() {
   return `tmp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+function historySignature(messages: ChatMessage[]) {
+  return messages
+    .map((message) => `${message.id ?? ''}|${message.time}|${message.text}|${message.attachment?.file_url ?? ''}`)
+    .join('||');
+}
+
 function appendUniqueMessage(prev: ChatMessage[], message: ChatMessage) {
   if (message.id && prev.some(existing => existing.id === message.id)) return prev;
   return [...prev, message];
@@ -155,7 +163,7 @@ export function useChat(appointmentId: string | null) {
   const modeRef = useRef<'socket' | 'http' | 'pending'>('pending');
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastCountRef = useRef(0);
+  const lastSignatureRef = useRef('');
 
   const stopPoll = useCallback(() => {
     if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
@@ -168,14 +176,15 @@ export function useChat(appointmentId: string | null) {
 
     fetchHistory(apptId).then(msgs => {
       setMessages(msgs);
-      lastCountRef.current = msgs.length;
+      lastSignatureRef.current = historySignature(msgs);
     });
 
     pollRef.current = setInterval(async () => {
       const msgs = await fetchHistory(apptId);
-      if (msgs.length !== lastCountRef.current) {
+      const signature = historySignature(msgs);
+      if (signature !== lastSignatureRef.current) {
         setMessages(msgs);
-        lastCountRef.current = msgs.length;
+        lastSignatureRef.current = signature;
       }
     }, POLL_INTERVAL);
   }, []);
@@ -184,15 +193,16 @@ export function useChat(appointmentId: string | null) {
     setMessages([]);
     setConnected(false);
     modeRef.current = 'pending';
-    lastCountRef.current = 0;
+    lastSignatureRef.current = '';
     stopPoll();
 
     if (!appointmentId) return;
     const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
     if (!token) { startHttpMode(appointmentId); return; }
 
-    // No socket server configured → go straight to HTTP
-    if (!CHAT_URL) { startHttpMode(appointmentId); return; }
+    // Canonical persistence mode: HTTP-backed chat history.
+    // Socket can be re-enabled by setting NEXT_PUBLIC_CHAT_TRANSPORT=socket.
+    if (FORCE_HTTP_TRANSPORT || !CHAT_URL) { startHttpMode(appointmentId); return; }
 
     // Try socket, fall back to HTTP after timeout
     const socket = io(CHAT_URL, {
@@ -230,7 +240,7 @@ export function useChat(appointmentId: string | null) {
 
         const history = Array.isArray(ack.messages) ? ack.messages.map(mapMsg) : [];
         setMessages(history);
-        lastCountRef.current = history.length;
+        lastSignatureRef.current = historySignature(history);
       });
     });
 

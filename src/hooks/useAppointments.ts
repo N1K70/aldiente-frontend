@@ -52,6 +52,18 @@ function normalize(raw: Record<string, unknown>): Appointment {
   };
 }
 
+function sortByScheduledAtAsc(a: Appointment, b: Appointment) {
+  const aTs = a.scheduledAt ? new Date(a.scheduledAt).getTime() : Number.MAX_SAFE_INTEGER;
+  const bTs = b.scheduledAt ? new Date(b.scheduledAt).getTime() : Number.MAX_SAFE_INTEGER;
+  return aTs - bTs;
+}
+
+function sortByScheduledAtDesc(a: Appointment, b: Appointment) {
+  const aTs = a.scheduledAt ? new Date(a.scheduledAt).getTime() : 0;
+  const bTs = b.scheduledAt ? new Date(b.scheduledAt).getTime() : 0;
+  return bTs - aTs;
+}
+
 export function useAppointments(role?: 'patient' | 'student') {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -73,8 +85,12 @@ export function useAppointments(role?: 'patient' | 'student') {
 
   useEffect(() => { refresh(); }, [refresh]);
 
-  const upcoming = appointments.filter(a => a.status === 'confirmed' || a.status === 'pending');
-  const past = appointments.filter(a => a.status === 'completed' || a.status === 'cancelled');
+  const upcoming = appointments
+    .filter(a => a.status === 'confirmed' || a.status === 'pending')
+    .sort(sortByScheduledAtAsc);
+  const past = appointments
+    .filter(a => a.status === 'completed' || a.status === 'cancelled')
+    .sort(sortByScheduledAtDesc);
   const next = upcoming[0] ?? null;
 
   return { appointments, upcoming, past, next, loading, error, refresh };
