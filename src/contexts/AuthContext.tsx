@@ -38,6 +38,12 @@ type RegisterData = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const PATIENT_ONBOARDING_KEY = 'aldiente_patient_onboarding_completed';
 
+function sanitizeUserName(name?: string | null) {
+  const trimmed = (name ?? '').trim();
+  if (!trimmed || isLikelyMockName(trimmed)) return undefined;
+  return trimmed;
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -47,7 +53,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const token = localStorage.getItem('authToken');
       const stored = localStorage.getItem('authUser');
       if (token && stored) {
-        setUser(JSON.parse(stored));
+        const parsed = JSON.parse(stored) as User;
+        setUser({ ...parsed, name: sanitizeUserName(parsed?.name) });
       } else {
         setUser(null);
       }
@@ -108,7 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id: String(data?.user?.id ?? data?.userId ?? data?.id ?? ''),
         email: data?.user?.email ?? data?.email ?? email,
         role: data?.user?.role ?? data?.role,
-        name: data?.user?.name ?? data?.user?.fullName ?? data?.user?.full_name ?? data?.name ?? data?.fullName ?? data?.full_name,
+        name: sanitizeUserName(data?.user?.name ?? data?.user?.fullName ?? data?.user?.full_name ?? data?.name ?? data?.fullName ?? data?.full_name),
       };
       localStorage.setItem('authUser', JSON.stringify(u));
       if (u.role) document.cookie = `authRole=${u.role}; path=/; SameSite=Lax`;
@@ -160,7 +167,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id: String(data?.user?.id ?? data?.id ?? ''),
         email: data?.user?.email ?? registerData.email,
         role: data?.user?.role ?? registerData.role ?? 'patient',
-        name: data?.user?.name ?? registerData.fullName ?? `${registerData.name} ${registerData.lastname}`.trim(),
+        name: sanitizeUserName(data?.user?.name ?? registerData.fullName ?? `${registerData.name} ${registerData.lastname}`.trim()),
       };
       localStorage.setItem('authUser', JSON.stringify(u));
       if (u.role) document.cookie = `authRole=${u.role}; path=/; SameSite=Lax`;
@@ -174,7 +181,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateUser = useCallback((patch: Partial<User>) => {
     setUser(prev => {
       if (!prev) return prev;
-      const updated = { ...prev, ...patch };
+      const normalizedPatch = {
+        ...patch,
+        name: patch.name === undefined ? prev.name : sanitizeUserName(patch.name),
+      };
+      const updated = { ...prev, ...normalizedPatch };
       localStorage.setItem('authUser', JSON.stringify(updated));
       return updated;
     });

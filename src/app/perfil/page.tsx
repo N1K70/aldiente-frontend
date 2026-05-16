@@ -1,14 +1,15 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Icon, Button, Glass, TextField } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { DesktopShell, useIsDesktop } from '@/components/desktop-shell';
 import { useProfile } from '@/hooks/useProfile';
 import { api } from '@/lib/api';
-import ProfileCompleteness from '@/components/ProfileCompleteness';
+import ProfileCompleteness from '@/components/ProfileCompletenessV2';
 import { getInitials, resolveDisplayName } from '@/lib/user-display';
+import { getProfileCompletionState } from '@/lib/profile-completion';
 
 type Section = 'datos' | 'seguridad' | 'notificaciones' | 'salud';
 
@@ -20,29 +21,6 @@ const MENU_ITEMS: { id: Section; icon: string; label: string; sub: string }[] = 
 ];
 
 interface University { id: string | number; name: string; }
-
-function isProfileComplete(profile: Record<string, string>, role?: string) {
-  if (role === 'student') {
-    const required = [
-      !!(profile.full_name || profile.name),
-      !!(profile.university_id || profile.university),
-      !!(profile.university_location || profile.location),
-      !!(profile.career_year || profile.year),
-      !!(profile.certifications || '').trim(),
-      ((profile.bio || '').trim().length >= 20),
-    ];
-    return required.every(Boolean);
-  }
-
-  const required = [
-    !!(profile.name || profile.full_name),
-    !!profile.phone,
-    !!(profile.birthdate || profile.birth_date),
-    !!profile.gender,
-    !!(profile.address || profile.location),
-  ];
-  return required.every(Boolean);
-}
 
 function AvatarBadge({ initials, role }: { initials: string; role?: string }) {
   return (
@@ -331,8 +309,10 @@ function PerfilDesktop() {
 
   const displayName = resolveDisplayName(user?.name, user?.email);
   const initials = getInitials(displayName, '?');
+  const role = user?.role === 'student' ? 'student' : 'patient';
   const merged = { name: user?.name ?? '', email: user?.email ?? '', ...profile } as Record<string, string>;
-  const showCompleteness = loaded && !loading && !isProfileComplete(merged, user?.role);
+  const completion = useMemo(() => getProfileCompletionState(merged, role), [merged, role]);
+  const showCompleteness = loaded && !loading && !completion.complete;
   const sectionMeta = MENU_ITEMS.find(m => m.id === section)!;
 
   const menuItems = user?.role === 'student'
@@ -340,7 +320,7 @@ function PerfilDesktop() {
     : MENU_ITEMS;
 
   return (
-    <DesktopShell role={user?.role === 'student' ? 'student' : 'patient'} activeId="profile" title="Mi perfil">
+    <DesktopShell role={role} activeId="profile" title="Mi perfil">
       <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 20 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <Glass hi radius={20} style={{ padding: 20, textAlign: 'center' }}>
@@ -357,7 +337,7 @@ function PerfilDesktop() {
           </Glass>
 
           {showCompleteness && (
-            <ProfileCompleteness loading={loading} profile={merged} role={user?.role === 'student' ? 'student' : 'patient'} onEdit={() => setSection('datos')} />
+            <ProfileCompleteness loading={loading} profile={merged} role={role} onEdit={() => setSection('datos')} />
           )}
 
           <Glass radius={16} style={{ padding: 8, display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -403,8 +383,10 @@ export default function PerfilPage() {
 
   const displayName = resolveDisplayName(user?.name, user?.email);
   const initials = getInitials(displayName, '?');
+  const role = user?.role === 'student' ? 'student' : 'patient';
   const merged = { name: user?.name ?? '', email: user?.email ?? '', ...profile } as Record<string, string>;
-  const showCompleteness = loaded && !loading && !isProfileComplete(merged, user?.role);
+  const completion = useMemo(() => getProfileCompletionState(merged, role), [merged, role]);
+  const showCompleteness = loaded && !loading && !completion.complete;
 
   const menuItems = user?.role === 'student'
     ? MENU_ITEMS.filter(m => m.id !== 'salud')
@@ -457,7 +439,7 @@ export default function PerfilPage() {
 
       <div style={{ padding: '0 20px 16px' }}>
         {showCompleteness && (
-          <ProfileCompleteness loading={loading} profile={merged} role={user?.role === 'student' ? 'student' : 'patient'} onEdit={() => setSection('datos')} />
+          <ProfileCompleteness loading={loading} profile={merged} role={role} onEdit={() => setSection('datos')} />
         )}
       </div>
 
