@@ -7,6 +7,7 @@ import { DesktopShell, useIsDesktop } from '@/components/desktop-shell';
 import BottomNav from '@/components/BottomNav';
 import { fetchProvidersForServiceName, fetchServiceById, ProviderItem, PublicServiceItem } from '@/lib/public-services';
 import { trackFunnelEvent } from '@/lib/frontend-analytics';
+import { reportFrontendError } from '@/lib/frontend-observability';
 
 function formatPrice(value?: number) {
   if (value == null) return 'Consultar';
@@ -78,26 +79,40 @@ export default function ServiceDetailPage() {
     let active = true;
     setLoading(true);
 
-    fetchServiceById(serviceId)
-      .then(async result => {
+    (async () => {
+      try {
+        const result = await fetchServiceById(serviceId);
         if (!active) return;
         setService(result);
-        if (result?.name) {
+
+        if (!result?.name) {
+          setProviders([]);
+          return;
+        }
+
+        try {
           const rows = await fetchProvidersForServiceName(result.name);
           if (!active) return;
           setProviders(rows);
-        } else {
+        } catch {
+          if (!active) return;
+          reportFrontendError({
+            module: 'servicio',
+            action: 'fetchProvidersForServiceName',
+            severity: 'warning',
+            message: 'Error cargando proveedores del servicio',
+            details: { serviceId, serviceName: result.name },
+          });
           setProviders([]);
         }
-      })
-      .catch(() => {
+      } catch {
         if (!active) return;
         setService(null);
         setProviders([]);
-      })
-      .finally(() => {
+      } finally {
         if (active) setLoading(false);
-      });
+      }
+    })();
 
     return () => {
       active = false;
