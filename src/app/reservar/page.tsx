@@ -19,6 +19,7 @@ const HOOK_SERVICES = [
 ] as const;
 
 const STEP_LABELS = ['Servicio', 'Fecha y hora', 'Confirmacion'] as const;
+const BOOKING_FEE_CLP = 3000;
 
 function formatPrice(value?: number) {
   if (value == null) return 'Consultar';
@@ -31,6 +32,23 @@ function formatLongDate(date: string) {
     day: 'numeric',
     month: 'long',
   });
+}
+
+function redirectToWebpay(url: string, token: string) {
+  if (!url || !token || typeof window === 'undefined') return;
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = url;
+  form.style.display = 'none';
+
+  const input = document.createElement('input');
+  input.type = 'hidden';
+  input.name = 'token_ws';
+  input.value = token;
+  form.appendChild(input);
+
+  document.body.appendChild(form);
+  form.submit();
 }
 
 function AuthBooking({
@@ -47,8 +65,6 @@ function AuthBooking({
   const [serviceId, setServiceId] = useState(preselectedServiceId ?? '');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
-  const [availabilityId, setAvailabilityId] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('webpay');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -74,16 +90,25 @@ function AuthBooking({
         flow: 'auth',
         serviceId,
         studentId,
-        paymentMethod,
       });
       const res = await api.post('/api/appointments', {
         studentServiceId: serviceId,
-        availabilityId: availabilityId || undefined,
         scheduledAt,
-        paymentMethod,
       });
       const appointmentId = res.data?.appointment?.id ?? res.data?.id ?? '';
-      router.push(`/confirmacion?id=${appointmentId}`);
+      if (!appointmentId) {
+        throw new Error('No se pudo crear la reserva.');
+      }
+
+      const paymentRes = await api.post(`/api/appointments/${appointmentId}/payment/initiate`);
+      const paymentUrl = paymentRes.data?.url;
+      const paymentToken = paymentRes.data?.token;
+      if (!paymentUrl || !paymentToken) {
+        throw new Error('No se pudo iniciar Webpay para la reserva.');
+      }
+
+      trackFunnelEvent('funnel_payment_started', { appointmentId, method: 'webpay' });
+      redirectToWebpay(paymentUrl, paymentToken);
     } catch (err) {
       reportFrontendError({
         module: 'reservar',
@@ -91,7 +116,10 @@ function AuthBooking({
         message: 'Error creando cita autenticada',
         details: { studentId, serviceId, date, time },
       });
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'No se pudo crear la cita.';
+      const message =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message
+        ?? (err as { message?: string })?.message
+        ?? 'No se pudo crear la cita.';
       setError(message);
     } finally {
       setSubmitting(false);
@@ -148,7 +176,6 @@ function AuthBooking({
                       onClick={() => {
                         setDate(item);
                         setTime('');
-                        setAvailabilityId('');
                       }}
                       style={{ minWidth: 82, padding: '12px 10px', borderRadius: 18, border: `2px solid ${selected ? 'var(--brand-500)' : 'rgba(255,255,255,0.9)'}`, background: selected ? 'linear-gradient(135deg, rgba(16,169,198,0.14), rgba(79,70,229,0.08))' : 'rgba(255,255,255,0.78)', cursor: 'pointer' }}
                     >
@@ -178,10 +205,7 @@ function AuthBooking({
                     <button
                       key={slot.id}
                       type="button"
-                      onClick={() => {
-                        setTime(slot.time);
-                        setAvailabilityId(slot.id);
-                      }}
+                      onClick={() => setTime(slot.time)}
                       style={{ height: 48, borderRadius: 14, border: `1.5px solid ${selected ? 'var(--brand-500)' : 'rgba(255,255,255,0.9)'}`, background: selected ? 'linear-gradient(135deg, rgba(16,169,198,0.14), rgba(79,70,229,0.08))' : 'rgba(255,255,255,0.78)', color: 'var(--ink-900)', fontWeight: 700, cursor: 'pointer' }}
                     >
                       {slot.time}
@@ -219,28 +243,19 @@ function AuthBooking({
                 <span style={{ color: 'var(--ink-500)' }}>Total</span>
                 <span style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, color: 'var(--ink-900)', letterSpacing: '-0.02em' }}>{formatPrice(selectedService?.price)}</span>
               </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                <span style={{ color: 'var(--ink-500)' }}>Cuota reserva Webpay</span>
+                <span style={{ fontWeight: 700, color: 'var(--ink-900)' }}>{formatPrice(BOOKING_FEE_CLP)}</span>
+              </div>
             </div>
           </Glass>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {[
-              { id: 'webpay', title: 'Webpay', desc: 'Debito o credito' },
-              { id: 'cash', title: 'Efectivo', desc: 'Pago presencial' },
-            ].map(option => {
-              const selected = paymentMethod === option.id;
-              return (
-                <button
-                  key={option.id}
-                  type="button"
-                  onClick={() => setPaymentMethod(option.id)}
-                  style={{ padding: 14, borderRadius: 16, textAlign: 'left', border: `2px solid ${selected ? 'var(--brand-500)' : 'rgba(255,255,255,0.9)'}`, background: selected ? 'linear-gradient(135deg, rgba(16,169,198,0.14), rgba(79,70,229,0.08))' : 'rgba(255,255,255,0.78)', cursor: 'pointer' }}
-                >
-                  <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink-900)' }}>{option.title}</div>
-                  <div style={{ fontSize: 13, color: 'var(--ink-500)', marginTop: 2 }}>{option.desc}</div>
-                </button>
-              );
-            })}
-          </div>
+          <Glass radius={16} style={{ padding: 14, background: 'rgba(16,169,198,0.08)' }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--brand-700)' }}>Pago obligatorio por Webpay</div>
+            <div style={{ fontSize: 13, color: 'var(--ink-600)', marginTop: 4 }}>
+              Para confirmar la reserva se paga una cuota de {formatPrice(BOOKING_FEE_CLP)}.
+            </div>
+          </Glass>
 
           {error && <div style={{ padding: '12px 16px', borderRadius: 12, background: 'var(--danger-100)', color: 'var(--danger-600)', fontSize: 14 }}>{error}</div>}
         </div>
@@ -252,7 +267,7 @@ function AuthBooking({
     <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
       {step > 0 && <Button size="md" variant="ghost" onClick={() => setStep(current => current - 1)}>Atras</Button>}
       <Button size="md" disabled={!canContinue || submitting || (step === 0 && !hasServices)} onClick={() => (step < 2 ? setStep(current => current + 1) : confirm())}>
-        {submitting ? 'Confirmando...' : step === 2 ? 'Confirmar y pagar' : 'Continuar'}
+        {submitting ? 'Redirigiendo a Webpay...' : step === 2 ? 'Confirmar e ir a pagar' : 'Continuar'}
       </Button>
     </div>
   );
@@ -280,6 +295,7 @@ function AuthBooking({
               <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--ink-500)' }}>Hora</span><span style={{ color: 'var(--ink-900)', fontWeight: 700 }}>{time || 'Pendiente'}</span></div>
               <div style={{ height: 1, background: 'var(--ink-100)' }} />
               <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--ink-500)' }}>Total</span><span style={{ color: 'var(--ink-900)', fontWeight: 700 }}>{formatPrice(selectedService?.price)}</span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--ink-500)' }}>Cuota reserva</span><span style={{ color: 'var(--ink-900)', fontWeight: 700 }}>{formatPrice(BOOKING_FEE_CLP)}</span></div>
             </div>
           </Glass>
         </div>
@@ -306,8 +322,7 @@ function AuthBooking({
 }
 
 function GuestCheckout() {
-  const router = useRouter();
-  const [step, setStep] = useState<'location' | 'service' | 'datetime' | 'checkout' | 'success'>('location');
+  const [step, setStep] = useState<'location' | 'service' | 'datetime' | 'checkout'>('location');
   const [universities, setUniversities] = useState<UniversityOption[]>([]);
   const [selectedUniversity, setSelectedUniversity] = useState<UniversityOption | null>(null);
   const [selectedHook, setSelectedHook] = useState<string>('');
@@ -323,7 +338,6 @@ function GuestCheckout() {
   const [loadingServices, setLoadingServices] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [successData, setSuccessData] = useState<{ appointment?: { service_name?: string; scheduled_at?: string; price?: number }; user?: { email?: string; is_new?: boolean } } | null>(null);
 
   const { slots, byDate, loading: slotsLoading } = useAvailabilities(selectedService?.id ?? null);
   const availableDates = useMemo(() => Array.from(new Set(slots.map(slot => slot.date))).sort(), [slots]);
@@ -391,8 +405,20 @@ function GuestCheckout() {
         email,
         phone: phone || null,
       });
-      setSuccessData(res.data);
-      setStep('success');
+
+      const appointmentId = res.data?.appointment?.id ?? '';
+      const paymentUrl = res.data?.payment?.url;
+      const paymentToken = res.data?.payment?.token;
+      if (!paymentUrl || !paymentToken) {
+        throw new Error('No se pudo iniciar Webpay para la reserva.');
+      }
+
+      trackFunnelEvent('funnel_payment_started', {
+        appointmentId: appointmentId || null,
+        method: 'webpay',
+        flow: 'guest',
+      });
+      redirectToWebpay(paymentUrl, paymentToken);
     } catch (err) {
       reportFrontendError({
         module: 'reservar',
@@ -400,26 +426,14 @@ function GuestCheckout() {
         message: 'Error procesando reserva en guest checkout',
         details: { university: selectedUniversity?.name, serviceId: selectedService.id, date, time },
       });
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'No se pudo procesar la reserva.';
+      const message =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message
+        ?? (err as { message?: string })?.message
+        ?? 'No se pudo procesar la reserva.';
       setError(message);
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const resetFlow = () => {
-    setStep('location');
-    setSelectedUniversity(null);
-    setSelectedHook('');
-    setSelectedService(null);
-    setDate('');
-    setTime('');
-    setName('');
-    setEmail('');
-    setPhone('');
-    setNotes('');
-    setError('');
-    setSuccessData(null);
   };
 
   return (
@@ -429,15 +443,13 @@ function GuestCheckout() {
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 30, fontWeight: 700, color: 'var(--ink-900)', letterSpacing: '-0.03em' }}>Reserva publica</div>
           <div style={{ fontSize: 14, color: 'var(--ink-600)', marginTop: 4 }}>Agenda sin iniciar sesion.</div>
         </div>
-        {step !== 'success' && (
-          <div style={{ display: 'flex', gap: 6 }}>
-            {['location', 'service', 'datetime', 'checkout'].map((item, index) => {
-              const order = ['location', 'service', 'datetime', 'checkout'];
-              const active = order.indexOf(step) >= index;
-              return <div key={item} style={{ width: 42, height: 6, borderRadius: 99, background: active ? 'linear-gradient(90deg, #10A9C6, #4F46E5)' : 'rgba(10,22,40,0.08)' }} />;
-            })}
-          </div>
-        )}
+        <div style={{ display: 'flex', gap: 6 }}>
+          {['location', 'service', 'datetime', 'checkout'].map((item, index) => {
+            const order = ['location', 'service', 'datetime', 'checkout'];
+            const active = order.indexOf(step) >= index;
+            return <div key={item} style={{ width: 42, height: 6, borderRadius: 99, background: active ? 'linear-gradient(90deg, #10A9C6, #4F46E5)' : 'rgba(10,22,40,0.08)' }} />;
+          })}
+        </div>
       </div>
 
       {step === 'location' && (
@@ -624,7 +636,7 @@ function GuestCheckout() {
                 <TextField label="Notas (opcional)" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Algo que debamos saber" />
                 {error && <div style={{ padding: '12px 16px', borderRadius: 12, background: 'var(--danger-100)', color: 'var(--danger-600)', fontSize: 14 }}>{error}</div>}
                 <Button size="lg" full onClick={handleSubmit} disabled={submitting || !name || !email}>
-                  {submitting ? 'Procesando...' : 'Confirmar reserva'}
+                  {submitting ? 'Redirigiendo a Webpay...' : 'Confirmar e ir a pagar'}
                 </Button>
               </div>
             </Glass>
@@ -638,31 +650,32 @@ function GuestCheckout() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}><span style={{ color: 'var(--ink-500)' }}>Hora</span><span style={{ fontWeight: 700, color: 'var(--ink-900)' }}>{time}</span></div>
                 <div style={{ height: 1, background: 'var(--ink-100)' }} />
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}><span style={{ color: 'var(--ink-500)' }}>Total</span><span style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, color: 'var(--ink-900)' }}>{formatPrice(selectedService.price)}</span></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}><span style={{ color: 'var(--ink-500)' }}>Cuota reserva Webpay</span><span style={{ fontWeight: 700, color: 'var(--ink-900)' }}>{formatPrice(BOOKING_FEE_CLP)}</span></div>
               </div>
             </Glass>
           </div>
         </div>
       )}
 
-      {step === 'success' && successData && (
+      {false && (
         <Glass hi radius={24} style={{ padding: 28, textAlign: 'center' }}>
           <div style={{ width: 84, height: 84, borderRadius: 28, margin: '0 auto 20px', background: 'linear-gradient(135deg, #D1FAE5, #10B981)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 12px 28px rgba(16,185,129,0.28)' }}>
             <Icon name="check" size={38} color="#fff" />
           </div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color: 'var(--ink-900)', letterSpacing: '-0.03em' }}>¡Reserva confirmada!</div>
           <div style={{ fontSize: 15, color: 'var(--ink-600)', lineHeight: 1.5, marginTop: 10 }}>
-            Hemos enviado los detalles a <b>{successData.user?.email || email}</b>.
+            Hemos enviado los detalles a <b>{email}</b>.
           </div>
           <div style={{ display: 'grid', gap: 10, maxWidth: 420, margin: '24px auto 0', textAlign: 'left' }}>
             <Glass radius={18} style={{ padding: 16 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}><span style={{ color: 'var(--ink-500)' }}>Servicio</span><span style={{ color: 'var(--ink-900)', fontWeight: 700 }}>{successData.appointment?.service_name || selectedService?.name}</span></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 8 }}><span style={{ color: 'var(--ink-500)' }}>Fecha</span><span style={{ color: 'var(--ink-900)', fontWeight: 700 }}>{successData.appointment?.scheduled_at ? new Date(successData.appointment.scheduled_at).toLocaleString('es-CL') : `${date} ${time}`}</span></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 8 }}><span style={{ color: 'var(--ink-500)' }}>Precio</span><span style={{ color: 'var(--ink-900)', fontWeight: 700 }}>{formatPrice(successData.appointment?.price ?? selectedService?.price)}</span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}><span style={{ color: 'var(--ink-500)' }}>Servicio</span><span style={{ color: 'var(--ink-900)', fontWeight: 700 }}>{selectedService?.name}</span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 8 }}><span style={{ color: 'var(--ink-500)' }}>Fecha</span><span style={{ color: 'var(--ink-900)', fontWeight: 700 }}>{`${date} ${time}`}</span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 8 }}><span style={{ color: 'var(--ink-500)' }}>Precio</span><span style={{ color: 'var(--ink-900)', fontWeight: 700 }}>{formatPrice(selectedService?.price)}</span></div>
             </Glass>
           </div>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 24, flexWrap: 'wrap' }}>
-            <Button size="md" variant="glass" onClick={resetFlow}>Hacer otra reserva</Button>
-            <Button size="md" onClick={() => router.push('/login')}>Ir a mi cuenta</Button>
+            <Button size="md" variant="glass" onClick={() => null}>Hacer otra reserva</Button>
+            <Button size="md" onClick={() => null}>Ir a mi cuenta</Button>
           </div>
         </Glass>
       )}
