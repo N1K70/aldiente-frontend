@@ -657,7 +657,7 @@ function GuestCheckout() {
         </div>
       )}
 
-      {false && (
+      {/*
         <Glass hi radius={24} style={{ padding: 28, textAlign: 'center' }}>
           <div style={{ width: 84, height: 84, borderRadius: 28, margin: '0 auto 20px', background: 'linear-gradient(135deg, #D1FAE5, #10B981)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 12px 28px rgba(16,185,129,0.28)' }}>
             <Icon name="check" size={38} color="#fff" />
@@ -678,7 +678,7 @@ function GuestCheckout() {
             <Button size="md" onClick={() => null}>Ir a mi cuenta</Button>
           </div>
         </Glass>
-      )}
+      */}
     </div>
   );
 }
