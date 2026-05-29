@@ -259,3 +259,35 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 ### Decision
 - `MERGE`
 - Motivo: Cambios funcionales y de confianza validados con gate tecnico en verde.
+
+---
+
+### Fecha
+- `2026-05-29`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit: pendiente
+
+### Scope del cambio
+- Guardrail anti-mock para produccion: nuevo `npm run qa:mock-guard` escanea `src` y falla si aparecen marcadores de datos ficticios (`mock`, `dummy`, `fake`, `sample`, `fixture`, `demo`, fixtures Visual QA).
+- `qa:release:local` ahora ejecuta el guard antes de typecheck/build/smokes.
+
+### Gate tecnico
+- `npm run qa:mock-guard`: `PASS`
+- `npm run qa:visual:snapshots`: `PASS`
+- `npm run qa:gate`: `PASS`
+
+### QA funcional ejecutado
+1. Flujo: Auditoria de mocks/fallbacks en codigo productivo
+   - Resultado: `PASS`
+   - Evidencia: `Production mock guard passed: no mock/demo markers found in src.`
+   - Notas: Fixtures QA siguen permitidos en `scripts` y `docs`; el bloqueo aplica solo a `src`.
+2. Flujo: Capturas visuales rutas criticas
+   - Resultado: `PASS`
+   - Evidencia: `tmp/visual-qa`
+   - Notas: Sin overflow, redirects inesperados ni mojibake visible.
+
+### Decision
+- `MERGE`
+- Motivo: Reduce riesgo de reintroducir datos ficticios en produccion y queda integrado al flujo pre-release.

@@ -72,6 +72,14 @@ Para corrida local de pre-release en un solo paso:
 
 `npm run qa:release:local`
 
+## Guardrail anti-mock en produccion
+
+Para auditar que el codigo productivo no reintroduzca datos ficticios en `src`:
+
+`npm run qa:mock-guard`
+
+El comando falla si encuentra marcadores como `mock`, `dummy`, `fake`, `sample`, `fixture`, `demo` o nombres de fixtures visuales dentro de codigo productivo. Los fixtures en `scripts` y `docs` siguen permitidos para QA.
+
 ## QA visual con Playwright
 
 Para cambios visuales o de UX, ejecutar la app local con Docker/hot reload y luego:
