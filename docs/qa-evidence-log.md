@@ -356,3 +356,30 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 ### Decision
 - `MERGE`
 - Motivo: Evita cookies de sesion obsoletas tras 401/refresh fallido y mantiene sincronizados cliente + proxy.
+
+---
+
+### Fecha
+- `2026-05-29`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit: pendiente
+
+### Scope del cambio
+- Encoding/copy productivo: se limpio mojibake restante en Home desktop/mobile.
+- Nuevo `npm run qa:encoding-guard` escanea `src` para detectar texto corrupto en codigo fuente.
+- `qa:release:local` ahora ejecuta `qa:encoding-guard` despues de `qa:mock-guard`.
+
+### Gate tecnico
+- `npm run qa:encoding-guard`: `PASS`
+
+### QA funcional ejecutado
+1. Flujo: Auditoria de encoding fuente
+   - Resultado: `PASS`
+   - Evidencia: `Source encoding guard passed: no mojibake-like text found in src.`
+   - Notas: `rg` no encuentra patrones `Ã|Â|â|ð|Å¸|ƒ|�` en `src`.
+
+### Decision
+- `MERGE`
+- Motivo: Evita regresiones de copy corrupto antes de llegar a QA visual/manual.

@@ -80,6 +80,14 @@ Para auditar que el codigo productivo no reintroduzca datos ficticios en `src`:
 
 El comando falla si encuentra marcadores como `mock`, `dummy`, `fake`, `sample`, `fixture`, `demo` o nombres de fixtures visuales dentro de codigo productivo. Los fixtures en `scripts` y `docs` siguen permitidos para QA.
 
+## Guardrail anti-mojibake en codigo fuente
+
+Para auditar que el codigo productivo no tenga texto con encoding corrupto:
+
+`npm run qa:encoding-guard`
+
+El comando escanea `src` y falla si detecta patrones visibles de mojibake como `Ã`, `Â`, `â`, `ð`, `Å¸`, `ƒ` o `�`. Tambien se ejecuta dentro de `npm run qa:release:local`.
+
 ## QA visual con Playwright
 
 Para cambios visuales o de UX, ejecutar la app local con Docker/hot reload y luego:

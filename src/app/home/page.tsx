@@ -41,7 +41,7 @@ function ApptDateBadge({ dateStr, time }: { dateStr: string; time?: string }) {
   return (
     <div style={{ width: 96, height: 108, borderRadius: 18, flexShrink: 0, background: 'linear-gradient(180deg, var(--brand-100), var(--brand-200))', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand-700)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{month}</div>
-      <div style={{ fontFamily: 'var(--font-display)', fontSize: 44, fontWeight: 700, color: 'var(--brand-800)', letterSpacing: '-0.03em', lineHeight: 1 }}>{day || 'â€”'}</div>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: 44, fontWeight: 700, color: 'var(--brand-800)', letterSpacing: '-0.03em', lineHeight: 1 }}>{day || '-'}</div>
       {time && <div style={{ fontSize: 12, color: 'var(--brand-700)', fontWeight: 600, marginTop: 2 }}>{time}</div>}
     </div>
   );
@@ -141,8 +141,8 @@ function HomeDesktop() {
 
   const apptTitle = next
     ? `${next.service || 'Cita'} ${next.student?.name ? `con ${next.student.name}` : ''}`
-    : loading ? 'Cargandoâ€¦' : 'Sin citas prÃ³ximas';
-  const apptSub = next?.clinic?.name ? `${next.clinic.name}${next.clinic.box ? ` Â· Box ${next.clinic.box}` : ''}` : '';
+    : loading ? 'Cargando...' : 'Sin citas proximas';
+  const apptSub = next?.clinic?.name ? `${next.clinic.name}${next.clinic.box ? ` - Box ${next.clinic.box}` : ''}` : '';
   const today = new Date().toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
 
   return (
@@ -167,7 +167,7 @@ function HomeDesktop() {
           <div style={{ position: 'relative', display: 'flex', gap: 24, alignItems: 'center' }}>
             <ApptDateBadge dateStr={next?.date ?? ''} time={next?.time} />
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand-700)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Tu prÃ³xima cita</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand-700)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Tu proxima cita</div>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, color: 'var(--ink-900)', letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: 4 }}>{apptTitle}</div>
               {apptSub && <div style={{ fontSize: 14, color: 'var(--ink-600)', marginBottom: 16 }}>{apptSub}</div>}
               {next && (
@@ -185,9 +185,9 @@ function HomeDesktop() {
         </Glass>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {[
-            { v: upcoming.length > 0 ? `${upcoming.length}` : 'â€”', l: 'Citas prÃ³ximas', tint: '#6366F1', icon: 'check' },
-            { v: next?.price ? `$${(next.price).toLocaleString('es-CL')}` : 'â€”', l: 'Precio prÃ³xima cita', tint: '#10B981', icon: 'sparkle' },
-            { v: STATUS_LABEL[next?.status ?? ''] ?? 'â€”', l: 'Estado', tint: '#F59E0B', icon: 'star' },
+            { v: upcoming.length > 0 ? `${upcoming.length}` : '-', l: 'Citas proximas', tint: '#6366F1', icon: 'check' },
+            { v: next?.price ? `$${(next.price).toLocaleString('es-CL')}` : '-', l: 'Precio proxima cita', tint: '#10B981', icon: 'sparkle' },
+            { v: STATUS_LABEL[next?.status ?? ''] ?? '-', l: 'Estado', tint: '#F59E0B', icon: 'star' },
           ].map(s => (
             <Glass key={s.l} radius={18} style={{ padding: 16, display: 'flex', alignItems: 'center', gap: 14 }}>
               <div style={{ width: 40, height: 40, borderRadius: 12, background: `${s.tint}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -204,8 +204,8 @@ function HomeDesktop() {
 
       <div style={{ marginBottom: 24 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 12 }}>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--ink-900)' }}>Â¿QuÃ© necesitas hoy?</div>
-          <button style={{ background: 'none', border: 'none', color: 'var(--brand-700)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }} onClick={() => router.push('/explorar')}>Ver todos los servicios â†’</button>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--ink-900)' }}>Que necesitas hoy?</div>
+          <button style={{ background: 'none', border: 'none', color: 'var(--brand-700)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }} onClick={() => router.push('/explorar')}>Ver todos los servicios</button>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
           {catalogLoading ? (
@@ -244,7 +244,7 @@ function HomeDesktop() {
       <div>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 12 }}>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--ink-900)' }}>Estudiantes destacados cerca tuyo</div>
-          <button style={{ background: 'none', border: 'none', color: 'var(--brand-700)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }} onClick={() => router.push('/explorar')}>Explorar todos â†’</button>
+          <button style={{ background: 'none', border: 'none', color: 'var(--brand-700)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }} onClick={() => router.push('/explorar')}>Explorar todos</button>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
           {catalogLoading ? (
@@ -330,7 +330,7 @@ export default function HomePage() {
   const initials = displayName.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'U';
 
   const apptDate = next?.date ? next.date.split(/[\s/-]/).slice(0, 2).join(' ') : '';
-  const apptTitle = next ? `${next.service || 'Cita'}${next.student?.name ? ` Â· ClÃ­nica` : ''}` : '';
+  const apptTitle = next ? `${next.service || 'Cita'}${next.student?.name ? ' - Clinica' : ''}` : '';
 
   return (
     <div className="app-scroll" style={{ minHeight: '100dvh', overflowY: 'auto', background: 'var(--bg-aurora)', position: 'relative', paddingBottom: 100 }}>
@@ -407,10 +407,10 @@ export default function HomePage() {
               <Icon name="calendar" size={22} color="rgba(255,255,255,0.9)" />
             </div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, letterSpacing: '-0.025em', marginBottom: 4, position: 'relative' }}>
-              {next.date}{next.time ? ` Â· ${next.time}` : ''}
+              {next.date}{next.time ? ` - ${next.time}` : ''}
             </div>
             <div style={{ fontSize: 15, opacity: 0.9, marginBottom: 16, position: 'relative' }}>
-              {next.service || 'Cita'}{next.clinic?.name ? ` Â· ${next.clinic.name}` : ''}
+              {next.service || 'Cita'}{next.clinic?.name ? ` - ${next.clinic.name}` : ''}
             </div>
             {next.student?.name && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 12, borderRadius: 16, background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.25)', position: 'relative' }}>
@@ -507,7 +507,7 @@ export default function HomePage() {
                     <div style={{ fontSize: 13, color: 'var(--ink-500)', marginTop: 2 }}>{student.university || 'Universidad asociada'}</div>
                     <div style={{ fontSize: 12, color: 'var(--brand-700)', marginTop: 6, fontWeight: 700 }}>
                       {student.serviceName || 'Servicio disponible'}
-                      {student.price != null ? ` Â· Desde $${student.price.toLocaleString('es-CL')}` : ''}
+                      {student.price != null ? ` - Desde $${student.price.toLocaleString('es-CL')}` : ''}
                     </div>
                   </div>
                   <Icon name="chevron" size={18} color="var(--ink-400)" />
