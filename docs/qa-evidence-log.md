@@ -267,7 +267,7 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 
 ### Branch / Commit
 - Branch: `dev`
-- Commit: pendiente
+- Commit: `ef9b6f4`
 
 ### Scope del cambio
 - Guardrail anti-mock para produccion: nuevo `npm run qa:mock-guard` escanea `src` y falla si aparecen marcadores de datos ficticios (`mock`, `dummy`, `fake`, `sample`, `fixture`, `demo`, fixtures Visual QA).
