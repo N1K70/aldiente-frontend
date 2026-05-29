@@ -364,7 +364,7 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 
 ### Branch / Commit
 - Branch: `dev`
-- Commit: pendiente
+- Commit: `a785f85`
 
 ### Scope del cambio
 - Encoding/copy productivo: se limpio mojibake restante en Home desktop/mobile.
