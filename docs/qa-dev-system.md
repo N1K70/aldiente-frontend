@@ -72,6 +72,14 @@ Para corrida local de pre-release en un solo paso:
 
 `npm run qa:release:local`
 
+## QA visual con Playwright
+
+Para cambios visuales o de UX, ejecutar la app local con Docker/hot reload y luego:
+
+`npm run qa:visual:snapshots`
+
+El comando captura pantallas desktop/mobile de rutas criticas, valida que no haya overflow horizontal y reporta redirecciones inesperadas. Las evidencias se guardan localmente en `tmp/visual-qa` y no se versionan.
+
 ## Contrato de adjuntos (chat)
 
 Para validar contrato de payload de adjuntos en chat antes de E2E backend:
