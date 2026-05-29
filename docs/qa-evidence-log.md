@@ -332,7 +332,7 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 
 ### Branch / Commit
 - Branch: `dev`
-- Commit: pendiente
+- Commit: `c99d388`
 
 ### Scope del cambio
 - Sesion expirada: se centralizo limpieza de sesion browser en `src/lib/auth-session.ts`.
