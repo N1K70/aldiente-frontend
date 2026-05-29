@@ -299,7 +299,7 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 
 ### Branch / Commit
 - Branch: `dev`
-- Commit: pendiente
+- Commit: `7828c9b`
 
 ### Scope del cambio
 - Login/redireccion por rol: `login()` ahora devuelve el usuario autenticado y `/login` redirige con el rol retornado por backend, no con una segunda lectura de `localStorage`.
