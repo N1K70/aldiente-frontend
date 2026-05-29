@@ -391,7 +391,7 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 
 ### Branch / Commit
 - Branch: `dev`
-- Commit: pendiente
+- Commit: `350c48c`
 
 ### Scope del cambio
 - Routing productivo: se agregaron redirects canonicos para aliases en ingles que antes podian caer en 404.
