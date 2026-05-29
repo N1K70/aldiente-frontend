@@ -66,8 +66,8 @@ export default function FunnelQaPage() {
   return (
     <div style={{ minHeight: '100dvh', background: 'var(--bg-aurora)', padding: '56px 20px 40px', fontFamily: 'var(--font-body)' }}>
       <div style={{ maxWidth: 980, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
-          <div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', alignItems: 'start', gap: 12 }}>
+          <div style={{ minWidth: 0 }}>
             <h1 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 30, fontWeight: 700, color: 'var(--ink-900)', letterSpacing: '-0.03em' }}>
               Funnel QA
             </h1>
@@ -85,7 +85,7 @@ export default function FunnelQaPage() {
               </div>
             )}
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end', minWidth: 0, maxWidth: '100%' }}>
             <Button size="sm" variant="glass" onClick={reload}>Recargar</Button>
             <Button
               size="sm"
@@ -130,12 +130,12 @@ export default function FunnelQaPage() {
         </div>
 
         <Glass radius={14} style={{ padding: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
             <div style={{ fontSize: 12, color: 'var(--ink-500)', fontWeight: 700, textTransform: 'uppercase' }}>Filtro</div>
             <select
               value={eventFilter}
               onChange={event => setEventFilter(event.target.value as (typeof EVENT_FILTERS)[number])}
-              style={{ height: 34, borderRadius: 10, border: '1px solid rgba(10,22,40,0.12)', background: 'rgba(255,255,255,0.9)', padding: '0 10px', fontSize: 13, color: 'var(--ink-900)' }}
+              style={{ height: 34, borderRadius: 10, border: '1px solid rgba(10,22,40,0.12)', background: 'rgba(255,255,255,0.9)', padding: '0 10px', fontSize: 13, color: 'var(--ink-900)', maxWidth: '100%' }}
             >
               {EVENT_FILTERS.map(item => (
                 <option key={item} value={item}>
@@ -155,7 +155,7 @@ export default function FunnelQaPage() {
               {coverageCompleted}/{coverage.length}
             </div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 8 }}>
             {coverage.map(item => (
               <div
                 key={item.name}
@@ -170,20 +170,21 @@ export default function FunnelQaPage() {
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   gap: 8,
+                  minWidth: 0,
                 }}
               >
-                <span>{item.name}</span>
-                <b style={{ color: item.present ? 'var(--success-700)' : 'var(--warning-700)' }}>
+                <span style={{ minWidth: 0, overflowWrap: 'anywhere' }}>{item.name}</span>
+                <b style={{ color: item.present ? 'var(--success-700)' : 'var(--warning-700)', flexShrink: 0 }}>
                   {item.present ? `OK (${item.count})` : 'FALTA'}
                 </b>
               </div>
             ))}
           </div>
-          <div style={{ marginTop: 10, fontSize: 12, color: 'var(--ink-600)' }}>
+          <div style={{ marginTop: 10, fontSize: 12, color: 'var(--ink-600)', overflowWrap: 'anywhere' }}>
             {missingEvents.length === 0 ? 'Cobertura completa en esta sesion.' : `Faltan: ${missingEvents.join(', ')}`}
           </div>
           <div style={{ marginTop: 8, display: 'flex', justifyContent: 'flex-end' }}>
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end', maxWidth: '100%' }}>
               <Button
                 size="sm"
                 variant="ghost"
