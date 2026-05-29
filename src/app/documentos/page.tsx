@@ -177,7 +177,7 @@ function UploadModal({ isStudent, onClose, onUploaded }: { isStudent: boolean; o
   );
 }
 
-function DocumentosContent({ isStudent, docs, loading, filter, setFilter, setModalOpen, handleDelete }: {
+function DocumentosContent({ isStudent, docs, loading, filter, setFilter, setModalOpen, handleDelete, deletingId, deleteError }: {
   isStudent: boolean;
   docs: UserDocument[];
   loading: boolean;
@@ -185,6 +185,8 @@ function DocumentosContent({ isStudent, docs, loading, filter, setFilter, setMod
   setFilter: (v: string) => void;
   setModalOpen: (v: boolean) => void;
   handleDelete: (doc: UserDocument) => void;
+  deletingId: string;
+  deleteError: string;
 }) {
   const categories = isStudent ? STUDENT_CATS : PATIENT_CATS;
   const currentYear = new Date().getFullYear();
@@ -200,6 +202,12 @@ function DocumentosContent({ isStudent, docs, loading, filter, setFilter, setMod
             <div style={{ fontSize: 13, color: 'var(--warning-600,#d97706)', marginTop: 2 }}>Debes subir tu Certificado de Alumno Regular {currentYear}.</div>
           </div>
           <button onClick={() => setModalOpen(true)} style={{ fontSize: 12, fontWeight: 700, color: 'var(--warning-700,#b45309)', background: 'rgba(245,158,11,0.15)', border: 'none', borderRadius: 8, padding: '6px 10px', cursor: 'pointer', whiteSpace: 'nowrap' }}>Subir</button>
+        </div>
+      )}
+
+      {deleteError && (
+        <div style={{ padding: '12px 14px', borderRadius: 14, background: 'var(--danger-100)', color: 'var(--danger-600)', fontSize: 13, fontWeight: 600 }}>
+          {deleteError}
         </div>
       )}
 
@@ -237,9 +245,9 @@ function DocumentosContent({ isStudent, docs, loading, filter, setFilter, setMod
                 style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(16,169,198,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <Icon name="download" size={16} color="var(--brand-600)" />
               </a>
-              <button onClick={() => handleDelete(doc)}
-                style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(239,68,68,0.08)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <Icon name="close" size={16} color="var(--danger-500,#ef4444)" />
+              <button onClick={() => handleDelete(doc)} disabled={deletingId === doc.id}
+                style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(239,68,68,0.08)', border: 'none', cursor: deletingId === doc.id ? 'wait' : 'pointer', opacity: deletingId === doc.id ? 0.55 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                {deletingId === doc.id ? '...' : <Icon name="close" size={16} color="var(--danger-500,#ef4444)" />}
               </button>
             </Glass>
           ))}
@@ -259,6 +267,8 @@ export default function DocumentosPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState('');
+  const [deleteError, setDeleteError] = useState('');
 
   const load = () => {
     setLoading(true);
@@ -282,9 +292,23 @@ export default function DocumentosPage() {
   useEffect(() => { load(); }, [filter]);
 
   const handleDelete = async (doc: UserDocument) => {
-    if (!confirm(`¿Eliminar "${doc.title}"?`)) return;
-    await api.delete(`/api/documents/${doc.id}`).catch(() => {});
-    setDocs(prev => prev.filter(d => d.id !== doc.id));
+    if (!confirm(`Eliminar "${doc.title}"?`)) return;
+    setDeletingId(doc.id);
+    setDeleteError('');
+    try {
+      await api.delete(`/api/documents/${doc.id}`);
+      setDocs(prev => prev.filter(d => d.id !== doc.id));
+    } catch (e: any) {
+      reportFrontendError({
+        module: 'documentos',
+        action: 'delete',
+        message: 'Error eliminando documento',
+        details: { status: e?.response?.status ?? null, documentId: doc.id },
+      });
+      setDeleteError('No pudimos eliminar el documento. Intenta nuevamente.');
+    } finally {
+      setDeletingId('');
+    }
   };
 
   const inner = (
@@ -296,6 +320,8 @@ export default function DocumentosPage() {
       setFilter={setFilter}
       setModalOpen={setModalOpen}
       handleDelete={handleDelete}
+      deletingId={deletingId}
+      deleteError={deleteError}
     />
   );
 

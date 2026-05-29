@@ -416,3 +416,34 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 ### Decision
 - `MERGE`
 - Motivo: Evita 404 por navegacion directa a aliases esperables y deja smoke automatico para prevenir regresiones.
+
+---
+
+### Fecha
+- `2026-05-29`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit: pendiente
+
+### Scope del cambio
+- Documentos: el borrado ya no elimina el item de la UI si `DELETE /api/documents/:id` falla.
+- Se agrego estado `deletingId`, mensaje de error visible y reporte `documentos/delete` en observabilidad frontend.
+
+### Gate tecnico
+- `npm run qa:encoding-guard`: `PASS`
+- `npm run qa:mock-guard`: `PASS`
+- `npm run qa:gate`: `PASS`
+
+### QA funcional ejecutado
+1. Flujo: Borrado defensivo de documentos
+   - Resultado: `PASS`
+   - Evidencia: revision de codigo + `qa:gate`.
+   - Notas: La UI solo remueve el documento tras respuesta exitosa del backend; en error conserva el item y muestra feedback.
+2. Flujo: QA visual documentos
+   - Resultado: `BLOCKED`
+   - Evidencia: `qa:visual:snapshots` y `qa:smoke:routes` quedaron bloqueados porque la app local en `localhost:3000` no respondia despues de regenerar `.next`; Docker CLI tampoco estaba accesible desde este contexto.
+
+### Decision
+- `FOLLOW-UP`
+- Motivo: Cambio tecnico validado, pero falta repetir QA visual cuando el servidor Docker/hot-reload local vuelva a responder.
