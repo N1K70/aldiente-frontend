@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const PROTECTED = ['/home', '/citas', '/chat', '/perfil', '/explorar', '/estudiante', '/reservar', '/confirmacion', '/dashboard', '/quiz', '/funnel-qa', '/telemetry-qa'];
+const PROTECTED = ['/home', '/citas', '/chat', '/perfil', '/explorar', '/estudiante', '/confirmacion', '/dashboard', '/quiz', '/funnel-qa', '/telemetry-qa'];
 const PUBLIC_ONLY = ['/login', '/signup', '/welcome'];
 const INTERNAL_TOOLS = ['/funnel-qa', '/telemetry-qa'];
 

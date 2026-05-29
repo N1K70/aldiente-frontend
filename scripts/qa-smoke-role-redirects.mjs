@@ -16,6 +16,16 @@ async function check({ name, path, role, expectLocationPrefix }) {
   return { name, status: res.status, location, ok, expectLocationPrefix };
 }
 
+async function checkStatus({ name, path, role, expectStatus }) {
+  const url = `${baseUrl}${path}`;
+  const res = await fetch(url, {
+    redirect: 'manual',
+    headers: role ? { Cookie: cookieForRole(role) } : undefined,
+  });
+
+  return { name, status: res.status, ok: res.status === expectStatus, expectStatus };
+}
+
 async function main() {
   const checks = [
     {
@@ -49,7 +59,18 @@ async function main() {
     },
   ];
 
-  const results = await Promise.all(checks.map(check));
+  const statusChecks = [
+    {
+      name: 'unauthenticated can open public /reservar',
+      path: '/reservar',
+      expectStatus: 200,
+    },
+  ];
+
+  const results = [
+    ...(await Promise.all(checks.map(check))),
+    ...(await Promise.all(statusChecks.map(checkStatus))),
+  ];
   let hasFailures = false;
 
   for (const result of results) {
@@ -57,7 +78,8 @@ async function main() {
     console.log(`${marker} ${result.name} (${result.status}) -> ${result.location}`);
     if (!result.ok) {
       hasFailures = true;
-      console.error(`Expected location prefix: ${result.expectLocationPrefix}`);
+      if ('expectLocationPrefix' in result) console.error(`Expected location prefix: ${result.expectLocationPrefix}`);
+      if ('expectStatus' in result) console.error(`Expected status: ${result.expectStatus}`);
     }
   }
 

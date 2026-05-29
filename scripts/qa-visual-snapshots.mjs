@@ -8,9 +8,16 @@ const outputDir = process.env.QA_VISUAL_OUTPUT_DIR || path.join('tmp', 'visual-q
 const pages = [
   { name: 'funnel-qa-desktop', path: '/funnel-qa', role: 'admin', viewport: { width: 1440, height: 1000 } },
   { name: 'funnel-qa-mobile', path: '/funnel-qa', role: 'admin', viewport: { width: 390, height: 844 } },
+  { name: 'login-mobile', path: '/login', viewport: { width: 390, height: 844 } },
+  { name: 'signup-mobile', path: '/signup', viewport: { width: 390, height: 844 } },
   { name: 'landing-desktop', path: '/landing', viewport: { width: 1440, height: 1000 } },
   { name: 'landing-mobile', path: '/landing', viewport: { width: 390, height: 844 } },
-  { name: 'home-mobile', path: '/home', role: 'patient', viewport: { width: 390, height: 844 } },
+  { name: 'home-mobile', path: '/home', role: 'patient', seedOnboarding: true, viewport: { width: 390, height: 844 } },
+  { name: 'explorar-mobile', path: '/explorar', role: 'patient', seedOnboarding: true, viewport: { width: 390, height: 844 } },
+  { name: 'reservar-public-mobile', path: '/reservar', viewport: { width: 390, height: 844 } },
+  { name: 'citas-mobile', path: '/citas', role: 'patient', viewport: { width: 390, height: 844 } },
+  { name: 'documentos-mobile', path: '/documentos', role: 'patient', viewport: { width: 390, height: 844 } },
+  { name: 'chat-mobile', path: '/chat', role: 'patient', viewport: { width: 390, height: 844 } },
 ];
 
 await fs.mkdir(outputDir, { recursive: true });
@@ -35,6 +42,24 @@ for (const spec of pages) {
       window.localStorage.setItem('authToken', 'visual-qa-token');
       window.localStorage.setItem('authUser', JSON.stringify(user));
     }, { user });
+  }
+
+  if (spec.seedOnboarding) {
+    const userId = `qa-${spec.role ?? 'patient'}`;
+    const university = {
+      id: 'visual-qa-university',
+      name: 'Universidad Visual QA',
+      short_name: 'Visual QA',
+      city: 'Santiago',
+      latitude: -33.45,
+      longitude: -70.66,
+    };
+    await context.addInitScript(({ userId, university }) => {
+      window.localStorage.setItem('aldiente_patient_onboarding_completed', 'true');
+      window.localStorage.setItem(`aldiente_patient_onboarding_completed:${userId}`, 'true');
+      window.localStorage.setItem('aldiente_selected_university', JSON.stringify(university));
+      window.localStorage.setItem(`aldiente_selected_university:${userId}`, JSON.stringify(university));
+    }, { userId, university });
   }
 
   const page = await context.newPage();
