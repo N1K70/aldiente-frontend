@@ -424,7 +424,7 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 
 ### Branch / Commit
 - Branch: `dev`
-- Commit: pendiente
+- Commit: `5252cfa`
 
 ### Scope del cambio
 - Documentos: el borrado ya no elimina el item de la UI si `DELETE /api/documents/:id` falla.
