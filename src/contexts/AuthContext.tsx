@@ -2,6 +2,7 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { api } from '@/lib/api';
+import { normalizeAuthRole } from '@/lib/auth-routing';
 
 export type User = {
   id: string;
@@ -13,8 +14,8 @@ export type User = {
 type AuthContextType = {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (data: RegisterData) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
+  register: (data: RegisterData) => Promise<User>;
   logout: () => void;
   updateUser: (patch: Partial<User>) => void;
 };
@@ -76,13 +77,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const u: User = {
         id: String(data?.user?.id ?? data?.userId ?? data?.id ?? ''),
         email: data?.user?.email ?? data?.email ?? email,
-        role: data?.user?.role ?? data?.role,
+        role: normalizeAuthRole(data?.user?.role ?? data?.role),
         name: data?.user?.name ?? data?.user?.fullName ?? data?.user?.full_name ?? data?.name ?? data?.fullName ?? data?.full_name,
       };
       localStorage.setItem('authUser', JSON.stringify(u));
       if (u.role) document.cookie = `authRole=${u.role}; path=/; SameSite=Lax`;
       setUser(u);
       window.dispatchEvent(new Event('auth:changed'));
+      return u;
     } finally {
       setLoading(false);
     }
@@ -125,13 +127,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const u: User = {
         id: String(data?.user?.id ?? data?.id ?? ''),
         email: data?.user?.email ?? registerData.email,
-        role: data?.user?.role ?? registerData.role ?? 'patient',
+        role: normalizeAuthRole(data?.user?.role ?? registerData.role) ?? 'patient',
         name: data?.user?.name ?? registerData.fullName ?? `${registerData.name} ${registerData.lastname}`.trim(),
       };
       localStorage.setItem('authUser', JSON.stringify(u));
       if (u.role) document.cookie = `authRole=${u.role}; path=/; SameSite=Lax`;
       setUser(u);
       window.dispatchEvent(new Event('auth:changed'));
+      return u;
     } finally {
       setLoading(false);
     }

@@ -291,3 +291,36 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 ### Decision
 - `MERGE`
 - Motivo: Reduce riesgo de reintroducir datos ficticios en produccion y queda integrado al flujo pre-release.
+
+---
+
+### Fecha
+- `2026-05-29`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit: pendiente
+
+### Scope del cambio
+- Login/redireccion por rol: `login()` ahora devuelve el usuario autenticado y `/login` redirige con el rol retornado por backend, no con una segunda lectura de `localStorage`.
+- Se centralizo normalizacion de rol y destino post-login en `src/lib/auth-routing.ts`.
+- `proxy.ts` reutiliza la misma logica para mantener consistencia entre middleware y cliente.
+
+### Gate tecnico
+- `npm run qa:smoke:roles`: `PASS`
+- `npm run qa:mock-guard`: `PASS`
+- `npm run qa:gate`: `PASS`
+- `npm run qa:visual:snapshots`: `PASS`
+
+### QA funcional ejecutado
+1. Flujo: Redireccion por rol en middleware
+   - Resultado: `PASS`
+   - Evidencia: `student /login -> /dashboard`, `patient /login -> /home`, `patient /dashboard -> /home`, `student /home -> /dashboard`.
+2. Flujo: Login mobile visual
+   - Resultado: `PASS`
+   - Evidencia: `tmp/visual-qa/login-mobile.png`
+   - Notas: Sin overflow ni mojibake visible.
+
+### Decision
+- `MERGE`
+- Motivo: Reduce una carrera/fragilidad post-login y alinea cliente + proxy en una unica fuente de verdad para rol/destino.
