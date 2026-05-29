@@ -4,6 +4,7 @@ import { chromium } from 'playwright';
 
 const baseUrl = process.env.QA_BASE_URL || 'http://127.0.0.1:3000';
 const outputDir = process.env.QA_VISUAL_OUTPUT_DIR || path.join('tmp', 'visual-qa');
+const mojibakePattern = /Ã|Â|â|ð|Å¸|ƒ|�/;
 
 const pages = [
   { name: 'funnel-qa-desktop', path: '/funnel-qa', role: 'admin', viewport: { width: 1440, height: 1000 } },
@@ -86,6 +87,7 @@ for (const spec of pages) {
     viewport: spec.viewport,
     unexpectedRedirect: finalUrl.pathname !== spec.path,
     horizontalOverflow: metrics.scrollWidth > metrics.clientWidth,
+    mojibakeDetected: mojibakePattern.test(metrics.text),
     metrics,
   });
 
@@ -99,7 +101,8 @@ await fs.writeFile(reportPath, JSON.stringify(report, null, 2));
 
 console.log(`Visual QA snapshots written to ${outputDir}`);
 for (const item of report) {
-  const status = item.horizontalOverflow || item.unexpectedRedirect ? 'WARN' : 'PASS';
+  const status = item.horizontalOverflow || item.unexpectedRedirect || item.mojibakeDetected ? 'WARN' : 'PASS';
   console.log(`${status} ${item.name}: ${item.screenshotPath}`);
   if (item.unexpectedRedirect) console.log(`  unexpected redirect: ${item.finalUrl}`);
+  if (item.mojibakeDetected) console.log('  mojibake-like text detected in visible copy');
 }

@@ -146,7 +146,7 @@ function HomeDesktop() {
   const today = new Date().toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
 
   return (
-    <DesktopShell role="patient" activeId="home" title={`Hola, ${firstName} ðŸ‘‹`} subtitle={`Hoy es ${today} Â· Tienes ${upcoming.length} cita${upcoming.length !== 1 ? 's' : ''} prÃ³xima${upcoming.length !== 1 ? 's' : ''}`}>
+    <DesktopShell role="patient" activeId="home" title={`Hola, ${firstName}`} subtitle={`Hoy es ${today} - Tienes ${upcoming.length} cita${upcoming.length !== 1 ? 's' : ''} proxima${upcoming.length !== 1 ? 's' : ''}`}>
       {selectedUniversity && (
         <Glass radius={18} style={{ padding: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 20 }}>
           <div>
@@ -339,7 +339,7 @@ export default function HomePage() {
         <div>
           <div style={{ fontSize: 14, color: 'var(--ink-500)', fontWeight: 500 }}>Hola,</div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, fontWeight: 700, color: 'var(--ink-900)', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
-            {firstName} ðŸ‘‹
+            {firstName}
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -388,13 +388,13 @@ export default function HomePage() {
       {/* Next appointment */}
       <div style={{ padding: '12px 20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, padding: '0 4px' }}>
-          <div style={{ fontSize: 13, color: 'var(--ink-600)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Tu prÃ³xima cita</div>
-          <Link href="/citas" style={{ color: 'var(--brand-700)', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>Ver todas â†’</Link>
+          <div style={{ fontSize: 13, color: 'var(--ink-600)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Tu proxima cita</div>
+          <Link href="/citas" style={{ color: 'var(--brand-700)', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>Ver todas</Link>
         </div>
 
         {loading ? (
           <div style={{ height: 160, borderRadius: 24, background: 'linear-gradient(135deg, #0E8AA5 0%, #4F46E5 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14 }}>Cargandoâ€¦</div>
+            <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14 }}>Cargando...</div>
           </div>
         ) : next ? (
           <div style={{ padding: 20, borderRadius: 24, position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, #0E8AA5 0%, #4F46E5 100%)', boxShadow: '0 18px 40px rgba(14,138,165,0.35), 0 4px 12px rgba(79,70,229,0.15)', color: '#fff' }}>
@@ -432,7 +432,7 @@ export default function HomePage() {
         ) : (
           <div style={{ padding: 24, borderRadius: 24, background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.9)', textAlign: 'center' }}>
             <Icon name="calendar" size={32} color="var(--ink-300)" />
-            <div style={{ fontSize: 15, color: 'var(--ink-600)', margin: '12px 0 16px', fontWeight: 500 }}>No tienes citas prÃ³ximas</div>
+            <div style={{ fontSize: 15, color: 'var(--ink-600)', margin: '12px 0 16px', fontWeight: 500 }}>No tienes citas proximas</div>
             <Button size="md" onClick={() => router.push('/explorar')}>Agendar cita</Button>
           </div>
         )}
@@ -442,7 +442,7 @@ export default function HomePage() {
       <div style={{ padding: '20px 20px 12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, padding: '0 4px' }}>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, color: 'var(--ink-900)', letterSpacing: '-0.02em' }}>Tratamientos</div>
-          <button style={{ background: 'none', border: 'none', color: 'var(--brand-700)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }} onClick={() => router.push('/explorar')}>Ver todos â†’</button>
+          <button style={{ background: 'none', border: 'none', color: 'var(--brand-700)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }} onClick={() => router.push('/explorar')}>Ver todos</button>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           {catalogLoading ? (
@@ -488,7 +488,7 @@ export default function HomePage() {
       <div style={{ padding: '8px 20px 20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, padding: '0 4px' }}>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, color: 'var(--ink-900)', letterSpacing: '-0.02em' }}>Estudiantes disponibles</div>
-          <button style={{ background: 'none', border: 'none', color: 'var(--brand-700)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }} onClick={() => router.push('/explorar')}>Ver todos â†’</button>
+          <button style={{ background: 'none', border: 'none', color: 'var(--brand-700)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }} onClick={() => router.push('/explorar')}>Ver todos</button>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {catalogLoading ? (
