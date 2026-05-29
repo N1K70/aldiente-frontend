@@ -3,6 +3,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { normalizeAuthRole } from '@/lib/auth-routing';
+import { clearBrowserAuthSession, setAuthCookie } from '@/lib/auth-session';
 
 export type User = {
   id: string;
@@ -71,7 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const token = data.token || data.accessToken || data.jwt;
       if (!token) throw new Error('No se recibió token');
       localStorage.setItem('authToken', token);
-      document.cookie = `authToken=${token}; path=/; SameSite=Lax`;
+      setAuthCookie('authToken', token);
       if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
 
       const u: User = {
@@ -81,7 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         name: data?.user?.name ?? data?.user?.fullName ?? data?.user?.full_name ?? data?.name ?? data?.fullName ?? data?.full_name,
       };
       localStorage.setItem('authUser', JSON.stringify(u));
-      if (u.role) document.cookie = `authRole=${u.role}; path=/; SameSite=Lax`;
+      if (u.role) setAuthCookie('authRole', u.role);
       setUser(u);
       window.dispatchEvent(new Event('auth:changed'));
       return u;
@@ -121,7 +122,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       localStorage.setItem('authToken', token);
-      document.cookie = `authToken=${token}; path=/; SameSite=Lax`;
+      setAuthCookie('authToken', token);
       if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
 
       const u: User = {
@@ -131,7 +132,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         name: data?.user?.name ?? registerData.fullName ?? `${registerData.name} ${registerData.lastname}`.trim(),
       };
       localStorage.setItem('authUser', JSON.stringify(u));
-      if (u.role) document.cookie = `authRole=${u.role}; path=/; SameSite=Lax`;
+      if (u.role) setAuthCookie('authRole', u.role);
       setUser(u);
       window.dispatchEvent(new Event('auth:changed'));
       return u;
@@ -150,11 +151,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('authUser');
-    document.cookie = 'authToken=; path=/; max-age=0';
-    document.cookie = 'authRole=; path=/; max-age=0';
+    clearBrowserAuthSession();
     setUser(null);
     window.dispatchEvent(new Event('auth:changed'));
   }, []);

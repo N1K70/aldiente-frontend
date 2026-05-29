@@ -324,3 +324,35 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 ### Decision
 - `MERGE`
 - Motivo: Reduce una carrera/fragilidad post-login y alinea cliente + proxy en una unica fuente de verdad para rol/destino.
+
+---
+
+### Fecha
+- `2026-05-29`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit: pendiente
+
+### Scope del cambio
+- Sesion expirada: se centralizo limpieza de sesion browser en `src/lib/auth-session.ts`.
+- `logout()` y el interceptor 401/refresh fallido ahora limpian `localStorage` y cookies `authToken`/`authRole`.
+- Refresh exitoso actualiza tambien la cookie `authToken`, no solo `localStorage`.
+
+### Gate tecnico
+- `npm run qa:smoke:roles`: `PASS`
+- `npm run qa:mock-guard`: `PASS`
+- `npm run qa:gate`: `PASS`
+
+### QA funcional ejecutado
+1. Flujo: Redirecciones protegidas por cookie/rol
+   - Resultado: `PASS`
+   - Evidencia: `qa:smoke:roles`
+   - Notas: Proxy mantiene redirecciones esperadas para estudiante/paciente/no autenticado.
+2. Flujo: Limpieza defensiva de sesion
+   - Resultado: `PASS`
+   - Evidencia: revision estatica `rg` confirma que la unica limpieza directa de `authToken`/`authRole` vive en `src/lib/auth-session.ts`.
+
+### Decision
+- `MERGE`
+- Motivo: Evita cookies de sesion obsoletas tras 401/refresh fallido y mantiene sincronizados cliente + proxy.
