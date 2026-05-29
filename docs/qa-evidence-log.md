@@ -383,3 +383,36 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 ### Decision
 - `MERGE`
 - Motivo: Evita regresiones de copy corrupto antes de llegar a QA visual/manual.
+
+---
+
+### Fecha
+- `2026-05-29`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit: pendiente
+
+### Scope del cambio
+- Routing productivo: se agregaron redirects canonicos para aliases en ingles que antes podian caer en 404.
+- Aliases cubiertos: `/appointments`, `/messages`, `/profile`, `/reservations`, `/services`, `/professionals`.
+- `npm run qa:smoke:routes` ahora valida redirects esperados ademas de status de rutas criticas.
+
+### Gate tecnico
+- `npm run qa:smoke:routes`: `PASS`
+- `npm run qa:smoke:roles`: `PASS`
+- `npm run qa:encoding-guard`: `PASS`
+- `npm run qa:mock-guard`: `PASS`
+- `npm run qa:gate`: `PASS`
+
+### QA funcional ejecutado
+1. Flujo: Aliases productivos directos
+   - Resultado: `PASS`
+   - Evidencia: `/appointments -> /citas`, `/messages -> /chat`, `/profile -> /perfil`, `/reservations -> /reservas`, `/services -> /servicios`, `/professionals -> /profesionales`.
+2. Flujo: Proxy/auth posterior a redirects
+   - Resultado: `PASS`
+   - Evidencia: `qa:smoke:roles`.
+
+### Decision
+- `MERGE`
+- Motivo: Evita 404 por navegacion directa a aliases esperables y deja smoke automatico para prevenir regresiones.
