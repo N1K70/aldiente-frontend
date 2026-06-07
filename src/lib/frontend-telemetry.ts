@@ -1,29 +1,4 @@
-type TelemetryKind = 'funnel_event' | 'frontend_error';
-
-type TelemetryEnvelope = {
-  kind: TelemetryKind;
-  timestamp: string;
-  route?: string;
-  data: Record<string, unknown>;
-};
-
-const REDACTED_KEYS = ['email', 'phone', 'rut', 'token', 'password', 'authorization', 'cookie'];
-
-function redactValue(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(redactValue);
-  if (!value || typeof value !== 'object') return value;
-  const source = value as Record<string, unknown>;
-  const out: Record<string, unknown> = {};
-  for (const [key, nested] of Object.entries(source)) {
-    const lowered = key.toLowerCase();
-    if (REDACTED_KEYS.some(blocked => lowered.includes(blocked))) {
-      out[key] = '[REDACTED]';
-      continue;
-    }
-    out[key] = redactValue(nested);
-  }
-  return out;
-}
+import { redactTelemetryValue, type TelemetryEnvelope, type TelemetryKind } from '@/lib/telemetry-contract';
 
 function getEndpoint() {
   const configured = process.env.NEXT_PUBLIC_FRONTEND_EVENTS_ENDPOINT?.trim();
@@ -39,7 +14,7 @@ export async function sendTelemetry(kind: TelemetryKind, payload: Omit<Telemetry
     kind,
     timestamp: payload.timestamp,
     route: payload.route,
-    data: redactValue(payload.data) as Record<string, unknown>,
+    data: redactTelemetryValue(payload.data) as Record<string, unknown>,
   };
 
   try {

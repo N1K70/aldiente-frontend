@@ -447,3 +447,35 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 ### Decision
 - `FOLLOW-UP`
 - Motivo: Cambio tecnico validado, pero falta repetir QA visual cuando el servidor Docker/hot-reload local vuelva a responder.
+
+---
+
+### Fecha
+- `2026-06-07`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit: pendiente
+
+### Scope del cambio
+- Telemetria frontend: se centralizo contrato/redaccion en `src/lib/telemetry-contract.ts`.
+- `/api/telemetry`, `frontend-telemetry` y `telemetry-store` usan una unica definicion `TelemetryEnvelope`.
+- Redaccion de PII y validacion de envelope quedan compartidas para evitar divergencia entre cliente e ingest.
+
+### Gate tecnico
+- `npm run qa:encoding-guard`: `PASS`
+- `npm run qa:mock-guard`: `PASS`
+- `npm run qa:funnel:event-contract`: `PASS`
+- `npm run qa:gate`: `PASS`
+
+### QA funcional ejecutado
+1. Flujo: Contrato de eventos funnel
+   - Resultado: `PASS`
+   - Evidencia: `qa:funnel:event-contract`.
+2. Flujo: Build/typecheck telemetria
+   - Resultado: `PASS`
+   - Evidencia: `qa:gate`.
+
+### Decision
+- `MERGE`
+- Motivo: Reduce divergencia entre emisor e ingest de telemetria sin cambiar el contrato publico.
