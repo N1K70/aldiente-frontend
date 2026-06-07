@@ -455,7 +455,7 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 
 ### Branch / Commit
 - Branch: `dev`
-- Commit: pendiente
+- Commit: `4eb68c2`
 
 ### Scope del cambio
 - Telemetria frontend: se centralizo contrato/redaccion en `src/lib/telemetry-contract.ts`.
