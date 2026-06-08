@@ -563,3 +563,34 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 ### Decision
 - `MERGE`
 - Motivo: La navegacion critica queda cubierta por links nativos y contrato Playwright automatizado.
+
+---
+
+### Fecha
+- `2026-06-08`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit: `working tree (sin commit todavia)`
+
+### Scope del cambio
+- Alineacion del gate local de release con la Definition of Done: `qa:release:local` ahora ejecuta tambien `qa:visual:snapshots`.
+- `docs/release-readiness-matrix.md` incluye `qa:navigation` como requisito explicito de release candidate.
+
+### Gate tecnico
+- `npm run qa:release:local`: `PASS`
+
+### QA funcional ejecutado
+1. Flujo: Release local completo
+   - Resultado: `PASS`
+   - Evidencia: `qa:mock-guard`, `qa:encoding-guard`, `qa:gate`, `qa:smoke:routes`, `qa:smoke:roles`, `qa:navigation`, `qa:visual:snapshots`.
+   - Notas: QA visual genera `WARN` por WebSocket HMR en Docker/headless, conocido y no bloqueante; no hubo blank pages ni documento principal `500`.
+
+### Hallazgos
+- Severidad: `Minor`
+- Descripcion: Persisten warnings HMR WebSocket en snapshots visuales locales.
+- Ticket Notion: `[P0] Release readiness matrix: flujos criticos y estado de validacion`
+
+### Decision
+- `MERGE`
+- Motivo: El gate local ya representa la DoD de release candidate antes de pasar a validaciones productivas.

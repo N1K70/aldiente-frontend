@@ -43,6 +43,7 @@ Guiar el trabajo restante hacia produccion con una matriz basada en riesgo. Noti
 - `npm run qa:gate`: PASS.
 - `npm run qa:smoke:routes`: PASS.
 - `npm run qa:smoke:roles`: PASS.
+- `npm run qa:navigation`: PASS.
 - `npm run qa:visual:snapshots`: PASS.
 - Variables productivas verificadas: `NEXT_PUBLIC_BACKEND_URL`, `NEXT_PUBLIC_CHAT_URL`, `NEXT_PUBLIC_FRONTEND_EVENTS_ENDPOINT`.
 - Matriz E2E productiva ejecutada con evidencia.
