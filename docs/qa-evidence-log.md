@@ -668,3 +668,44 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 ### Decision
 - `FOLLOW-UP`
 - Motivo: Falta validacion manual en ambiente productivo para cerrar P0.
+
+---
+
+### Fecha
+- `2026-06-08`
+
+### Branch / Commit
+- Branch: `master`
+- Commit: `working tree (sin commit todavia)`
+
+### Scope del cambio
+- QA productivo en `https://aldiente.app` con cuentas de prueba.
+- Hotfix local para `/perfil`: separacion de componentes desktop/mobile para mantener orden estable de hooks durante hidratacion.
+
+### Gate tecnico
+- `npm run qa:gate`: `PASS`
+
+### QA funcional ejecutado
+1. Flujo: Login estudiante productivo
+   - Resultado: `PASS parcial`
+   - Evidencia: `estudiante@test.com` con `password123` redirige a `/dashboard`; `/dashboard`, `/agenda`, `/servicios` y `/chat` renderizan contenido.
+   - Hallazgo: `/perfil` productivo muestra error de pagina y React #300 antes del hotfix.
+2. Flujo: Login paciente productivo
+   - Resultado: `FAIL`
+   - Evidencia: `paciente@test.com` con `password123` queda en `/login`; backend responde `401` y UI muestra credenciales incorrectas.
+3. Flujo: Hotfix `/perfil`
+   - Resultado: `PASS local`
+   - Evidencia: `qa:gate` compila `/perfil` despues de estabilizar hook order.
+
+### Hallazgos
+- Severidad: `Blocker`
+- Descripcion: Cuenta paciente de prueba no autentica en produccion con las credenciales indicadas.
+- Ticket Notion: `[P0] Release candidate: validar produccion post-deploy`
+
+- Severidad: `Major`
+- Descripcion: `/perfil` productivo falla para estudiante con React #300; hotfix preparado localmente.
+- Ticket Notion: `[P0] Release candidate: validar produccion post-deploy`
+
+### Decision
+- `FOLLOW-UP`
+- Motivo: Se requiere redeploy con hotfix y corregir/confirmar credenciales paciente antes de cerrar E2E productivo.

@@ -371,15 +371,11 @@ function PerfilDesktop() {
   );
 }
 
-// ── Mobile page ────────────────────────────────────────────────
-export default function PerfilPage() {
-  const isDesktop = useIsDesktop();
+function PerfilMobile() {
   const router = useRouter();
   const { user, logout } = useAuth();
   const { profile, loading, saving, loaded, save } = useProfile(user?.role === 'student' ? 'student' : 'patient');
   const [section, setSection] = useState<Section | null>(null);
-
-  if (isDesktop) return <PerfilDesktop />;
 
   const displayName = resolveDisplayName(user?.name, user?.email);
   const initials = getInitials(displayName, '?');
@@ -481,4 +477,10 @@ export default function PerfilPage() {
       </nav>
     </div>
   );
+}
+
+// Mobile and desktop are split so hook order stays stable during hydration.
+export default function PerfilPage() {
+  const isDesktop = useIsDesktop();
+  return isDesktop ? <PerfilDesktop /> : <PerfilMobile />;
 }
