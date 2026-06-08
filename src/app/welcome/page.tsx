@@ -12,12 +12,8 @@ export default function WelcomePage() {
 
   const cta = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <Link href="/signup" style={{ textDecoration: 'none', display: 'block' }}>
-        <Button size="lg" full trailingIcon="arrow_right">Crear cuenta</Button>
-      </Link>
-      <Link href="/login" style={{ textDecoration: 'none', display: 'block' }}>
-        <Button size="lg" full variant="glass">Ya tengo cuenta</Button>
-      </Link>
+      <Button href="/signup" size="lg" full trailingIcon="arrow_right">Crear cuenta</Button>
+      <Button href="/login" size="lg" full variant="glass">Ya tengo cuenta</Button>
     </div>
   );
 

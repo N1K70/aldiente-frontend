@@ -86,7 +86,7 @@ function mapMsg(m: Record<string, unknown>): ChatMessage {
   };
 }
 
-// ── HTTP fallback ──────────────────────────────────────────────
+// HTTP fallback.
 
 async function fetchHistory(appointmentId: string): Promise<ChatMessage[]> {
   try {
@@ -154,7 +154,7 @@ function appendUniqueMessage(prev: ChatMessage[], message: ChatMessage) {
   return [...prev, message];
 }
 
-// ── Hook ───────────────────────────────────────────────────────
+// Hook.
 
 export function useChat(appointmentId: string | null) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -163,6 +163,7 @@ export function useChat(appointmentId: string | null) {
   const modeRef = useRef<'socket' | 'http' | 'pending'>('pending');
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const missingChatConfigReportedRef = useRef(false);
   const lastSignatureRef = useRef('');
 
   const stopPoll = useCallback(() => {
@@ -202,7 +203,20 @@ export function useChat(appointmentId: string | null) {
 
     // Canonical persistence mode: HTTP-backed chat history.
     // Socket can be re-enabled by setting NEXT_PUBLIC_CHAT_TRANSPORT=socket.
-    if (FORCE_HTTP_TRANSPORT || !CHAT_URL) { startHttpMode(appointmentId); return; }
+    if (FORCE_HTTP_TRANSPORT || !CHAT_URL) {
+      if (process.env.NODE_ENV === 'production' && !missingChatConfigReportedRef.current) {
+        missingChatConfigReportedRef.current = true;
+        reportFrontendError({
+          module: 'chat',
+          action: 'missingChatConfig',
+          severity: 'warning',
+          message: 'NEXT_PUBLIC_CHAT_URL no configurado en produccion; usando fallback HTTP',
+          details: { appointmentId },
+        });
+      }
+      startHttpMode(appointmentId);
+      return;
+    }
 
     // Try socket, fall back to HTTP after timeout
     const socket = io(CHAT_URL, {

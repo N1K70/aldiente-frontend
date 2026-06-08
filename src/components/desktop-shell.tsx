@@ -1,33 +1,35 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Icon, Button, Glass } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
 import { getInitials, resolveDisplayName } from '@/lib/user-display';
 
 export const DESKTOP_BP = 1024;
-const MOCK_NAMES = new Set(['maria rodriguez', 'maría rodríguez', 'usuario demo', 'test user']);
 
-function normalizeName(value: string) {
-  return value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim();
+function subscribeToViewport(callback: () => void) {
+  const mq = window.matchMedia(`(min-width: ${DESKTOP_BP}px)`);
+  const handler = () => callback();
+  queueMicrotask(callback);
+
+  if (mq.addEventListener) {
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }
+
+  mq.addListener(handler);
+  return () => mq.removeListener(handler);
+}
+
+function getViewportSnapshot() {
+  return window.matchMedia(`(min-width: ${DESKTOP_BP}px)`).matches;
 }
 
 export function useIsDesktop() {
-  const [isDesktop, setIsDesktop] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia(`(min-width: ${DESKTOP_BP}px)`);
-    setIsDesktop(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
-  return isDesktop;
+  return useSyncExternalStore(subscribeToViewport, getViewportSnapshot, () => false);
 }
 
 // ── Sidebar ───────────────────────────────────────────────────────────────────
@@ -65,12 +67,12 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({ icon, label, href, active, ba
     style={{
       display: 'flex', alignItems: 'center', gap: 12,
       padding: '10px 14px', borderRadius: 12, cursor: 'pointer',
+      textDecoration: 'none',
       background: active ? 'linear-gradient(135deg, rgba(16,169,198,0.14), rgba(79,70,229,0.08))' : 'transparent',
       color: active ? 'var(--brand-700)' : 'var(--ink-700)',
       fontWeight: active ? 700 : 500, fontSize: 14,
       border: active ? '1px solid rgba(16,169,198,0.2)' : '1px solid transparent',
       transition: 'all 0.15s',
-      textDecoration: 'none',
     }}
   >
     <Icon name={icon as Parameters<typeof Icon>[0]['name']} size={18} color={active ? 'var(--brand-600)' : 'var(--ink-500)'} />
@@ -130,7 +132,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role = 'patient', activeId }) 
 
       {/* Nav links */}
       {links.map(l => (
-        <SidebarLink key={l.id} icon={l.icon} label={l.label} href={l.href} active={l.id === activeId} badge={'badge' in l ? (l as { badge: string }).badge : undefined} />
+        <SidebarLink key={l.id} icon={l.icon} label={l.label} href={l.href} active={l.id === activeId} badge={l.badge} />
       ))}
 
       <div style={{ flex: 1 }} />

@@ -1,9 +1,10 @@
 import axios from 'axios';
+import { clearBrowserAuthSession, setAuthCookie } from '@/lib/auth-session';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001');
 
 export const api = axios.create({
-  baseURL: BACKEND_URL,
+  ...(BACKEND_URL ? { baseURL: BACKEND_URL } : {}),
   timeout: 10000,
 });
 
@@ -39,15 +40,14 @@ api.interceptors.response.use(
           const newToken = data?.token;
           if (newToken) {
             localStorage.setItem('authToken', newToken);
+            setAuthCookie('authToken', newToken);
             config.headers.Authorization = `Bearer ${newToken}`;
             return api(config);
           }
         } catch {}
       }
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('authUser');
+        clearBrowserAuthSession();
         window.dispatchEvent(new Event('auth:changed'));
         window.dispatchEvent(new Event('auth:expired'));
         if (window.location.pathname !== '/login') window.location.href = '/login';

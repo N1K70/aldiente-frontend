@@ -2,6 +2,8 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { api } from '@/lib/api';
+import { normalizeAuthRole } from '@/lib/auth-routing';
+import { clearBrowserAuthSession, setAuthCookie } from '@/lib/auth-session';
 import { isLikelyMockName } from '@/lib/user-display';
 
 export type User = {
@@ -14,8 +16,8 @@ export type User = {
 type AuthContextType = {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (data: RegisterData) => Promise<{ role?: User['role']; authenticated: boolean }>;
+  login: (email: string, password: string) => Promise<User>;
+  register: (data: RegisterData) => Promise<User>;
   logout: () => void;
   updateUser: (patch: Partial<User>) => void;
 };
@@ -108,22 +110,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const token = data.token || data.accessToken || data.jwt;
       if (!token) throw new Error('No se recibio token');
       localStorage.setItem('authToken', token);
-      document.cookie = `authToken=${token}; path=/; SameSite=Lax`;
+      setAuthCookie('authToken', token);
       if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
 
       const u: User = {
         id: String(data?.user?.id ?? data?.userId ?? data?.id ?? ''),
         email: data?.user?.email ?? data?.email ?? email,
-        role: data?.user?.role ?? data?.role,
+        role: normalizeAuthRole(data?.user?.role ?? data?.role),
         name: sanitizeUserName(data?.user?.name ?? data?.user?.fullName ?? data?.user?.full_name ?? data?.name ?? data?.fullName ?? data?.full_name),
       };
       localStorage.setItem('authUser', JSON.stringify(u));
-      if (u.role) document.cookie = `authRole=${u.role}; path=/; SameSite=Lax`;
+      if (u.role) setAuthCookie('authRole', u.role);
       if (u.role === 'patient') {
         localStorage.setItem(`${PATIENT_ONBOARDING_KEY}:${u.id || u.email}`, 'true');
       }
       setUser(u);
       window.dispatchEvent(new Event('auth:changed'));
+      return u;
     } finally {
       setLoading(false);
     }
@@ -158,21 +161,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       localStorage.setItem('authToken', token);
-      document.cookie = `authToken=${token}; path=/; SameSite=Lax`;
+      setAuthCookie('authToken', token);
       if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
 
       const u: User = {
         id: String(data?.user?.id ?? data?.id ?? ''),
         email: data?.user?.email ?? registerData.email,
-        role: data?.user?.role ?? registerData.role ?? 'patient',
+        role: normalizeAuthRole(data?.user?.role ?? registerData.role) ?? 'patient',
         name: sanitizeUserName(data?.user?.name ?? registerData.fullName ?? `${registerData.name} ${registerData.lastname}`.trim()),
       };
 
       localStorage.setItem('authUser', JSON.stringify(u));
-      if (u.role) document.cookie = `authRole=${u.role}; path=/; SameSite=Lax`;
+      if (u.role) setAuthCookie('authRole', u.role);
       setUser(u);
       window.dispatchEvent(new Event('auth:changed'));
-      return { role: u.role, authenticated: Boolean(token) };
+      return u;
     } finally {
       setLoading(false);
     }
@@ -192,11 +195,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('authUser');
-    document.cookie = 'authToken=; path=/; max-age=0';
-    document.cookie = 'authRole=; path=/; max-age=0';
+    clearBrowserAuthSession();
     setUser(null);
     window.dispatchEvent(new Event('auth:changed'));
   }, []);

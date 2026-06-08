@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 
 // ── Icons ─────────────────────────────────────────────────────
 interface IconProps { name: string; size?: number; color?: string; stroke?: number; }
@@ -77,6 +78,7 @@ export const Glass: React.FC<GlassProps> = ({ children, hi = false, style = {}, 
 interface ButtonProps {
   children: React.ReactNode;
   onClick?: () => void;
+  href?: string;
   variant?: 'primary' | 'glass' | 'ghost' | 'outline';
   size?: 'sm' | 'md' | 'lg';
   icon?: string;
@@ -89,7 +91,7 @@ interface ButtonProps {
 
 export const Button: React.FC<ButtonProps> = ({
   children, onClick, variant = 'primary', size = 'md',
-  icon, trailingIcon, full = false, disabled = false, style = {}, type = 'button',
+  href, icon, trailingIcon, full = false, disabled = false, style = {}, type = 'button',
 }) => {
   const [hover, setHover] = useState(false);
   const [press, setPress] = useState(false);
@@ -134,6 +136,53 @@ export const Button: React.FC<ButtonProps> = ({
     },
   };
 
+  const buttonStyle: React.CSSProperties = {
+    height: s.h,
+    padding: `0 ${s.px}px`,
+    gap: s.gap,
+    borderRadius: s.r,
+    fontSize: s.fs,
+    fontWeight: 600,
+    fontFamily: 'var(--font-body)',
+    letterSpacing: '-0.01em',
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    opacity: disabled ? 0.5 : 1,
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'transform 180ms var(--ease-out-quart), box-shadow 180ms var(--ease-out-quart), background 180ms',
+    transform: press ? 'scale(0.98) translateY(1px)' : hover ? 'translateY(-1px)' : 'none',
+    width: full ? '100%' : 'auto',
+    textDecoration: 'none',
+    ...variantStyles[variant],
+    ...style,
+  };
+
+  const content = (
+    <>
+      {icon && <Icon name={icon} size={size === 'lg' ? 22 : 20} color="currentColor" />}
+      {children}
+      {trailingIcon && <Icon name={trailingIcon} size={size === 'lg' ? 22 : 20} color="currentColor" />}
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        aria-disabled={disabled || undefined}
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => { setHover(false); setPress(false); }}
+        onMouseDown={() => setPress(true)}
+        onMouseUp={() => setPress(false)}
+        onClick={disabled ? event => event.preventDefault() : onClick}
+        style={buttonStyle}
+      >
+        {content}
+      </Link>
+    );
+  }
+
   return (
     <button
       type={type}
@@ -143,30 +192,9 @@ export const Button: React.FC<ButtonProps> = ({
       onMouseLeave={() => { setHover(false); setPress(false); }}
       onMouseDown={() => setPress(true)}
       onMouseUp={() => setPress(false)}
-      style={{
-        height: s.h,
-        padding: `0 ${s.px}px`,
-        gap: s.gap,
-        borderRadius: s.r,
-        fontSize: s.fs,
-        fontWeight: 600,
-        fontFamily: 'var(--font-body)',
-        letterSpacing: '-0.01em',
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 0.5 : 1,
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        transition: 'transform 180ms var(--ease-out-quart), box-shadow 180ms var(--ease-out-quart), background 180ms',
-        transform: press ? 'scale(0.98) translateY(1px)' : hover ? 'translateY(-1px)' : 'none',
-        width: full ? '100%' : 'auto',
-        ...variantStyles[variant],
-        ...style,
-      }}
+      style={buttonStyle}
     >
-      {icon && <Icon name={icon} size={size === 'lg' ? 22 : 20} color="currentColor" />}
-      {children}
-      {trailingIcon && <Icon name={trailingIcon} size={size === 'lg' ? 22 : 20} color="currentColor" />}
+      {content}
     </button>
   );
 };

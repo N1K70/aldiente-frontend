@@ -1,9 +1,4 @@
-export type TelemetryEnvelope = {
-  kind: 'funnel_event' | 'frontend_error';
-  timestamp: string;
-  route?: string;
-  data: Record<string, unknown>;
-};
+import type { TelemetryEnvelope } from '@/lib/telemetry-contract';
 
 const STORE_LIMIT = 200;
 

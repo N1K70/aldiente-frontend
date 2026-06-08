@@ -11,6 +11,7 @@ import { api } from '@/lib/api';
 import { fetchPublicServicesByUniversityName, fetchUniversities, filterHookServices, PublicServiceItem, UniversityOption } from '@/lib/public-services';
 import { reportFrontendError } from '@/lib/frontend-observability';
 import { trackFunnelEvent } from '@/lib/frontend-analytics';
+import { useAuth } from '@/contexts/AuthContext';
 
 const HOOK_SERVICES = [
   { key: 'limpieza', name: 'Limpieza dental', icon: 'sparkle', description: 'Limpieza profesional y cuidado preventivo.' },
@@ -685,8 +686,22 @@ function GuestCheckout() {
 
 function BookingInner() {
   const params = useSearchParams();
+  const router = useRouter();
+  const { user, loading } = useAuth();
   const studentId = params.get('studentId');
   const serviceId = params.get('serviceId');
+
+  useEffect(() => {
+    if (studentId && !loading && !user) router.replace('/login');
+  }, [loading, router, studentId, user]);
+
+  if (studentId && loading) {
+    return <div style={{ minHeight: '100dvh', background: 'var(--bg-aurora)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ink-500)' }}>Cargando...</div>;
+  }
+
+  if (studentId && !user) {
+    return <div style={{ minHeight: '100dvh', background: 'var(--bg-aurora)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ink-500)' }}>Redirigiendo...</div>;
+  }
 
   if (studentId) {
     return <AuthBooking studentId={studentId} preselectedServiceId={serviceId} />;

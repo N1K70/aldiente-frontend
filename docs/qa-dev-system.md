@@ -32,6 +32,7 @@ Si el cambio toca autenticacion, navegacion o reservas, validar al menos:
 3. Explorar -> Reserva -> Confirmacion.
 4. Acceso a chat segun estado de cita.
 5. Documentos y reagendamiento (si el cambio afecta citas/perfil).
+6. Funnel QA: revisar `/funnel-qa` y confirmar eventos esperados (`visit`, `signup_completed`, `service_viewed`, `booking_started`, `payment_started`, `payment_completed`).
 
 ## Politica de severidad
 
@@ -67,6 +68,46 @@ Si la app ya esta levantada, puedes ejecutar ambos smokes con:
 
 `npm run qa:smoke:all`
 
+Para corrida local de pre-release en un solo paso:
+
+`npm run qa:release:local`
+
+## Check de variables productivas
+
+Antes de promover un release candidate, validar que las variables publicas de produccion apunten a endpoints productivos:
+
+`npm run qa:env:production`
+
+Tambien se puede validar un snapshot local exportado desde Vercel o preparado manualmente:
+
+`npm run qa:env:production -- .env.production.local`
+
+El check exige `https` y bloquea `localhost` para `NEXT_PUBLIC_BACKEND_URL` y `NEXT_PUBLIC_CHAT_URL`. `NEXT_PUBLIC_FRONTEND_EVENTS_ENDPOINT` puede ser `/api/...` o una URL `https`.
+
+## Guardrail anti-mock en produccion
+
+Para auditar que el codigo productivo no reintroduzca datos ficticios en `src`:
+
+`npm run qa:mock-guard`
+
+El comando falla si encuentra marcadores como `mock`, `dummy`, `fake`, `sample`, `fixture`, `demo` o nombres de fixtures visuales dentro de codigo productivo. Los fixtures en `scripts` y `docs` siguen permitidos para QA.
+
+## Guardrail anti-mojibake en codigo fuente
+
+Para auditar que el codigo productivo no tenga texto con encoding corrupto:
+
+`npm run qa:encoding-guard`
+
+El comando escanea `src` y falla si detecta patrones visibles de mojibake como `Ã`, `Â`, `â`, `ð`, `Å¸`, `ƒ` o `�`. Tambien se ejecuta dentro de `npm run qa:release:local`.
+
+## QA visual con Playwright
+
+Para cambios visuales o de UX, ejecutar la app local con Docker/hot reload y luego:
+
+`npm run qa:visual:snapshots`
+
+El comando captura pantallas desktop/mobile de rutas criticas, valida que no haya overflow horizontal y reporta redirecciones inesperadas. Las evidencias se guardan localmente en `tmp/visual-qa` y no se versionan.
+
 ## Contrato de adjuntos (chat)
 
 Para validar contrato de payload de adjuntos en chat antes de E2E backend:
@@ -82,3 +123,14 @@ El fixture debe ser un array JSON de mensajes con campo `attachment`.
 Fixture versionado para pruebas tipo backend real:
 
 `npm run qa:chat:attachment-contract:fixture`
+
+## Contrato de eventos de funnel
+
+Para validar estructura base de eventos de funnel:
+
+`npm run qa:funnel:event-contract`
+
+Chequea que cada evento tenga:
+- `name` dentro del set permitido de funnel.
+- `timestamp` no vacio.
+- `payload` como objeto.

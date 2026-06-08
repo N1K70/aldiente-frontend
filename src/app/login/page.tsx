@@ -7,15 +7,7 @@ import { Button, Icon, TextField, Glass } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsDesktop } from '@/components/desktop-shell';
 import { reportFrontendError } from '@/lib/frontend-observability';
-
-function roleHome() {
-  try {
-    const role = JSON.parse(localStorage.getItem('authUser') ?? '{}').role;
-    return role === 'student' || role === 'admin' ? '/dashboard' : '/home';
-  } catch {
-    return '/home';
-  }
-}
+import { getRoleHome } from '@/lib/auth-routing';
 
 function MailOnlyNotice() {
   return (
@@ -56,8 +48,8 @@ export default function LoginPage() {
     }
     setLoading(true);
     try {
-      await login(normalizedEmail, normalizedPw);
-      router.push(roleHome());
+      const authenticatedUser = await login(normalizedEmail, normalizedPw);
+      router.replace(getRoleHome(authenticatedUser.role));
     } catch {
       reportFrontendError({
         module: 'login',

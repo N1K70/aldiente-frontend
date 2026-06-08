@@ -378,17 +378,12 @@ function SignupInner() {
                   university: normalizedUniversity || undefined,
                   careerYear: data.careerYear || undefined,
                 });
-                if (result.authenticated) {
-                  const finalRole = result.role ?? role;
-                  trackFunnelEvent('funnel_signup_completed', {
-                    role: finalRole,
-                    emailDomain: normalizedEmail.split('@')[1] ?? null,
-                  });
-                  router.push(finalRole === 'student' || finalRole === 'admin' ? '/dashboard' : '/quiz');
-                  return;
-                }
-
-                router.push('/login?registered=1');
+                const finalRole = result.role ?? role;
+                trackFunnelEvent('funnel_signup_completed', {
+                  role: finalRole,
+                  emailDomain: normalizedEmail.split('@')[1] ?? null,
+                });
+                router.push(finalRole === 'student' || finalRole === 'admin' ? '/dashboard' : '/quiz');
               } catch {
                 reportFrontendError({
                   module: 'signup',

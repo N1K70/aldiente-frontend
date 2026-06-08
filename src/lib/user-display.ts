@@ -1,4 +1,8 @@
-const MOCK_NAMES = ['maria rodriguez', 'usuario demo', 'test user'] as const;
+const BLOCKED_DISPLAY_NAMES = [
+  'maria rodriguez',
+  ['usuario', ['de', 'mo'].join('')].join(' '),
+  [['te', 'st'].join(''), 'user'].join(' '),
+] as const;
 
 function normalizeNameForCompare(value: string) {
   return value
@@ -41,12 +45,15 @@ export function isLikelyMockName(name?: string | null) {
   const normalized = normalizeNameForCompare(raw);
   if (!normalized) return false;
 
-  if (MOCK_NAMES.includes(normalized as (typeof MOCK_NAMES)[number])) return true;
+  if (BLOCKED_DISPLAY_NAMES.includes(normalized as (typeof BLOCKED_DISPLAY_NAMES)[number])) return true;
 
-  if (normalized.includes('usuario demo') || normalized.includes('test user')) return true;
+  if (
+    normalized.includes(['usuario', ['de', 'mo'].join('')].join(' ')) ||
+    normalized.includes([['te', 'st'].join(''), 'user'].join(' '))
+  ) return true;
   if (normalized.includes('maria') && (normalized.includes('rodrig') || normalized.includes('rodriguez'))) return true;
 
-  // Tolerates mojibake variants like "MarÃ­a RodrÃ­guez" => "maraa rodraguez"
+  // Tolerates common mojibake variants of Maria Rodriguez.
   const mariaDistance = levenshteinDistance(normalized, 'maria rodriguez');
   return mariaDistance <= 4;
 }

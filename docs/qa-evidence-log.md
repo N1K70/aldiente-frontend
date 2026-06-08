@@ -2,7 +2,7 @@
 
 ## Registro
 
-Usa este bloque por cada ronda de validación.
+Usa este bloque por cada ronda de validacion.
 
 ### Fecha
 - `YYYY-MM-DD`
@@ -14,7 +14,7 @@ Usa este bloque por cada ronda de validación.
 ### Scope del cambio
 - 
 
-### Gate técnico
+### Gate tecnico
 - `npm run typecheck`: `PASS | FAIL`
 - `npm run build`: `PASS | FAIL`
 
@@ -30,10 +30,10 @@ Usa este bloque por cada ronda de validación.
 
 ### Hallazgos
 - Severidad:
-- Descripción:
+- Descripcion:
 - Ticket Notion:
 
-### Decisión
+### Decision
 - `MERGE | NO MERGE`
 - Motivo:
 
@@ -47,17 +47,17 @@ Usa este bloque por cada ronda de validación.
 - Commit: `3d72e92` (HEAD actual)
 
 ### Scope del cambio
-- Fix de validación en signup (`normalizedEmail` fuera de scope en catch).
+- Fix de validacion en signup (`normalizedEmail` fuera de scope en catch).
 - Observabilidad de errores en flujo de documentos (carga, subida, eliminación).
 - Observabilidad de errores en retorno Webpay (cancel/commit).
 - Observabilidad de errores en chat (historial, conexión socket fallback, envío HTTP fallback).
 
-### Gate técnico
+### Gate tecnico
 - `npm run typecheck`: `PASS`
 - `npm run build`: `PASS`
 
 ### QA funcional ejecutado
-1. Flujo: Smoke de rutas críticas
+1. Flujo: Smoke de rutas criticas
    - Resultado: `PASS`
    - Evidencia: `npm run qa:smoke:routes`
    - Notas: Rutas públicas/protegidas responden según esperado.
@@ -68,12 +68,12 @@ Usa este bloque por cada ronda de validación.
 
 ### Hallazgos
 - Severidad: `N/A`
-- Descripción: Sin bloqueantes técnicos posteriores a los cambios.
+- Descripcion: Sin bloqueantes técnicos posteriores a los cambios.
 - Ticket Notion: `[P1] Instrumentar errores críticos frontend: auth, pagos, chat, documentos`
 
-### Decisión
+### Decision
 - `MERGE`
-- Motivo: Gate técnico en verde y cobertura incremental de observabilidad en flujos críticos.
+- Motivo: Gate tecnico en verde y cobertura incremental de observabilidad en flujos críticos.
 
 ---
 
@@ -90,7 +90,7 @@ Usa este bloque por cada ronda de validación.
 - Reserva autenticada sin servicio ficticio.
 - Instrumentación de observabilidad local con `reportFrontendError(...)`.
 
-### Gate técnico
+### Gate tecnico
 - `npm run typecheck`: `PASS`
 - `npm run build`: `PASS`
 
@@ -110,12 +110,12 @@ Usa este bloque por cada ronda de validación.
 
 ### Hallazgos
 - Severidad: `N/A`
-- Descripción: Sin bloqueantes técnicos en gate.
+- Descripcion: Sin bloqueantes técnicos en gate.
 - Ticket Notion: `[P0] Hardening: reemplazar fallbacks mock por estados de error explícitos`
 
-### Decisión
+### Decision
 - `MERGE`
-- Motivo: cambios alineados a P0, gate técnico en verde y manejo de errores más robusto.
+- Motivo: cambios alineados a P0, Gate tecnico en verde y manejo de errores más robusto.
 
 ---
 
@@ -222,6 +222,415 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 ---
 
 ### Fecha
+- `2026-05-13`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit: `f4c0d59`, `608cd41`, `ba74392`
+
+### Scope del cambio
+- Chat accesible por `appointmentId` aun cuando la cita no aparezca en el listado local.
+- Landing con seccion FAQ + senales de confianza (desktop/mobile).
+- Home con bloque "Confianza y ayuda" para reforzar supervision y acceso rapido a chat/FAQ.
+
+### Gate tecnico
+- `npm run typecheck`: `PASS`
+- `npm run build`: `PASS`
+
+### QA funcional ejecutado
+1. Flujo: Acceso a chat desde URL con `appointmentId`
+   - Resultado: `PASS`
+   - Evidencia: `npm run qa:gate` posterior al cambio `f4c0d59`
+   - Notas: Se crea thread fallback y no depende de que la cita este en la lista local.
+2. Flujo: Landing con FAQ y confianza
+   - Resultado: `PASS`
+   - Evidencia: `npm run qa:gate` posterior al cambio `608cd41`
+   - Notas: Secciones visibles en desktop y mobile.
+3. Flujo: Home con "Confianza y ayuda"
+   - Resultado: `PASS`
+   - Evidencia: `npm run qa:gate` posterior al cambio `ba74392`
+   - Notas: Accesos rapidos a chat y FAQ activos.
+
+### Hallazgos
+- Severidad: `Minor`
+- Descripcion: Persisten textos con encoding roto (mojibake) en algunas pantallas; no bloquea flujo, pero afecta calidad visual/copy.
+- Ticket Notion: Backlog P1 (copy y conversion)
+
+### Decision
+- `MERGE`
+- Motivo: Cambios funcionales y de confianza validados con gate tecnico en verde.
+
+---
+
+### Fecha
+- `2026-05-29`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit: `ef9b6f4`
+
+### Scope del cambio
+- Guardrail anti-mock para produccion: nuevo `npm run qa:mock-guard` escanea `src` y falla si aparecen marcadores de datos ficticios (`mock`, `dummy`, `fake`, `sample`, `fixture`, `demo`, fixtures Visual QA).
+- `qa:release:local` ahora ejecuta el guard antes de typecheck/build/smokes.
+
+### Gate tecnico
+- `npm run qa:mock-guard`: `PASS`
+- `npm run qa:visual:snapshots`: `PASS`
+- `npm run qa:gate`: `PASS`
+
+### QA funcional ejecutado
+1. Flujo: Auditoria de mocks/fallbacks en codigo productivo
+   - Resultado: `PASS`
+   - Evidencia: `Production mock guard passed: no mock/demo markers found in src.`
+   - Notas: Fixtures QA siguen permitidos en `scripts` y `docs`; el bloqueo aplica solo a `src`.
+2. Flujo: Capturas visuales rutas criticas
+   - Resultado: `PASS`
+   - Evidencia: `tmp/visual-qa`
+   - Notas: Sin overflow, redirects inesperados ni mojibake visible.
+
+### Decision
+- `MERGE`
+- Motivo: Reduce riesgo de reintroducir datos ficticios en produccion y queda integrado al flujo pre-release.
+
+---
+
+### Fecha
+- `2026-05-29`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit: `7828c9b`
+
+### Scope del cambio
+- Login/redireccion por rol: `login()` ahora devuelve el usuario autenticado y `/login` redirige con el rol retornado por backend, no con una segunda lectura de `localStorage`.
+- Se centralizo normalizacion de rol y destino post-login en `src/lib/auth-routing.ts`.
+- `proxy.ts` reutiliza la misma logica para mantener consistencia entre middleware y cliente.
+
+### Gate tecnico
+- `npm run qa:smoke:roles`: `PASS`
+- `npm run qa:mock-guard`: `PASS`
+- `npm run qa:gate`: `PASS`
+- `npm run qa:visual:snapshots`: `PASS`
+
+### QA funcional ejecutado
+1. Flujo: Redireccion por rol en middleware
+   - Resultado: `PASS`
+   - Evidencia: `student /login -> /dashboard`, `patient /login -> /home`, `patient /dashboard -> /home`, `student /home -> /dashboard`.
+2. Flujo: Login mobile visual
+   - Resultado: `PASS`
+   - Evidencia: `tmp/visual-qa/login-mobile.png`
+   - Notas: Sin overflow ni mojibake visible.
+
+### Decision
+- `MERGE`
+- Motivo: Reduce una carrera/fragilidad post-login y alinea cliente + proxy en una unica fuente de verdad para rol/destino.
+
+---
+
+### Fecha
+- `2026-05-29`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit: `c99d388`
+
+### Scope del cambio
+- Sesion expirada: se centralizo limpieza de sesion browser en `src/lib/auth-session.ts`.
+- `logout()` y el interceptor 401/refresh fallido ahora limpian `localStorage` y cookies `authToken`/`authRole`.
+- Refresh exitoso actualiza tambien la cookie `authToken`, no solo `localStorage`.
+
+### Gate tecnico
+- `npm run qa:smoke:roles`: `PASS`
+- `npm run qa:mock-guard`: `PASS`
+- `npm run qa:gate`: `PASS`
+
+### QA funcional ejecutado
+1. Flujo: Redirecciones protegidas por cookie/rol
+   - Resultado: `PASS`
+   - Evidencia: `qa:smoke:roles`
+   - Notas: Proxy mantiene redirecciones esperadas para estudiante/paciente/no autenticado.
+2. Flujo: Limpieza defensiva de sesion
+   - Resultado: `PASS`
+   - Evidencia: revision estatica `rg` confirma que la unica limpieza directa de `authToken`/`authRole` vive en `src/lib/auth-session.ts`.
+
+### Decision
+- `MERGE`
+- Motivo: Evita cookies de sesion obsoletas tras 401/refresh fallido y mantiene sincronizados cliente + proxy.
+
+---
+
+### Fecha
+- `2026-05-29`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit: `a785f85`
+
+### Scope del cambio
+- Encoding/copy productivo: se limpio mojibake restante en Home desktop/mobile.
+- Nuevo `npm run qa:encoding-guard` escanea `src` para detectar texto corrupto en codigo fuente.
+- `qa:release:local` ahora ejecuta `qa:encoding-guard` despues de `qa:mock-guard`.
+
+### Gate tecnico
+- `npm run qa:encoding-guard`: `PASS`
+
+### QA funcional ejecutado
+1. Flujo: Auditoria de encoding fuente
+   - Resultado: `PASS`
+   - Evidencia: `Source encoding guard passed: no mojibake-like text found in src.`
+   - Notas: `rg` no encuentra patrones `Ã|Â|â|ð|Å¸|ƒ|�` en `src`.
+
+### Decision
+- `MERGE`
+- Motivo: Evita regresiones de copy corrupto antes de llegar a QA visual/manual.
+
+---
+
+### Fecha
+- `2026-05-29`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit: `350c48c`
+
+### Scope del cambio
+- Routing productivo: se agregaron redirects canonicos para aliases en ingles que antes podian caer en 404.
+- Aliases cubiertos: `/appointments`, `/messages`, `/profile`, `/reservations`, `/services`, `/professionals`.
+- `npm run qa:smoke:routes` ahora valida redirects esperados ademas de status de rutas criticas.
+
+### Gate tecnico
+- `npm run qa:smoke:routes`: `PASS`
+- `npm run qa:smoke:roles`: `PASS`
+- `npm run qa:encoding-guard`: `PASS`
+- `npm run qa:mock-guard`: `PASS`
+- `npm run qa:gate`: `PASS`
+
+### QA funcional ejecutado
+1. Flujo: Aliases productivos directos
+   - Resultado: `PASS`
+   - Evidencia: `/appointments -> /citas`, `/messages -> /chat`, `/profile -> /perfil`, `/reservations -> /reservas`, `/services -> /servicios`, `/professionals -> /profesionales`.
+2. Flujo: Proxy/auth posterior a redirects
+   - Resultado: `PASS`
+   - Evidencia: `qa:smoke:roles`.
+
+### Decision
+- `MERGE`
+- Motivo: Evita 404 por navegacion directa a aliases esperables y deja smoke automatico para prevenir regresiones.
+
+---
+
+### Fecha
+- `2026-05-29`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit: `5252cfa`
+
+### Scope del cambio
+- Documentos: el borrado ya no elimina el item de la UI si `DELETE /api/documents/:id` falla.
+- Se agrego estado `deletingId`, mensaje de error visible y reporte `documentos/delete` en observabilidad frontend.
+
+### Gate tecnico
+- `npm run qa:encoding-guard`: `PASS`
+- `npm run qa:mock-guard`: `PASS`
+- `npm run qa:gate`: `PASS`
+
+### QA funcional ejecutado
+1. Flujo: Borrado defensivo de documentos
+   - Resultado: `PASS`
+   - Evidencia: revision de codigo + `qa:gate`.
+   - Notas: La UI solo remueve el documento tras respuesta exitosa del backend; en error conserva el item y muestra feedback.
+2. Flujo: QA visual documentos
+   - Resultado: `BLOCKED`
+   - Evidencia: `qa:visual:snapshots` y `qa:smoke:routes` quedaron bloqueados porque la app local en `localhost:3000` no respondia despues de regenerar `.next`; Docker CLI tampoco estaba accesible desde este contexto.
+
+### Decision
+- `FOLLOW-UP`
+- Motivo: Cambio tecnico validado, pero falta repetir QA visual cuando el servidor Docker/hot-reload local vuelva a responder.
+
+---
+
+### Fecha
+- `2026-06-07`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit: `4eb68c2`
+
+### Scope del cambio
+- Telemetria frontend: se centralizo contrato/redaccion en `src/lib/telemetry-contract.ts`.
+- `/api/telemetry`, `frontend-telemetry` y `telemetry-store` usan una unica definicion `TelemetryEnvelope`.
+- Redaccion de PII y validacion de envelope quedan compartidas para evitar divergencia entre cliente e ingest.
+
+### Gate tecnico
+- `npm run qa:encoding-guard`: `PASS`
+- `npm run qa:mock-guard`: `PASS`
+- `npm run qa:funnel:event-contract`: `PASS`
+- `npm run qa:gate`: `PASS`
+
+### QA funcional ejecutado
+1. Flujo: Contrato de eventos funnel
+   - Resultado: `PASS`
+   - Evidencia: `qa:funnel:event-contract`.
+2. Flujo: Build/typecheck telemetria
+   - Resultado: `PASS`
+   - Evidencia: `qa:gate`.
+
+### Decision
+- `MERGE`
+- Motivo: Reduce divergencia entre emisor e ingest de telemetria sin cambiar el contrato publico.
+
+---
+
+### Fecha
+- `2026-06-07`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit: `working tree (sin commit todavia)`
+
+### Scope del cambio
+- QA visual local con Docker/hot-reload: `qa:visual:snapshots` ahora evita falsos positivos de paginas en blanco.
+- El script usa `domcontentloaded`, espera contenido visible, captura console/page errors y marca `FAIL` si la UI renderizada no tiene texto.
+- Se recupero el entorno local reiniciando solo `aldiente_frontend` tras detectar estado stale de Next dev.
+
+### Gate tecnico
+- `npm run qa:encoding-guard`: `PASS`
+- `npm run qa:mock-guard`: `PASS`
+- `npm run qa:visual:snapshots`: `PASS` con `WARN` HMR WebSocket despues de reiniciar `aldiente_frontend`
+- `npm run qa:gate`: `PASS` despues de limpiar `.next` corrupto
+
+### QA funcional ejecutado
+1. Flujo: Capturas visuales rutas criticas
+   - Resultado: `PASS`
+   - Evidencia: `tmp/visual-qa/*.png` + `tmp/visual-qa/report.json`
+   - Notas: 12 rutas renderizaron UI real sin overflow, redirects inesperados, mojibake visible, paginas en blanco ni documento principal `500`.
+2. Flujo: Deteccion anti-blank-page
+   - Resultado: `PASS`
+   - Evidencia: corrida previa fallo correctamente con `blank page rendered` y expuso `Module not found: Can't resolve '@/lib/telemetry-contract'`.
+   - Notas: El archivo existia en host/contenedor y `tsc --noEmit` dentro del contenedor pasaba; reiniciar `aldiente_frontend` limpio el estado stale de Next dev.
+
+### Hallazgos
+- Severidad: `Minor`
+- Descripcion: Playwright headless registra errores WebSocket HMR (`/_next/webpack-hmr`) en Docker, por eso las rutas quedan como `WARN`; no bloquea render ni snapshots.
+- Ticket Notion: `[P0] Recuperar QA visual local con Docker/hot-reload`
+
+### Decision
+- `MERGE`
+- Motivo: El QA visual deja de aceptar paginas en blanco como exitosas y vuelve a producir evidencia util para desarrollo continuo.
+
+---
+
+### Fecha
+- `2026-06-07`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit: `working tree (sin commit todavia)`
+
+### Scope del cambio
+- Navegacion critica: sidebar/bottom nav/CTAs pasan de depender de `router.push` en botones/divs a links nativos cuando el destino es una ruta.
+- `Button` ahora soporta `href` para renderizar como link con el mismo estilo visual, evitando `Link` envolviendo `button`.
+- Se agrego `npm run qa:navigation` con Playwright para validar CTAs publicos, navegacion paciente y navegacion estudiante.
+- `qa:release:local` ahora incluye `qa:navigation`.
+
+### Gate tecnico
+- `npm run qa:encoding-guard`: `PASS`
+- `npm run qa:mock-guard`: `PASS`
+- `npm run qa:gate`: `PASS`
+- `npm run qa:navigation`: `PASS`
+- `npm run qa:visual:snapshots`: `PASS` con `WARN` HMR WebSocket en Docker/headless
+
+### QA funcional ejecutado
+1. Flujo: CTAs publicos welcome/landing
+   - Resultado: `PASS`
+   - Evidencia: `tmp/navigation-qa/report.json`
+   - Notas: `/welcome -> /signup`, `/welcome -> /login`, `/landing -> /signup`.
+2. Flujo: Navegacion paciente
+   - Resultado: `PASS`
+   - Evidencia: `qa:navigation`
+   - Notas: Links a explorar, citas, chat, perfil y documentos cambian ruta sin depender de handlers React.
+3. Flujo: Navegacion estudiante
+   - Resultado: `PASS`
+   - Evidencia: `qa:navigation`
+   - Notas: Links a agenda, servicios, mensajes y perfil cambian ruta.
+
+### Hallazgos
+- Severidad: `Minor`
+- Descripcion: Persiste `WARN` de WebSocket HMR en Docker/headless durante QA visual; no bloquea navegacion ni render.
+- Ticket Notion: `[P0] Corregir navegación de sidebar y CTAs internos que no cambian vista`
+
+### Decision
+- `MERGE`
+- Motivo: La navegacion critica queda cubierta por links nativos y contrato Playwright automatizado.
+
+---
+
+### Fecha
+- `2026-06-08`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit: `working tree (sin commit todavia)`
+
+### Scope del cambio
+- Alineacion del gate local de release con la Definition of Done: `qa:release:local` ahora ejecuta tambien `qa:visual:snapshots`.
+- `docs/release-readiness-matrix.md` incluye `qa:navigation` como requisito explicito de release candidate.
+
+### Gate tecnico
+- `npm run qa:release:local`: `PASS`
+
+### QA funcional ejecutado
+1. Flujo: Release local completo
+   - Resultado: `PASS`
+   - Evidencia: `qa:mock-guard`, `qa:encoding-guard`, `qa:gate`, `qa:smoke:routes`, `qa:smoke:roles`, `qa:navigation`, `qa:visual:snapshots`.
+   - Notas: QA visual genera `WARN` por WebSocket HMR en Docker/headless, conocido y no bloqueante; no hubo blank pages ni documento principal `500`.
+
+### Hallazgos
+- Severidad: `Minor`
+- Descripcion: Persisten warnings HMR WebSocket en snapshots visuales locales.
+- Ticket Notion: `[P0] Release readiness matrix: flujos criticos y estado de validacion`
+
+### Decision
+- `MERGE`
+- Motivo: El gate local ya representa la DoD de release candidate antes de pasar a validaciones productivas.
+
+---
+
+### Fecha
+- `2026-06-08`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit: `working tree (sin commit todavia)`
+
+### Scope del cambio
+- Preparacion de release candidate productivo: `qa:env:production` ahora puede validar un archivo env local exportado desde Vercel o preparado manualmente.
+- Documentacion actualizada para ejecutar el check con `npm run qa:env:production -- .env.production.local` antes de deploy/E2E productivo.
+
+### Gate tecnico
+- `npm run qa:env:production -- tmp\\aldiente-valid-production.env`: `PASS`
+- `npm run qa:env:production -- tmp\\aldiente-invalid-production.env`: `FAIL esperado`
+
+### QA funcional ejecutado
+1. Flujo: Validacion de variables productivas validas
+   - Resultado: `PASS`
+   - Evidencia: backend/chat `https` y telemetry `/api/telemetry` aceptados.
+2. Flujo: Bloqueo de variables no productivas
+   - Resultado: `PASS`
+   - Evidencia: el script rechazo `http://localhost:3001` y telemetry `http://localhost:3000/api/telemetry`.
+
+### Hallazgos
+- Severidad: `Minor`
+- Descripcion: El runner `npm` en Windows es mas estable usando argumento posicional (`-- archivo.env`) que `-- --env-file archivo.env`.
+- Ticket Notion: `[P0] Release candidate: validar produccion post-deploy`
+
+### Decision
+- `MERGE`
+- Motivo: Reduce riesgo de deploy con endpoints locales o inseguros y deja el paso de variables productivas automatizable antes de Vercel/E2E.
+---
+
+### Fecha
 - `2026-05-14`
 
 ### Branch / Commit
@@ -229,16 +638,16 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 - Commit: `82e005a`
 
 ### Scope del cambio
-- Merge de `dev -> master` y validación de smoke QA local.
-- Estandarización de comando de contrato de adjuntos chat (`qa-chat:contract`).
+- Merge de `dev -> master` y validacion de smoke QA local.
+- Estandarizacion de comando de contrato de adjuntos chat (`qa-chat:contract`).
 
-### Gate técnico
+### Gate tecnico
 - `npm run qa:smoke:routes`: `PASS`
 - `npm run qa:smoke:roles`: `PASS`
 - `npm run qa-chat:contract`: `PASS`
 
 ### QA funcional ejecutado
-1. Flujo: Smoke de rutas críticas (`/`, `/login`, `/home`, `/explorar`, `/reservar`, `/citas`, `/chat`, `/perfil`)
+1. Flujo: Smoke de rutas criticas (`/`, `/login`, `/home`, `/explorar`, `/reservar`, `/citas`, `/chat`, `/perfil`)
    - Resultado: `PASS`
    - Evidencia: `npm run qa:smoke:routes`
    - Notas: Respuestas esperadas (200/307) en localhost.
@@ -253,9 +662,85 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 
 ### Hallazgos
 - Severidad: `N/A`
-- Descripción: Sin bloqueantes en smoke local.
+- Descripcion: Sin bloqueantes en smoke local.
 - Ticket Notion: `[P0] Ejecutar smoke QA E2E de flujos críticos por rol (paciente/estudiante)`
 
-### Decisión
+### Decision
 - `FOLLOW-UP`
-- Motivo: Falta validación manual en ambiente productivo para cerrar P0.
+- Motivo: Falta validacion manual en ambiente productivo para cerrar P0.
+
+---
+
+### Fecha
+- `2026-06-08`
+
+### Branch / Commit
+- Branch: `master`
+- Commit: `working tree (sin commit todavia)`
+
+### Scope del cambio
+- QA productivo en `https://aldiente.app` con cuentas de prueba.
+- Hotfix local para `/perfil`: separacion de componentes desktop/mobile para mantener orden estable de hooks durante hidratacion.
+
+### Gate tecnico
+- `npm run qa:gate`: `PASS`
+
+### QA funcional ejecutado
+1. Flujo: Login estudiante productivo
+   - Resultado: `PASS parcial`
+   - Evidencia: `estudiante@test.com` con `password123` redirige a `/dashboard`; `/dashboard`, `/agenda`, `/servicios` y `/chat` renderizan contenido.
+   - Hallazgo: `/perfil` productivo muestra error de pagina y React #300 antes del hotfix.
+2. Flujo: Login paciente productivo
+   - Resultado: `FAIL`
+   - Evidencia: `paciente@test.com` con `password123` queda en `/login`; backend responde `401` y UI muestra credenciales incorrectas.
+3. Flujo: Hotfix `/perfil`
+   - Resultado: `PASS local`
+   - Evidencia: `qa:gate` compila `/perfil` despues de estabilizar hook order.
+
+### Hallazgos
+- Severidad: `Blocker`
+- Descripcion: Cuenta paciente de prueba no autentica en produccion con las credenciales indicadas.
+- Ticket Notion: `[P0] Release candidate: validar produccion post-deploy`
+
+- Severidad: `Major`
+- Descripcion: `/perfil` productivo falla para estudiante con React #300; hotfix preparado localmente.
+- Ticket Notion: `[P0] Release candidate: validar produccion post-deploy`
+
+### Decision
+- `FOLLOW-UP`
+- Motivo: Se requiere redeploy con hotfix y corregir/confirmar credenciales paciente antes de cerrar E2E productivo.
+
+---
+
+### Fecha
+- `2026-06-08`
+
+### Branch / Commit
+- Branch: `master`
+- Commit: `working tree (sin commit todavia)`
+
+### Scope del cambio
+- Hotfix React #300 en `/perfil`: `ProfileCompletenessV2` ya no retorna antes de ejecutar `useMemo`.
+- Causa raiz: hook order inestable cuando `loading` cambiaba entre renders.
+
+### Gate tecnico
+- `npm run qa:encoding-guard`: `PASS`
+- `npm run qa:mock-guard`: `PASS`
+- `npm run qa:gate`: `PASS`
+
+### QA funcional ejecutado
+1. Flujo: Build de `/perfil`
+   - Resultado: `PASS`
+   - Evidencia: Next build genera `/perfil` correctamente.
+2. Flujo: Guardrail React hooks
+   - Resultado: `PASS local`
+   - Evidencia: `useMemo` se ejecuta antes de returns condicionales en `ProfileCompletenessV2`.
+
+### Hallazgos
+- Severidad: `Major`
+- Descripcion: React #300 se originaba por retorno condicional antes de hooks en componente de completitud de perfil.
+- Ticket Notion: `[P0] Release candidate: validar produccion post-deploy`
+
+### Decision
+- `MERGE`
+- Motivo: Corrige el crash visible de `/perfil`; queda pendiente redeploy y retest productivo.

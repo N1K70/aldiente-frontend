@@ -42,7 +42,7 @@ function ApptDateBadge({ dateStr, time }: { dateStr: string; time?: string }) {
   return (
     <div style={{ width: 96, height: 108, borderRadius: 18, flexShrink: 0, background: 'linear-gradient(180deg, var(--brand-100), var(--brand-200))', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand-700)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{month}</div>
-      <div style={{ fontFamily: 'var(--font-display)', fontSize: 44, fontWeight: 700, color: 'var(--brand-800)', letterSpacing: '-0.03em', lineHeight: 1 }}>{day || '—'}</div>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: 44, fontWeight: 700, color: 'var(--brand-800)', letterSpacing: '-0.03em', lineHeight: 1 }}>{day || '-'}</div>
       {time && <div style={{ fontSize: 12, color: 'var(--brand-700)', fontWeight: 600, marginTop: 2 }}>{time}</div>}
     </div>
   );
@@ -142,12 +142,12 @@ function HomeDesktop() {
 
   const apptTitle = next
     ? `${next.service || 'Cita'} ${next.student?.name ? `con ${next.student.name}` : ''}`
-    : loading ? 'Cargando…' : 'Sin citas próximas';
-  const apptSub = next?.clinic?.name ? `${next.clinic.name}${next.clinic.box ? ` · Box ${next.clinic.box}` : ''}` : '';
+    : loading ? 'Cargando...' : 'Sin citas proximas';
+  const apptSub = next?.clinic?.name ? `${next.clinic.name}${next.clinic.box ? ` - Box ${next.clinic.box}` : ''}` : '';
   const today = new Date().toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
 
   return (
-    <DesktopShell role="patient" activeId="home" title={`Hola, ${firstName} 👋`} subtitle={`Hoy es ${today} · Tienes ${upcoming.length} cita${upcoming.length !== 1 ? 's' : ''} próxima${upcoming.length !== 1 ? 's' : ''}`}>
+    <DesktopShell role="patient" activeId="home" title={`Hola, ${firstName}`} subtitle={`Hoy es ${today} - Tienes ${upcoming.length} cita${upcoming.length !== 1 ? 's' : ''} proxima${upcoming.length !== 1 ? 's' : ''}`}>
       {selectedUniversity && (
         <Glass radius={18} style={{ padding: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 20 }}>
           <div>
@@ -168,7 +168,7 @@ function HomeDesktop() {
           <div style={{ position: 'relative', display: 'flex', gap: 24, alignItems: 'center' }}>
             <ApptDateBadge dateStr={next?.date ?? ''} time={next?.time} />
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand-700)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Tu próxima cita</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand-700)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Tu proxima cita</div>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, color: 'var(--ink-900)', letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: 4 }}>{apptTitle}</div>
               {apptSub && <div style={{ fontSize: 14, color: 'var(--ink-600)', marginBottom: 16 }}>{apptSub}</div>}
               {next && (
@@ -186,9 +186,9 @@ function HomeDesktop() {
         </Glass>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {[
-            { v: upcoming.length > 0 ? `${upcoming.length}` : '—', l: 'Citas próximas', tint: '#6366F1', icon: 'check' },
-            { v: next?.price ? `$${(next.price).toLocaleString('es-CL')}` : '—', l: 'Precio próxima cita', tint: '#10B981', icon: 'sparkle' },
-            { v: STATUS_LABEL[next?.status ?? ''] ?? '—', l: 'Estado', tint: '#F59E0B', icon: 'star' },
+            { v: upcoming.length > 0 ? `${upcoming.length}` : '-', l: 'Citas proximas', tint: '#6366F1', icon: 'check' },
+            { v: next?.price ? `$${(next.price).toLocaleString('es-CL')}` : '-', l: 'Precio proxima cita', tint: '#10B981', icon: 'sparkle' },
+            { v: STATUS_LABEL[next?.status ?? ''] ?? '-', l: 'Estado', tint: '#F59E0B', icon: 'star' },
           ].map(s => (
             <Glass key={s.l} radius={18} style={{ padding: 16, display: 'flex', alignItems: 'center', gap: 14 }}>
               <div style={{ width: 40, height: 40, borderRadius: 12, background: `${s.tint}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -205,8 +205,8 @@ function HomeDesktop() {
 
       <div style={{ marginBottom: 24 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 12 }}>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--ink-900)' }}>¿Qué necesitas hoy?</div>
-          <button style={{ background: 'none', border: 'none', color: 'var(--brand-700)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }} onClick={() => router.push('/explorar')}>Ver todos los servicios →</button>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--ink-900)' }}>Que necesitas hoy?</div>
+          <button style={{ background: 'none', border: 'none', color: 'var(--brand-700)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }} onClick={() => router.push('/explorar')}>Ver todos los servicios</button>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
           {catalogLoading ? (
@@ -245,7 +245,7 @@ function HomeDesktop() {
       <div>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 12 }}>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--ink-900)' }}>Estudiantes destacados cerca tuyo</div>
-          <button style={{ background: 'none', border: 'none', color: 'var(--brand-700)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }} onClick={() => router.push('/explorar')}>Explorar todos →</button>
+          <button style={{ background: 'none', border: 'none', color: 'var(--brand-700)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }} onClick={() => router.push('/explorar')}>Explorar todos</button>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
           {catalogLoading ? (
@@ -282,6 +282,33 @@ function HomeDesktop() {
           )}
         </div>
       </div>
+
+      <div style={{ marginTop: 24 }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--ink-900)', marginBottom: 12 }}>
+          Confianza y ayuda
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <Glass radius={18} style={{ padding: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <Icon name="shield" size={16} color="var(--success-600)" />
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink-900)' }}>Atencion supervisada</div>
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--ink-600)', lineHeight: 1.4 }}>
+              Cada procedimiento incluye supervision docente clinica.
+            </div>
+          </Glass>
+          <Glass radius={18} style={{ padding: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <Icon name="chat" size={16} color="var(--brand-700)" />
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink-900)' }}>Dudas antes de reservar</div>
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--ink-600)', lineHeight: 1.4, marginBottom: 10 }}>
+              Conversa con tu estudiante directamente desde el chat.
+            </div>
+            <Button size="sm" variant="glass" onClick={() => router.push('/chat')}>Ir a chat</Button>
+          </Glass>
+        </div>
+      </div>
     </DesktopShell>
   );
 }
@@ -304,7 +331,7 @@ export default function HomePage() {
   const initials = getInitials(displayName);
 
   const apptDate = next?.date ? next.date.split(/[\s/-]/).slice(0, 2).join(' ') : '';
-  const apptTitle = next ? `${next.service || 'Cita'}${next.student?.name ? ` · Clínica` : ''}` : '';
+  const apptTitle = next ? `${next.service || 'Cita'}${next.student?.name ? ' - Clinica' : ''}` : '';
 
   return (
     <div className="app-scroll" style={{ minHeight: '100dvh', overflowY: 'auto', background: 'var(--bg-aurora)', position: 'relative', paddingBottom: 100 }}>
@@ -313,7 +340,7 @@ export default function HomePage() {
         <div>
           <div style={{ fontSize: 14, color: 'var(--ink-500)', fontWeight: 500 }}>Hola,</div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, fontWeight: 700, color: 'var(--ink-900)', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
-            {firstName} 👋
+            {firstName}
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -362,13 +389,13 @@ export default function HomePage() {
       {/* Next appointment */}
       <div style={{ padding: '12px 20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, padding: '0 4px' }}>
-          <div style={{ fontSize: 13, color: 'var(--ink-600)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Tu próxima cita</div>
-          <Link href="/citas" style={{ color: 'var(--brand-700)', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>Ver todas →</Link>
+          <div style={{ fontSize: 13, color: 'var(--ink-600)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Tu proxima cita</div>
+          <Link href="/citas" style={{ color: 'var(--brand-700)', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>Ver todas</Link>
         </div>
 
         {loading ? (
           <div style={{ height: 160, borderRadius: 24, background: 'linear-gradient(135deg, #0E8AA5 0%, #4F46E5 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14 }}>Cargando…</div>
+            <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14 }}>Cargando...</div>
           </div>
         ) : next ? (
           <div style={{ padding: 20, borderRadius: 24, position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, #0E8AA5 0%, #4F46E5 100%)', boxShadow: '0 18px 40px rgba(14,138,165,0.35), 0 4px 12px rgba(79,70,229,0.15)', color: '#fff' }}>
@@ -381,10 +408,10 @@ export default function HomePage() {
               <Icon name="calendar" size={22} color="rgba(255,255,255,0.9)" />
             </div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, letterSpacing: '-0.025em', marginBottom: 4, position: 'relative' }}>
-              {next.date}{next.time ? ` · ${next.time}` : ''}
+              {next.date}{next.time ? ` - ${next.time}` : ''}
             </div>
             <div style={{ fontSize: 15, opacity: 0.9, marginBottom: 16, position: 'relative' }}>
-              {next.service || 'Cita'}{next.clinic?.name ? ` · ${next.clinic.name}` : ''}
+              {next.service || 'Cita'}{next.clinic?.name ? ` - ${next.clinic.name}` : ''}
             </div>
             {next.student?.name && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 12, borderRadius: 16, background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.25)', position: 'relative' }}>
@@ -406,7 +433,7 @@ export default function HomePage() {
         ) : (
           <div style={{ padding: 24, borderRadius: 24, background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.9)', textAlign: 'center' }}>
             <Icon name="calendar" size={32} color="var(--ink-300)" />
-            <div style={{ fontSize: 15, color: 'var(--ink-600)', margin: '12px 0 16px', fontWeight: 500 }}>No tienes citas próximas</div>
+            <div style={{ fontSize: 15, color: 'var(--ink-600)', margin: '12px 0 16px', fontWeight: 500 }}>No tienes citas proximas</div>
             <Button size="md" onClick={() => router.push('/explorar')}>Agendar cita</Button>
           </div>
         )}
@@ -416,7 +443,7 @@ export default function HomePage() {
       <div style={{ padding: '20px 20px 12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, padding: '0 4px' }}>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, color: 'var(--ink-900)', letterSpacing: '-0.02em' }}>Tratamientos</div>
-          <button style={{ background: 'none', border: 'none', color: 'var(--brand-700)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }} onClick={() => router.push('/explorar')}>Ver todos →</button>
+          <button style={{ background: 'none', border: 'none', color: 'var(--brand-700)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }} onClick={() => router.push('/explorar')}>Ver todos</button>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           {catalogLoading ? (
@@ -462,7 +489,7 @@ export default function HomePage() {
       <div style={{ padding: '8px 20px 20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, padding: '0 4px' }}>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, color: 'var(--ink-900)', letterSpacing: '-0.02em' }}>Estudiantes disponibles</div>
-          <button style={{ background: 'none', border: 'none', color: 'var(--brand-700)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }} onClick={() => router.push('/explorar')}>Ver todos →</button>
+          <button style={{ background: 'none', border: 'none', color: 'var(--brand-700)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }} onClick={() => router.push('/explorar')}>Ver todos</button>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {catalogLoading ? (
@@ -481,7 +508,7 @@ export default function HomePage() {
                     <div style={{ fontSize: 13, color: 'var(--ink-500)', marginTop: 2 }}>{student.university || 'Universidad asociada'}</div>
                     <div style={{ fontSize: 12, color: 'var(--brand-700)', marginTop: 6, fontWeight: 700 }}>
                       {student.serviceName || 'Servicio disponible'}
-                      {student.price != null ? ` · Desde $${student.price.toLocaleString('es-CL')}` : ''}
+                      {student.price != null ? ` - Desde $${student.price.toLocaleString('es-CL')}` : ''}
                     </div>
                   </div>
                   <Icon name="chevron" size={18} color="var(--ink-400)" />
@@ -496,6 +523,37 @@ export default function HomePage() {
         </div>
       </div>
 
+      <div style={{ padding: '8px 20px 20px' }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, color: 'var(--ink-900)', letterSpacing: '-0.02em', marginBottom: 12 }}>
+          Confianza y ayuda
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <Glass radius={20} style={{ padding: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <Icon name="shield" size={16} color="var(--success-600)" />
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink-900)' }}>Atencion supervisada</div>
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--ink-600)', lineHeight: 1.4 }}>
+              Las atenciones son realizadas por estudiantes avanzados con supervision docente.
+            </div>
+          </Glass>
+          <Glass radius={20} style={{ padding: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <Icon name="help" size={16} color="var(--brand-700)" />
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink-900)' }}>Preguntas frecuentes</div>
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--ink-600)', lineHeight: 1.4, marginBottom: 10 }}>
+              Puedes revisar detalles de reserva, pagos y cambios desde landing o durante tu flujo.
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <Button href="/landing" size="sm" variant="glass">Ver FAQ</Button>
+              <Button href="/documentos" size="sm" variant="glass">Documentos</Button>
+              <Button size="sm" variant="ghost" onClick={() => window.open('mailto:hola@aldiente.cl')}>Soporte</Button>
+            </div>
+          </Glass>
+        </div>
+      </div>
+
       {/* Tab bar */}
       <div style={{ position: 'fixed', bottom: 24, left: 16, right: 16, zIndex: 10 }}>
         <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', height: 64, borderRadius: 999, padding: '0 12px', background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)', border: '1px solid rgba(255,255,255,0.9)', boxShadow: '0 18px 40px rgba(10,22,40,0.12), inset 0 1px 0 rgba(255,255,255,0.9)' }}>
@@ -506,12 +564,10 @@ export default function HomePage() {
             { icon: 'chat',     label: 'Chat',    href: '/chat' },
             { icon: 'user',     label: 'Perfil',  href: '/perfil' },
           ].map(t => (
-            <Link key={t.label} href={t.href} style={{ textDecoration: 'none' }}>
-              <button style={{ width: 56, height: 48, border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, color: t.active ? 'var(--brand-700)' : 'var(--ink-500)', position: 'relative' }}>
+            <Link key={t.label} href={t.href} style={{ width: 56, height: 48, textDecoration: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, color: t.active ? 'var(--brand-700)' : 'var(--ink-500)', position: 'relative' }}>
                 {t.active && <div style={{ position: 'absolute', inset: 4, borderRadius: 999, background: 'linear-gradient(135deg, rgba(16,169,198,0.15), rgba(79,70,229,0.1))' }}/>}
                 <Icon name={t.icon as Parameters<typeof Icon>[0]['name']} size={22} color={t.active ? 'var(--brand-700)' : 'var(--ink-500)'} stroke={t.active ? 2.2 : 1.8} />
                 <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.01em', position: 'relative' }}>{t.label}</div>
-              </button>
             </Link>
           ))}
         </div>

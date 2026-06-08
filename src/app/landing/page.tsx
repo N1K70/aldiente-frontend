@@ -75,7 +75,7 @@ function LandingDesktop({ stats }: { stats: PlatformStats }) {
         </div>
         <div style={{ flex: 1 }} />
         <Link href="/login" style={{ textDecoration: 'none', fontSize: 14, fontWeight: 600, color: 'var(--ink-700)' }}>Iniciar sesión</Link>
-        <Link href="/signup"><Button size="md">Crear cuenta</Button></Link>
+        <Button href="/signup" size="md">Crear cuenta</Button>
       </div>
 
       {/* Hero */}
@@ -91,7 +91,7 @@ function LandingDesktop({ stats }: { stats: PlatformStats }) {
             Atención dental de calidad hasta 60% más accesible. Estudiantes de los últimos años, siempre supervisados por odontólogos certificados.
           </p>
           <div style={{ display: 'flex', gap: 12, marginBottom: 36 }}>
-            <Link href="/signup"><Button size="lg" trailingIcon="arrow_right">Buscar atención</Button></Link>
+            <Button href="/signup" size="lg" trailingIcon="arrow_right">Buscar atención</Button>
             <Button size="lg" variant="glass" onClick={() => router.push('/signup?role=student')}>Soy estudiante</Button>
           </div>
           <div style={{ display: 'flex', gap: 32, fontSize: 13, color: 'var(--ink-600)' }}>
@@ -161,6 +161,49 @@ function LandingDesktop({ stats }: { stats: PlatformStats }) {
         </div>
       </div>
 
+      {/* FAQ + Trust */}
+      <div style={{ padding: '20px 60px 70px' }}>
+        <div style={{ maxWidth: 1160, margin: '0 auto', display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 20 }}>
+          <Glass hi radius={24} style={{ padding: 28 }}>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 30, fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--ink-900)', marginBottom: 14 }}>
+              Preguntas frecuentes
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {[
+                ['Como funciona la supervision?', 'Cada atencion es realizada por estudiantes avanzados y supervisada por docentes odontologos durante el procedimiento.'],
+                ['Cuando y como pago?', 'El pago se realiza en la clinica al confirmar tu cita. Antes de reservar, ves precio estimado y duracion.'],
+                ['Puedo reagendar o cancelar?', 'Si. Puedes gestionar cambios desde tu perfil y chat de cita segun la disponibilidad.'],
+              ].map(([q, a]) => (
+                <div key={q} style={{ padding: 16, borderRadius: 14, background: 'rgba(255,255,255,0.66)', border: '1px solid rgba(255,255,255,0.9)' }}>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink-900)', marginBottom: 4 }}>{q}</div>
+                  <div style={{ fontSize: 14, color: 'var(--ink-600)', lineHeight: 1.45 }}>{a}</div>
+                </div>
+              ))}
+            </div>
+          </Glass>
+          <Glass radius={24} style={{ padding: 24 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-500)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
+              Senales de confianza
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[
+                'Validacion de perfil de estudiante y universidad',
+                'Supervision docente en procedimientos clinicos',
+                'Historial de citas y chat por atencion',
+                'Transparencia de precio antes de reservar',
+                'Soporte por correo para dudas pre y post cita',
+                'Flujo de pago con confirmacion y trazabilidad de reserva',
+              ].map(item => (
+                <div key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 14, color: 'var(--ink-700)', lineHeight: 1.4 }}>
+                  <Icon name="check" size={14} color="var(--success-600)" />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+          </Glass>
+        </div>
+      </div>
+
       {/* CTA */}
       <div style={{ padding: '80px 60px', textAlign: 'center' }}>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 48, fontWeight: 700, letterSpacing: '-0.035em', lineHeight: 1.05, marginBottom: 14, color: 'var(--ink-900)' }}>
@@ -168,7 +211,7 @@ function LandingDesktop({ stats }: { stats: PlatformStats }) {
         </div>
         <div style={{ fontSize: 17, color: 'var(--ink-600)', marginBottom: 28 }}>Regístrate en 2 minutos. Sin compromisos.</div>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
-          <Link href="/signup"><Button size="lg" trailingIcon="arrow_right">Empezar ahora</Button></Link>
+          <Button href="/signup" size="lg" trailingIcon="arrow_right">Empezar ahora</Button>
           <Button size="lg" variant="glass" onClick={() => document.getElementById('how-it-works-desktop')?.scrollIntoView({ behavior: 'smooth' })}>Ver cómo funciona</Button>
         </div>
       </div>
@@ -301,9 +344,7 @@ export default function LandingPage() {
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28, maxWidth: 440 }}>
-          <Link href="/signup" style={{ textDecoration: 'none', display: 'block' }}>
-            <Button size="lg" full trailingIcon="arrow_right">Crear cuenta gratis</Button>
-          </Link>
+          <Button href="/signup" size="lg" full trailingIcon="arrow_right">Crear cuenta gratis</Button>
           <Button size="lg" full variant="glass" onClick={() => {
             document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
           }}>
@@ -467,6 +508,46 @@ export default function LandingPage() {
         </Glass>
       </section>
 
+      {/* FAQ + Trust */}
+      <section style={{ position: 'relative', zIndex: 1, padding: '8px 24px 40px' }}>
+        <Glass hi radius={26} style={{ padding: 22, maxWidth: 480, marginBottom: 12 }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--ink-900)', marginBottom: 12 }}>
+            Preguntas frecuentes
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {[
+              ['Hay supervision?', 'Si. Cada atencion considera supervision docente clinica.'],
+              ['Como pago?', 'El pago se realiza en clinica. Puedes ver precio antes de reservar.'],
+              ['Puedo reagendar?', 'Si, desde Citas o directamente desde el chat de la atencion.'],
+            ].map(([q, a]) => (
+              <div key={q} style={{ padding: 14, borderRadius: 14, background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.9)' }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink-900)', marginBottom: 2 }}>{q}</div>
+                <div style={{ fontSize: 13, color: 'var(--ink-600)', lineHeight: 1.4 }}>{a}</div>
+              </div>
+            ))}
+          </div>
+        </Glass>
+        <Glass radius={22} style={{ padding: 18, maxWidth: 480 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-500)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+            Confianza
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {[
+              'Perfiles verificados por universidad',
+              'Citas supervisadas por docentes',
+              'Precio visible antes de reservar',
+              'Soporte para pacientes por correo',
+              'Confirmacion de reserva y pago registrado',
+            ].map(item => (
+              <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--ink-700)' }}>
+                <Icon name="check" size={13} color="var(--success-600)" />
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
+        </Glass>
+      </section>
+
       {/* CTA final */}
       <section style={{ position: 'relative', zIndex: 1, padding: '20px 24px 40px' }}>
         <div style={{
@@ -487,8 +568,8 @@ export default function LandingPage() {
           <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.85)', margin: '0 0 20px', lineHeight: 1.45, position: 'relative' }}>
             Crea tu cuenta en menos de un minuto y agenda tu primera cita hoy.
           </p>
-          <Link href="/signup" style={{ textDecoration: 'none', display: 'block', position: 'relative' }}>
-            <button style={{
+          <Link href="/signup" style={{
+              textDecoration: 'none', position: 'relative',
               width: '100%', height: 56, borderRadius: 18,
               background: '#fff', border: 'none',
               fontFamily: 'var(--font-body)', fontSize: 17, fontWeight: 700,
@@ -498,7 +579,6 @@ export default function LandingPage() {
             }}>
               Empezar gratis
               <Icon name="arrow_right" size={20} />
-            </button>
           </Link>
         </div>
       </section>

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { getRoleHome, normalizeAuthRole } from '@/lib/auth-routing';
 
-const PROTECTED = ['/home', '/citas', '/chat', '/perfil', '/explorar', '/estudiante', '/reservar', '/confirmacion', '/dashboard', '/quiz', '/funnel-qa', '/telemetry-qa'];
+const PROTECTED = ['/home', '/citas', '/chat', '/perfil', '/explorar', '/estudiante', '/confirmacion', '/dashboard', '/quiz', '/funnel-qa', '/telemetry-qa'];
 const PUBLIC_ONLY = ['/login', '/signup', '/welcome'];
 const INTERNAL_TOOLS = ['/funnel-qa', '/telemetry-qa'];
 
@@ -12,8 +13,9 @@ function internalToolsEnabled() {
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get('authToken')?.value;
-  const role = request.cookies.get('authRole')?.value;
-  const isStudent = role === 'student' || role === 'admin';
+  const role = normalizeAuthRole(request.cookies.get('authRole')?.value);
+  const roleHome = getRoleHome(role);
+  const isStudent = roleHome === '/dashboard';
 
   const isProtected = PROTECTED.some(p => pathname.startsWith(p));
   const isPublicOnly = PUBLIC_ONLY.some(p => pathname.startsWith(p));
@@ -24,11 +26,11 @@ export function proxy(request: NextRequest) {
   }
 
   if (isPublicOnly && token) {
-    return NextResponse.redirect(new URL(isStudent ? '/dashboard' : '/home', request.url));
+    return NextResponse.redirect(new URL(roleHome, request.url));
   }
 
   if (token && isInternalTool && role !== 'admin' && !internalToolsEnabled()) {
-    return NextResponse.redirect(new URL(isStudent ? '/dashboard' : '/home', request.url));
+    return NextResponse.redirect(new URL(roleHome, request.url));
   }
 
   if (token && pathname.startsWith('/dashboard') && !isStudent) {
