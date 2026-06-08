@@ -40,7 +40,7 @@ function DashboardDesktop() {
   const toneMap = { brand: { bg: 'var(--brand-100)', fg: 'var(--brand-700)' }, success: { bg: 'var(--success-100)', fg: 'var(--success-600)' }, warning: { bg: 'var(--warning-100)', fg: 'var(--warning-600)' } } as const;
 
   return (
-    <DesktopShell role="student" activeId="home" title={`Buenos días, ${firstName} ✨`} subtitle={`Tienes ${upcoming.length} cita${upcoming.length !== 1 ? 's' : ''} próxima${upcoming.length !== 1 ? 's' : ''} · ${pendingRequests.length} solicitud${pendingRequests.length !== 1 ? 'es' : ''} pendiente${pendingRequests.length !== 1 ? 's' : ''}`}>
+    <DesktopShell role="student" activeId="home" title={`MASTER CHECK - ${firstName}`} subtitle={`Tienes ${upcoming.length} cita${upcoming.length !== 1 ? 's' : ''} próxima${upcoming.length !== 1 ? 's' : ''} · ${pendingRequests.length} solicitud${pendingRequests.length !== 1 ? 'es' : ''} pendiente${pendingRequests.length !== 1 ? 's' : ''}`}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 24 }}>
         {[
           { v: `${upcoming.length}`, l: 'Citas próximas',    trend: 'activas',    tint: '#6366F1', icon: 'check' },
@@ -165,7 +165,7 @@ export default function DashboardPage() {
           <div>
             <p style={{ fontSize: 14, color: 'var(--ink-500)', margin: '0 0 2px' }}>Panel estudiante</p>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 26, fontWeight: 700, letterSpacing: '-0.03em', margin: 0, color: 'var(--ink-900)' }}>
-              Hola, {user?.name?.split(' ')[0] ?? 'Estudiante'}
+              MASTER CHECK - {user?.name?.split(' ')[0] ?? 'Estudiante'}
             </h1>
           </div>
           <div style={{ width: 44, height: 44, borderRadius: 999, background: 'linear-gradient(135deg, #4F46E5 0%, #10A9C6 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 700, color: '#fff' }}>
