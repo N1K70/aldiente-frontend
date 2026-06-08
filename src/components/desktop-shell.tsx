@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Icon, Button, Glass } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
+import { getInitials, resolveDisplayName } from '@/lib/user-display';
 
 export const DESKTOP_BP = 1024;
 
@@ -102,15 +103,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ role = 'patient', activeId }) 
          : undefined,
   }));
 
-  const fallbackName = user?.email ? user.email.split('@')[0] : 'Usuario';
-  const displayName = user?.name?.trim() || fallbackName;
-  const initials = displayName
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map(w => w[0])
-    .join('')
-    .toUpperCase() || 'U';
+  const displayName = resolveDisplayName(user?.name, user?.email);
+  const initials = getInitials(displayName);
 
   return (
     <aside style={{

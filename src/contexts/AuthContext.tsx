@@ -4,6 +4,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import { api } from '@/lib/api';
 import { normalizeAuthRole } from '@/lib/auth-routing';
 import { clearBrowserAuthSession, setAuthCookie } from '@/lib/auth-session';
+import { isLikelyMockName } from '@/lib/user-display';
 
 export type User = {
   id: string;
@@ -37,6 +38,13 @@ type RegisterData = {
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const PATIENT_ONBOARDING_KEY = 'aldiente_patient_onboarding_completed';
+
+function sanitizeUserName(name?: string | null) {
+  const trimmed = (name ?? '').trim();
+  if (!trimmed || isLikelyMockName(trimmed)) return undefined;
+  return trimmed;
+}
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -47,7 +55,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const token = localStorage.getItem('authToken');
       const stored = localStorage.getItem('authUser');
       if (token && stored) {
-        setUser(JSON.parse(stored));
+        const parsed = JSON.parse(stored) as User;
+        setUser({ ...parsed, name: sanitizeUserName(parsed?.name) });
       } else {
         setUser(null);
       }
@@ -65,6 +74,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => window.removeEventListener('auth:changed', onChanged);
   }, [loadFromStorage]);
 
+  useEffect(() => {
+    if (!user?.id || !user?.role || user.role === 'admin') return;
+
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+
+    let cancelled = false;
+    const endpoint = user.role === 'student' ? '/api/students/profile' : '/api/patients/profile';
+
+    api.get(endpoint)
+      .then(({ data }) => {
+        if (cancelled) return;
+        const raw = data?.profile ?? data ?? {};
+        const profileName = [raw?.name, raw?.full_name, raw?.fullName]
+          .find((value: unknown) => typeof value === 'string' && value.trim().length > 0) as string | undefined;
+        if (profileName && !isLikelyMockName(profileName) && profileName !== user.name) {
+          setUser(prev => {
+            if (!prev) return prev;
+            const updated = { ...prev, name: profileName };
+            localStorage.setItem('authUser', JSON.stringify(updated));
+            return updated;
+          });
+        }
+      })
+      .catch(() => {});
+
+    return () => { cancelled = true; };
+  }, [user?.id, user?.role, user?.name]);
+
   const login = useCallback(async (email: string, password: string) => {
     setLoading(true);
     try {
@@ -79,10 +117,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id: String(data?.user?.id ?? data?.userId ?? data?.id ?? ''),
         email: data?.user?.email ?? data?.email ?? email,
         role: normalizeAuthRole(data?.user?.role ?? data?.role),
-        name: data?.user?.name ?? data?.user?.fullName ?? data?.user?.full_name ?? data?.name ?? data?.fullName ?? data?.full_name,
+        name: sanitizeUserName(data?.user?.name ?? data?.user?.fullName ?? data?.user?.full_name ?? data?.name ?? data?.fullName ?? data?.full_name),
       };
       localStorage.setItem('authUser', JSON.stringify(u));
       if (u.role) setAuthCookie('authRole', u.role);
+      if (u.role === 'patient') {
+        localStorage.setItem(`${PATIENT_ONBOARDING_KEY}:${u.id || u.email}`, 'true');
+      }
       setUser(u);
       window.dispatchEvent(new Event('auth:changed'));
       return u;
@@ -129,7 +170,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id: String(data?.user?.id ?? data?.id ?? ''),
         email: data?.user?.email ?? registerData.email,
         role: normalizeAuthRole(data?.user?.role ?? registerData.role) ?? 'patient',
-        name: data?.user?.name ?? registerData.fullName ?? `${registerData.name} ${registerData.lastname}`.trim(),
+        name: sanitizeUserName(data?.user?.name ?? registerData.fullName ?? `${registerData.name} ${registerData.lastname}`.trim()),
       };
       localStorage.setItem('authUser', JSON.stringify(u));
       if (u.role) setAuthCookie('authRole', u.role);
@@ -144,7 +185,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateUser = useCallback((patch: Partial<User>) => {
     setUser(prev => {
       if (!prev) return prev;
-      const updated = { ...prev, ...patch };
+      const normalizedPatch = {
+        ...patch,
+        name: patch.name === undefined ? prev.name : sanitizeUserName(patch.name),
+      };
+      const updated = { ...prev, ...normalizedPatch };
       localStorage.setItem('authUser', JSON.stringify(updated));
       return updated;
     });

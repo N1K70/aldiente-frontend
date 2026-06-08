@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Glass, Icon, Button } from '@/components/ui';
@@ -350,7 +350,21 @@ function ChatInner() {
     }
 
     if (activeApptIdx >= threadsWithFallback.length) setActiveApptIdx(0);
-  }, [activeApptIdx, requestedAppointmentId, threadsWithFallback]);
+
+    if (!requestedAppointmentId && threads[0]?.appointmentId) {
+      router.replace(`/chat?appointmentId=${threads[0].appointmentId}`);
+      return;
+    }
+
+  }, [activeApptIdx, requestedAppointmentId, router, threads, threadsWithFallback]);
+
+  const selectThread = useCallback((index: number) => {
+    setActiveApptIdx(index);
+    const appointmentId = threadsWithFallback[index]?.appointmentId;
+    if (!appointmentId) return;
+    if (requestedAppointmentId === appointmentId) return;
+    router.replace(`/chat?appointmentId=${appointmentId}`);
+  }, [requestedAppointmentId, router, threadsWithFallback]);
 
   const activeThread = threadsWithFallback[activeApptIdx];
   const activeAppointment = useMemo(
@@ -405,7 +419,7 @@ function ChatInner() {
           role={role}
           threads={threadsWithFallback}
         activeIdx={activeApptIdx}
-        onSelectThread={setActiveApptIdx}
+        onSelectThread={selectThread}
         messages={messages}
         input={input}
         setInput={setInput}

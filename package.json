@@ -16,6 +16,7 @@
     "qa:env:production": "node scripts/qa-production-env.mjs",
     "qa:mock-guard": "node scripts/qa-production-mock-guard.mjs",
     "qa:encoding-guard": "node scripts/qa-source-encoding-guard.mjs",
+    "qa-chat:contract": "npm run qa:chat:attachment-contract",
     "qa:chat:attachment-contract": "node scripts/qa-chat-attachment-contract.mjs",
     "qa:chat:attachment-contract:fixture": "node scripts/qa-chat-attachment-contract.mjs docs/fixtures/chat-attachments.sample.json",
     "qa:chat:attachment-contract:all": "npm run qa:chat:attachment-contract && npm run qa:chat:attachment-contract:fixture",

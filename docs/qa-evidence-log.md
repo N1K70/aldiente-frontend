@@ -2,7 +2,7 @@
 
 ## Registro
 
-Usa este bloque por cada ronda de validación.
+Usa este bloque por cada ronda de validacion.
 
 ### Fecha
 - `YYYY-MM-DD`
@@ -14,7 +14,7 @@ Usa este bloque por cada ronda de validación.
 ### Scope del cambio
 - 
 
-### Gate técnico
+### Gate tecnico
 - `npm run typecheck`: `PASS | FAIL`
 - `npm run build`: `PASS | FAIL`
 
@@ -30,10 +30,10 @@ Usa este bloque por cada ronda de validación.
 
 ### Hallazgos
 - Severidad:
-- Descripción:
+- Descripcion:
 - Ticket Notion:
 
-### Decisión
+### Decision
 - `MERGE | NO MERGE`
 - Motivo:
 
@@ -47,17 +47,17 @@ Usa este bloque por cada ronda de validación.
 - Commit: `3d72e92` (HEAD actual)
 
 ### Scope del cambio
-- Fix de validación en signup (`normalizedEmail` fuera de scope en catch).
+- Fix de validacion en signup (`normalizedEmail` fuera de scope en catch).
 - Observabilidad de errores en flujo de documentos (carga, subida, eliminación).
 - Observabilidad de errores en retorno Webpay (cancel/commit).
 - Observabilidad de errores en chat (historial, conexión socket fallback, envío HTTP fallback).
 
-### Gate técnico
+### Gate tecnico
 - `npm run typecheck`: `PASS`
 - `npm run build`: `PASS`
 
 ### QA funcional ejecutado
-1. Flujo: Smoke de rutas críticas
+1. Flujo: Smoke de rutas criticas
    - Resultado: `PASS`
    - Evidencia: `npm run qa:smoke:routes`
    - Notas: Rutas públicas/protegidas responden según esperado.
@@ -68,12 +68,12 @@ Usa este bloque por cada ronda de validación.
 
 ### Hallazgos
 - Severidad: `N/A`
-- Descripción: Sin bloqueantes técnicos posteriores a los cambios.
+- Descripcion: Sin bloqueantes técnicos posteriores a los cambios.
 - Ticket Notion: `[P1] Instrumentar errores críticos frontend: auth, pagos, chat, documentos`
 
-### Decisión
+### Decision
 - `MERGE`
-- Motivo: Gate técnico en verde y cobertura incremental de observabilidad en flujos críticos.
+- Motivo: Gate tecnico en verde y cobertura incremental de observabilidad en flujos críticos.
 
 ---
 
@@ -90,7 +90,7 @@ Usa este bloque por cada ronda de validación.
 - Reserva autenticada sin servicio ficticio.
 - Instrumentación de observabilidad local con `reportFrontendError(...)`.
 
-### Gate técnico
+### Gate tecnico
 - `npm run typecheck`: `PASS`
 - `npm run build`: `PASS`
 
@@ -110,12 +110,12 @@ Usa este bloque por cada ronda de validación.
 
 ### Hallazgos
 - Severidad: `N/A`
-- Descripción: Sin bloqueantes técnicos en gate.
+- Descripcion: Sin bloqueantes técnicos en gate.
 - Ticket Notion: `[P0] Hardening: reemplazar fallbacks mock por estados de error explícitos`
 
-### Decisión
+### Decision
 - `MERGE`
-- Motivo: cambios alineados a P0, gate técnico en verde y manejo de errores más robusto.
+- Motivo: cambios alineados a P0, Gate tecnico en verde y manejo de errores más robusto.
 
 ---
 
@@ -628,3 +628,43 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 ### Decision
 - `MERGE`
 - Motivo: Reduce riesgo de deploy con endpoints locales o inseguros y deja el paso de variables productivas automatizable antes de Vercel/E2E.
+---
+
+### Fecha
+- `2026-05-14`
+
+### Branch / Commit
+- Branch: `master`
+- Commit: `82e005a`
+
+### Scope del cambio
+- Merge de `dev -> master` y validacion de smoke QA local.
+- Estandarizacion de comando de contrato de adjuntos chat (`qa-chat:contract`).
+
+### Gate tecnico
+- `npm run qa:smoke:routes`: `PASS`
+- `npm run qa:smoke:roles`: `PASS`
+- `npm run qa-chat:contract`: `PASS`
+
+### QA funcional ejecutado
+1. Flujo: Smoke de rutas criticas (`/`, `/login`, `/home`, `/explorar`, `/reservar`, `/citas`, `/chat`, `/perfil`)
+   - Resultado: `PASS`
+   - Evidencia: `npm run qa:smoke:routes`
+   - Notas: Respuestas esperadas (200/307) en localhost.
+2. Flujo: Redirecciones por rol
+   - Resultado: `PASS`
+   - Evidencia: `npm run qa:smoke:roles`
+   - Notas: Patient/student/unauthenticated consistentes con middleware.
+3. Flujo: Contrato de adjuntos de chat
+   - Resultado: `PASS`
+   - Evidencia: `npm run qa-chat:contract`
+   - Notas: Casos `ok` y `bad` del smoke pasan correctamente.
+
+### Hallazgos
+- Severidad: `N/A`
+- Descripcion: Sin bloqueantes en smoke local.
+- Ticket Notion: `[P0] Ejecutar smoke QA E2E de flujos críticos por rol (paciente/estudiante)`
+
+### Decision
+- `FOLLOW-UP`
+- Motivo: Falta validacion manual en ambiente productivo para cerrar P0.

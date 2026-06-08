@@ -21,6 +21,24 @@ interface UserDocument {
   created_at: string;
 }
 
+function resolveUploadedFileUrl(payload: any): string {
+  const candidates = [
+    payload?.url,
+    payload?.file_url,
+    payload?.fileUrl,
+    payload?.secure_url,
+    payload?.data?.url,
+    payload?.data?.file_url,
+    payload?.data?.fileUrl,
+    payload?.data?.secure_url,
+    payload?.result?.url,
+    payload?.result?.file_url,
+  ];
+
+  const match = candidates.find((value) => typeof value === 'string' && value.trim().length > 0);
+  return typeof match === 'string' ? match.trim() : '';
+}
+
 const QUOTA = 30 * 1024 * 1024;
 
 const STUDENT_CATS = [
@@ -83,13 +101,13 @@ function UploadModal({ isStudent, onClose, onUploaded }: { isStudent: boolean; o
       const form = new FormData();
       form.append('file', file);
       const uploadRes = await api.post('/api/files/upload', form);
-      const fileUrl = uploadRes.data?.url ?? uploadRes.data?.file_url;
+      const fileUrl = resolveUploadedFileUrl(uploadRes.data);
 
       if (!fileUrl) throw new Error('No se recibio URL del archivo');
 
       await api.post('/api/documents', {
         title: title.trim(),
-        category,
+        category: category.trim(),
         description: desc.trim() || undefined,
         year: year || undefined,
         file_url: fileUrl,

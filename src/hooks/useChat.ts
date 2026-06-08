@@ -3,7 +3,9 @@ import { io, Socket } from 'socket.io-client';
 import { api } from '@/lib/api';
 import { reportFrontendError } from '@/lib/frontend-observability';
 
-const CHAT_URL = process.env.NEXT_PUBLIC_CHAT_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3005');
+const CHAT_URL = process.env.NEXT_PUBLIC_CHAT_URL || '';
+const CHAT_TRANSPORT = (process.env.NEXT_PUBLIC_CHAT_TRANSPORT || 'http').toLowerCase();
+const FORCE_HTTP_TRANSPORT = CHAT_TRANSPORT !== 'socket';
 const SOCKET_CONNECT_TIMEOUT = 4000;
 const POLL_INTERVAL = 5000;
 
@@ -19,6 +21,18 @@ export interface ChatMessage {
     file_size?: number;
     file_mime?: string;
   };
+}
+
+interface ChatJoinAck {
+  ok?: boolean;
+  error?: string;
+  messages?: Record<string, unknown>[];
+}
+
+interface ChatSendAck {
+  ok?: boolean;
+  error?: string;
+  message?: Record<string, unknown>;
 }
 
 function getUserId(): string {
@@ -72,7 +86,7 @@ function mapMsg(m: Record<string, unknown>): ChatMessage {
   };
 }
 
-// ── HTTP fallback ──────────────────────────────────────────────
+// HTTP fallback.
 
 async function fetchHistory(appointmentId: string): Promise<ChatMessage[]> {
   try {
@@ -90,8 +104,9 @@ async function fetchHistory(appointmentId: string): Promise<ChatMessage[]> {
   }
 }
 
-async function postMessage(appointmentId: string, content: string): Promise<void> {
-  await api.post(`/api/appointments/${appointmentId}/messages`, { content });
+async function postMessage(appointmentId: string, content: string): Promise<Record<string, unknown>> {
+  const res = await api.post(`/api/appointments/${appointmentId}/messages`, { content });
+  return (res.data ?? {}) as Record<string, unknown>;
 }
 
 async function uploadChatFile(file: File) {
@@ -124,7 +139,22 @@ function hasValidAttachmentContract(attachment: {
   }
 }
 
-// ── Hook ───────────────────────────────────────────────────────
+function nextTempId() {
+  return `tmp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function historySignature(messages: ChatMessage[]) {
+  return messages
+    .map((message) => `${message.id ?? ''}|${message.time}|${message.text}|${message.attachment?.file_url ?? ''}`)
+    .join('||');
+}
+
+function appendUniqueMessage(prev: ChatMessage[], message: ChatMessage) {
+  if (message.id && prev.some(existing => existing.id === message.id)) return prev;
+  return [...prev, message];
+}
+
+// Hook.
 
 export function useChat(appointmentId: string | null) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -133,8 +163,8 @@ export function useChat(appointmentId: string | null) {
   const modeRef = useRef<'socket' | 'http' | 'pending'>('pending');
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastCountRef = useRef(0);
   const missingChatConfigReportedRef = useRef(false);
+  const lastSignatureRef = useRef('');
 
   const stopPoll = useCallback(() => {
     if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
@@ -147,14 +177,15 @@ export function useChat(appointmentId: string | null) {
 
     fetchHistory(apptId).then(msgs => {
       setMessages(msgs);
-      lastCountRef.current = msgs.length;
+      lastSignatureRef.current = historySignature(msgs);
     });
 
     pollRef.current = setInterval(async () => {
       const msgs = await fetchHistory(apptId);
-      if (msgs.length !== lastCountRef.current) {
+      const signature = historySignature(msgs);
+      if (signature !== lastSignatureRef.current) {
         setMessages(msgs);
-        lastCountRef.current = msgs.length;
+        lastSignatureRef.current = signature;
       }
     }, POLL_INTERVAL);
   }, []);
@@ -163,15 +194,16 @@ export function useChat(appointmentId: string | null) {
     setMessages([]);
     setConnected(false);
     modeRef.current = 'pending';
-    lastCountRef.current = 0;
+    lastSignatureRef.current = '';
     stopPoll();
 
     if (!appointmentId) return;
     const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
     if (!token) { startHttpMode(appointmentId); return; }
 
-    // No socket server configured → go straight to HTTP
-    if (!CHAT_URL) {
+    // Canonical persistence mode: HTTP-backed chat history.
+    // Socket can be re-enabled by setting NEXT_PUBLIC_CHAT_TRANSPORT=socket.
+    if (FORCE_HTTP_TRANSPORT || !CHAT_URL) {
       if (process.env.NODE_ENV === 'production' && !missingChatConfigReportedRef.current) {
         missingChatConfigReportedRef.current = true;
         reportFrontendError({
@@ -205,7 +237,25 @@ export function useChat(appointmentId: string | null) {
       if (timeoutRef.current) { clearTimeout(timeoutRef.current); timeoutRef.current = null; }
       modeRef.current = 'socket';
       setConnected(true);
-      socket.emit('chat:join', { appointmentId });
+      socket.emit('chat:join', { appointmentId }, (ack?: ChatJoinAck) => {
+        if (!ack?.ok) {
+          reportFrontendError({
+            module: 'chat',
+            action: 'joinAck',
+            severity: 'warning',
+            message: 'No se pudo cargar historial por socket, usando fallback HTTP',
+            details: { appointmentId, reason: ack?.error ?? 'join_failed' },
+          });
+          socket.disconnect();
+          socketRef.current = null;
+          startHttpMode(appointmentId);
+          return;
+        }
+
+        const history = Array.isArray(ack.messages) ? ack.messages.map(mapMsg) : [];
+        setMessages(history);
+        lastSignatureRef.current = historySignature(history);
+      });
     });
 
     socket.on('disconnect', () => {
@@ -234,7 +284,8 @@ export function useChat(appointmentId: string | null) {
     });
 
     socket.on('chat:message', (msg: Record<string, unknown>) => {
-      setMessages(prev => [...prev, mapMsg(msg)]);
+      const mapped = mapMsg(msg);
+      setMessages(prev => appendUniqueMessage(prev, mapped));
     });
 
     return () => {
@@ -247,20 +298,40 @@ export function useChat(appointmentId: string | null) {
 
   const sendMessage = useCallback((content: string) => {
     if (!appointmentId || !content.trim()) return;
-    const optimistic: ChatMessage = { from: 'me', text: content, time: fmt() };
+    const tempId = nextTempId();
+    const optimistic: ChatMessage = { id: tempId, from: 'me', text: content, time: fmt() };
     setMessages(prev => [...prev, optimistic]);
 
     if (modeRef.current === 'socket' && socketRef.current?.connected) {
-      socketRef.current.emit('chat:message', { appointmentId, content });
-    } else {
-      postMessage(appointmentId, content).catch((e: any) => {
-        reportFrontendError({
-          module: 'chat',
-          action: 'sendMessage',
-          message: 'Error enviando mensaje por fallback HTTP',
-          details: { appointmentId, status: e?.response?.status ?? null },
-        });
+      socketRef.current.emit('chat:message', { appointmentId, content }, (ack?: ChatSendAck) => {
+        if (!ack?.ok || !ack.message) {
+          setMessages(prev => prev.filter(message => message.id !== tempId));
+          reportFrontendError({
+            module: 'chat',
+            action: 'sendMessageAck',
+            message: 'Error enviando mensaje por socket',
+            details: { appointmentId, reason: ack?.error ?? 'send_failed' },
+          });
+          return;
+        }
+        const persisted = mapMsg(ack.message);
+        setMessages(prev => appendUniqueMessage(prev.filter(message => message.id !== tempId), persisted));
       });
+    } else {
+      postMessage(appointmentId, content)
+        .then(payload => {
+          const persisted = mapMsg(payload);
+          setMessages(prev => appendUniqueMessage(prev.filter(message => message.id !== tempId), persisted));
+        })
+        .catch((e: any) => {
+          setMessages(prev => prev.filter(message => message.id !== tempId));
+          reportFrontendError({
+            module: 'chat',
+            action: 'sendMessage',
+            message: 'Error enviando mensaje por fallback HTTP',
+            details: { appointmentId, status: e?.response?.status ?? null },
+          });
+        });
     }
   }, [appointmentId]);
 
@@ -278,24 +349,44 @@ export function useChat(appointmentId: string | null) {
     }
 
     const content = `[Archivo] ${attachment.file_name}`;
-    const optimistic: ChatMessage = { from: 'me', text: content, time: fmt(), attachment };
+    const tempId = nextTempId();
+    const optimistic: ChatMessage = { id: tempId, from: 'me', text: content, time: fmt(), attachment };
     setMessages(prev => [...prev, optimistic]);
 
     const payload = { appointmentId, content, attachment };
     if (modeRef.current === 'socket' && socketRef.current?.connected) {
-      socketRef.current.emit('chat:message', payload);
+      socketRef.current.emit('chat:message', payload, (ack?: ChatSendAck) => {
+        if (!ack?.ok || !ack.message) {
+          setMessages(prev => prev.filter(message => message.id !== tempId));
+          reportFrontendError({
+            module: 'chat',
+            action: 'sendFileAck',
+            message: 'Error enviando archivo por socket',
+            details: { appointmentId, fileName: file.name, reason: ack?.error ?? 'send_failed' },
+          });
+          return;
+        }
+        const persisted = mapMsg(ack.message);
+        setMessages(prev => appendUniqueMessage(prev.filter(message => message.id !== tempId), persisted));
+      });
     } else {
       api.post(`/api/appointments/${appointmentId}/messages`, {
         content,
         attachment,
-      }).catch((e: any) => {
-        reportFrontendError({
-          module: 'chat',
-          action: 'sendFile',
-          message: 'Error enviando archivo por fallback HTTP',
-          details: { appointmentId, status: e?.response?.status ?? null, fileName: file.name },
+      })
+        .then(res => {
+          const persisted = mapMsg((res?.data ?? {}) as Record<string, unknown>);
+          setMessages(prev => appendUniqueMessage(prev.filter(message => message.id !== tempId), persisted));
+        })
+        .catch((e: any) => {
+          setMessages(prev => prev.filter(message => message.id !== tempId));
+          reportFrontendError({
+            module: 'chat',
+            action: 'sendFile',
+            message: 'Error enviando archivo por fallback HTTP',
+            details: { appointmentId, status: e?.response?.status ?? null, fileName: file.name },
+          });
         });
-      });
     }
   }, [appointmentId]);
 
