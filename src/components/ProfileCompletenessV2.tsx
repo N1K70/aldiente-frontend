@@ -19,12 +19,11 @@ export default function ProfileCompletenessV2({
   onEdit,
   loading = false,
 }: Props) {
-  if (loading) return null;
-
   const completion = useMemo(() => {
     return getProfileCompletionState(profile, role, documentsCount);
   }, [profile, role, documentsCount]);
 
+  if (loading) return null;
   if (completion.complete || completion.percent >= 100) return null;
 
   const barColor =

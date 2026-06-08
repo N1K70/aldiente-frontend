@@ -709,3 +709,38 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 ### Decision
 - `FOLLOW-UP`
 - Motivo: Se requiere redeploy con hotfix y corregir/confirmar credenciales paciente antes de cerrar E2E productivo.
+
+---
+
+### Fecha
+- `2026-06-08`
+
+### Branch / Commit
+- Branch: `master`
+- Commit: `working tree (sin commit todavia)`
+
+### Scope del cambio
+- Hotfix React #300 en `/perfil`: `ProfileCompletenessV2` ya no retorna antes de ejecutar `useMemo`.
+- Causa raiz: hook order inestable cuando `loading` cambiaba entre renders.
+
+### Gate tecnico
+- `npm run qa:encoding-guard`: `PASS`
+- `npm run qa:mock-guard`: `PASS`
+- `npm run qa:gate`: `PASS`
+
+### QA funcional ejecutado
+1. Flujo: Build de `/perfil`
+   - Resultado: `PASS`
+   - Evidencia: Next build genera `/perfil` correctamente.
+2. Flujo: Guardrail React hooks
+   - Resultado: `PASS local`
+   - Evidencia: `useMemo` se ejecuta antes de returns condicionales en `ProfileCompletenessV2`.
+
+### Hallazgos
+- Severidad: `Major`
+- Descripcion: React #300 se originaba por retorno condicional antes de hooks en componente de completitud de perfil.
+- Ticket Notion: `[P0] Release candidate: validar produccion post-deploy`
+
+### Decision
+- `MERGE`
+- Motivo: Corrige el crash visible de `/perfil`; queda pendiente redeploy y retest productivo.
