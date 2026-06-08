@@ -544,8 +544,9 @@ export default function HomePage() {
             <div style={{ fontSize: 13, color: 'var(--ink-600)', lineHeight: 1.4, marginBottom: 10 }}>
               Puedes revisar detalles de reserva, pagos y cambios desde landing o durante tu flujo.
             </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <Button size="sm" variant="glass" onClick={() => router.push('/landing')}>Ver FAQ</Button>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <Button href="/landing" size="sm" variant="glass">Ver FAQ</Button>
+              <Button href="/documentos" size="sm" variant="glass">Documentos</Button>
               <Button size="sm" variant="ghost" onClick={() => window.open('mailto:hola@aldiente.cl')}>Soporte</Button>
             </div>
           </Glass>
@@ -562,12 +563,10 @@ export default function HomePage() {
             { icon: 'chat',     label: 'Chat',    href: '/chat' },
             { icon: 'user',     label: 'Perfil',  href: '/perfil' },
           ].map(t => (
-            <Link key={t.label} href={t.href} style={{ textDecoration: 'none' }}>
-              <button style={{ width: 56, height: 48, border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, color: t.active ? 'var(--brand-700)' : 'var(--ink-500)', position: 'relative' }}>
+            <Link key={t.label} href={t.href} style={{ width: 56, height: 48, textDecoration: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, color: t.active ? 'var(--brand-700)' : 'var(--ink-500)', position: 'relative' }}>
                 {t.active && <div style={{ position: 'absolute', inset: 4, borderRadius: 999, background: 'linear-gradient(135deg, rgba(16,169,198,0.15), rgba(79,70,229,0.1))' }}/>}
                 <Icon name={t.icon as Parameters<typeof Icon>[0]['name']} size={22} color={t.active ? 'var(--brand-700)' : 'var(--ink-500)'} stroke={t.active ? 2.2 : 1.8} />
                 <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.01em', position: 'relative' }}>{t.label}</div>
-              </button>
             </Link>
           ))}
         </div>

@@ -75,7 +75,7 @@ function LandingDesktop({ stats }: { stats: PlatformStats }) {
         </div>
         <div style={{ flex: 1 }} />
         <Link href="/login" style={{ textDecoration: 'none', fontSize: 14, fontWeight: 600, color: 'var(--ink-700)' }}>Iniciar sesión</Link>
-        <Link href="/signup"><Button size="md">Crear cuenta</Button></Link>
+        <Button href="/signup" size="md">Crear cuenta</Button>
       </div>
 
       {/* Hero */}
@@ -91,7 +91,7 @@ function LandingDesktop({ stats }: { stats: PlatformStats }) {
             Atención dental de calidad hasta 60% más accesible. Estudiantes de los últimos años, siempre supervisados por odontólogos certificados.
           </p>
           <div style={{ display: 'flex', gap: 12, marginBottom: 36 }}>
-            <Link href="/signup"><Button size="lg" trailingIcon="arrow_right">Buscar atención</Button></Link>
+            <Button href="/signup" size="lg" trailingIcon="arrow_right">Buscar atención</Button>
             <Button size="lg" variant="glass" onClick={() => router.push('/signup?role=student')}>Soy estudiante</Button>
           </div>
           <div style={{ display: 'flex', gap: 32, fontSize: 13, color: 'var(--ink-600)' }}>
@@ -211,7 +211,7 @@ function LandingDesktop({ stats }: { stats: PlatformStats }) {
         </div>
         <div style={{ fontSize: 17, color: 'var(--ink-600)', marginBottom: 28 }}>Regístrate en 2 minutos. Sin compromisos.</div>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
-          <Link href="/signup"><Button size="lg" trailingIcon="arrow_right">Empezar ahora</Button></Link>
+          <Button href="/signup" size="lg" trailingIcon="arrow_right">Empezar ahora</Button>
           <Button size="lg" variant="glass" onClick={() => document.getElementById('how-it-works-desktop')?.scrollIntoView({ behavior: 'smooth' })}>Ver cómo funciona</Button>
         </div>
       </div>
@@ -344,9 +344,7 @@ export default function LandingPage() {
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28, maxWidth: 440 }}>
-          <Link href="/signup" style={{ textDecoration: 'none', display: 'block' }}>
-            <Button size="lg" full trailingIcon="arrow_right">Crear cuenta gratis</Button>
-          </Link>
+          <Button href="/signup" size="lg" full trailingIcon="arrow_right">Crear cuenta gratis</Button>
           <Button size="lg" full variant="glass" onClick={() => {
             document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
           }}>
@@ -570,8 +568,8 @@ export default function LandingPage() {
           <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.85)', margin: '0 0 20px', lineHeight: 1.45, position: 'relative' }}>
             Crea tu cuenta en menos de un minuto y agenda tu primera cita hoy.
           </p>
-          <Link href="/signup" style={{ textDecoration: 'none', display: 'block', position: 'relative' }}>
-            <button style={{
+          <Link href="/signup" style={{
+              textDecoration: 'none', position: 'relative',
               width: '100%', height: 56, borderRadius: 18,
               background: '#fff', border: 'none',
               fontFamily: 'var(--font-body)', fontSize: 17, fontWeight: 700,
@@ -581,7 +579,6 @@ export default function LandingPage() {
             }}>
               Empezar gratis
               <Icon name="arrow_right" size={20} />
-            </button>
           </Link>
         </div>
       </section>

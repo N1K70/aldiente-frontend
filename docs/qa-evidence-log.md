@@ -518,3 +518,48 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 ### Decision
 - `MERGE`
 - Motivo: El QA visual deja de aceptar paginas en blanco como exitosas y vuelve a producir evidencia util para desarrollo continuo.
+
+---
+
+### Fecha
+- `2026-06-07`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit: `working tree (sin commit todavia)`
+
+### Scope del cambio
+- Navegacion critica: sidebar/bottom nav/CTAs pasan de depender de `router.push` en botones/divs a links nativos cuando el destino es una ruta.
+- `Button` ahora soporta `href` para renderizar como link con el mismo estilo visual, evitando `Link` envolviendo `button`.
+- Se agrego `npm run qa:navigation` con Playwright para validar CTAs publicos, navegacion paciente y navegacion estudiante.
+- `qa:release:local` ahora incluye `qa:navigation`.
+
+### Gate tecnico
+- `npm run qa:encoding-guard`: `PASS`
+- `npm run qa:mock-guard`: `PASS`
+- `npm run qa:gate`: `PASS`
+- `npm run qa:navigation`: `PASS`
+- `npm run qa:visual:snapshots`: `PASS` con `WARN` HMR WebSocket en Docker/headless
+
+### QA funcional ejecutado
+1. Flujo: CTAs publicos welcome/landing
+   - Resultado: `PASS`
+   - Evidencia: `tmp/navigation-qa/report.json`
+   - Notas: `/welcome -> /signup`, `/welcome -> /login`, `/landing -> /signup`.
+2. Flujo: Navegacion paciente
+   - Resultado: `PASS`
+   - Evidencia: `qa:navigation`
+   - Notas: Links a explorar, citas, chat, perfil y documentos cambian ruta sin depender de handlers React.
+3. Flujo: Navegacion estudiante
+   - Resultado: `PASS`
+   - Evidencia: `qa:navigation`
+   - Notas: Links a agenda, servicios, mensajes y perfil cambian ruta.
+
+### Hallazgos
+- Severidad: `Minor`
+- Descripcion: Persiste `WARN` de WebSocket HMR en Docker/headless durante QA visual; no bloquea navegacion ni render.
+- Ticket Notion: `[P0] Corregir navegación de sidebar y CTAs internos que no cambian vista`
+
+### Decision
+- `MERGE`
+- Motivo: La navegacion critica queda cubierta por links nativos y contrato Playwright automatizado.

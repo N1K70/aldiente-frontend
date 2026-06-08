@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Icon, Button, Glass } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
@@ -253,10 +254,10 @@ export default function DashboardPage() {
           { icon: 'chat',     label: 'Mensajes',      href: '/chat' },
           { icon: 'user',     label: 'Perfil',        href: '/perfil' },
         ].map(t => (
-          <button key={t.label} onClick={() => router.push(t.href)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', padding: '0 12px', color: t.active ? 'var(--brand-600)' : 'var(--ink-400)' }}>
+          <Link key={t.label} href={t.href} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', padding: '0 12px', color: t.active ? 'var(--brand-600)' : 'var(--ink-400)', textDecoration: 'none' }}>
             <Icon name={t.icon as Parameters<typeof Icon>[0]['name']} size={22} color={t.active ? 'var(--brand-600)' : 'var(--ink-400)'} />
             <span style={{ fontSize: 10, fontWeight: t.active ? 700 : 500 }}>{t.label}</span>
-          </button>
+          </Link>
         ))}
       </nav>
     </div>

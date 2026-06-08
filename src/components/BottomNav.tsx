@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Icon } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -23,7 +24,6 @@ const STUDENT_TABS = [
 
 export default function BottomNav() {
   const { user } = useAuth();
-  const router = useRouter();
   const pathname = usePathname();
 
   if (!user) return null;
@@ -48,8 +48,8 @@ export default function BottomNav() {
       {tabs.map(tab => {
         const active = isActive(tab.href);
         return (
-          <button key={tab.href} onClick={() => router.push(tab.href)}
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', padding: '0 14px', color: active ? 'var(--brand-600)' : 'var(--ink-400)' }}>
+          <Link key={tab.href} href={tab.href}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', padding: '0 14px', color: active ? 'var(--brand-600)' : 'var(--ink-400)', textDecoration: 'none' }}>
             <div style={{ position: 'relative' }}>
               <Icon name={tab.icon as Parameters<typeof Icon>[0]['name']} size={22} color={active ? 'var(--brand-600)' : 'var(--ink-400)'} />
               {active && (
@@ -57,7 +57,7 @@ export default function BottomNav() {
               )}
             </div>
             <span style={{ fontSize: 10, fontWeight: active ? 700 : 500 }}>{tab.label}</span>
-          </button>
+          </Link>
         );
       })}
     </nav>

@@ -1,23 +1,34 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Icon, Button, Glass } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
 
 export const DESKTOP_BP = 1024;
 
-export function useIsDesktop() {
-  const [isDesktop, setIsDesktop] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia(`(min-width: ${DESKTOP_BP}px)`);
-    setIsDesktop(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+function subscribeToViewport(callback: () => void) {
+  const mq = window.matchMedia(`(min-width: ${DESKTOP_BP}px)`);
+  const handler = () => callback();
+  queueMicrotask(callback);
+
+  if (mq.addEventListener) {
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
-  }, []);
-  return isDesktop;
+  }
+
+  mq.addListener(handler);
+  return () => mq.removeListener(handler);
+}
+
+function getViewportSnapshot() {
+  return window.matchMedia(`(min-width: ${DESKTOP_BP}px)`).matches;
+}
+
+export function useIsDesktop() {
+  return useSyncExternalStore(subscribeToViewport, getViewportSnapshot, () => false);
 }
 
 // ── Sidebar ───────────────────────────────────────────────────────────────────
@@ -48,13 +59,14 @@ const ADMIN_LINKS = [
   { id: 'settings', icon: 'shield',   label: 'Ajustes',       href: '/perfil' },
 ];
 
-interface SidebarLinkProps { icon: string; label: string; active?: boolean; badge?: string; onClick?: () => void; }
-const SidebarLink: React.FC<SidebarLinkProps> = ({ icon, label, active, badge, onClick }) => (
-  <div
-    onClick={onClick}
+interface SidebarLinkProps { icon: string; label: string; href: string; active?: boolean; badge?: string; }
+const SidebarLink: React.FC<SidebarLinkProps> = ({ icon, label, href, active, badge }) => (
+  <Link
+    href={href}
     style={{
       display: 'flex', alignItems: 'center', gap: 12,
       padding: '10px 14px', borderRadius: 12, cursor: 'pointer',
+      textDecoration: 'none',
       background: active ? 'linear-gradient(135deg, rgba(16,169,198,0.14), rgba(79,70,229,0.08))' : 'transparent',
       color: active ? 'var(--brand-700)' : 'var(--ink-700)',
       fontWeight: active ? 700 : 500, fontSize: 14,
@@ -69,7 +81,7 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({ icon, label, active, badge, o
         {badge}
       </span>
     )}
-  </div>
+  </Link>
 );
 
 interface SidebarProps { role?: 'patient' | 'student' | 'admin'; activeId?: string; }
@@ -127,7 +139,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role = 'patient', activeId }) 
 
       {/* Nav links */}
       {links.map(l => (
-        <SidebarLink key={l.id} icon={l.icon} label={l.label} active={l.id === activeId} badge={l.badge} onClick={() => router.push(l.href)} />
+        <SidebarLink key={l.id} icon={l.icon} label={l.label} href={l.href} active={l.id === activeId} badge={l.badge} />
       ))}
 
       <div style={{ flex: 1 }} />
