@@ -72,6 +72,18 @@ Para corrida local de pre-release en un solo paso:
 
 `npm run qa:release:local`
 
+## Check de variables productivas
+
+Antes de promover un release candidate, validar que las variables publicas de produccion apunten a endpoints productivos:
+
+`npm run qa:env:production`
+
+Tambien se puede validar un snapshot local exportado desde Vercel o preparado manualmente:
+
+`npm run qa:env:production -- .env.production.local`
+
+El check exige `https` y bloquea `localhost` para `NEXT_PUBLIC_BACKEND_URL` y `NEXT_PUBLIC_CHAT_URL`. `NEXT_PUBLIC_FRONTEND_EVENTS_ENDPOINT` puede ser `/api/...` o una URL `https`.
+
 ## Guardrail anti-mock en produccion
 
 Para auditar que el codigo productivo no reintroduzca datos ficticios en `src`:

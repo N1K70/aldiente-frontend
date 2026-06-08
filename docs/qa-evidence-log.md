@@ -594,3 +594,37 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 ### Decision
 - `MERGE`
 - Motivo: El gate local ya representa la DoD de release candidate antes de pasar a validaciones productivas.
+
+---
+
+### Fecha
+- `2026-06-08`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit: `working tree (sin commit todavia)`
+
+### Scope del cambio
+- Preparacion de release candidate productivo: `qa:env:production` ahora puede validar un archivo env local exportado desde Vercel o preparado manualmente.
+- Documentacion actualizada para ejecutar el check con `npm run qa:env:production -- .env.production.local` antes de deploy/E2E productivo.
+
+### Gate tecnico
+- `npm run qa:env:production -- tmp\\aldiente-valid-production.env`: `PASS`
+- `npm run qa:env:production -- tmp\\aldiente-invalid-production.env`: `FAIL esperado`
+
+### QA funcional ejecutado
+1. Flujo: Validacion de variables productivas validas
+   - Resultado: `PASS`
+   - Evidencia: backend/chat `https` y telemetry `/api/telemetry` aceptados.
+2. Flujo: Bloqueo de variables no productivas
+   - Resultado: `PASS`
+   - Evidencia: el script rechazo `http://localhost:3001` y telemetry `http://localhost:3000/api/telemetry`.
+
+### Hallazgos
+- Severidad: `Minor`
+- Descripcion: El runner `npm` en Windows es mas estable usando argumento posicional (`-- archivo.env`) que `-- --env-file archivo.env`.
+- Ticket Notion: `[P0] Release candidate: validar produccion post-deploy`
+
+### Decision
+- `MERGE`
+- Motivo: Reduce riesgo de deploy con endpoints locales o inseguros y deja el paso de variables productivas automatizable antes de Vercel/E2E.
