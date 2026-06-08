@@ -479,3 +479,42 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 ### Decision
 - `MERGE`
 - Motivo: Reduce divergencia entre emisor e ingest de telemetria sin cambiar el contrato publico.
+
+---
+
+### Fecha
+- `2026-06-07`
+
+### Branch / Commit
+- Branch: `dev`
+- Commit: `working tree (sin commit todavia)`
+
+### Scope del cambio
+- QA visual local con Docker/hot-reload: `qa:visual:snapshots` ahora evita falsos positivos de paginas en blanco.
+- El script usa `domcontentloaded`, espera contenido visible, captura console/page errors y marca `FAIL` si la UI renderizada no tiene texto.
+- Se recupero el entorno local reiniciando solo `aldiente_frontend` tras detectar estado stale de Next dev.
+
+### Gate tecnico
+- `npm run qa:encoding-guard`: `PASS`
+- `npm run qa:mock-guard`: `PASS`
+- `npm run qa:visual:snapshots`: `PASS` con `WARN` HMR WebSocket despues de reiniciar `aldiente_frontend`
+- `npm run qa:gate`: `PASS` despues de limpiar `.next` corrupto
+
+### QA funcional ejecutado
+1. Flujo: Capturas visuales rutas criticas
+   - Resultado: `PASS`
+   - Evidencia: `tmp/visual-qa/*.png` + `tmp/visual-qa/report.json`
+   - Notas: 12 rutas renderizaron UI real sin overflow, redirects inesperados, mojibake visible, paginas en blanco ni documento principal `500`.
+2. Flujo: Deteccion anti-blank-page
+   - Resultado: `PASS`
+   - Evidencia: corrida previa fallo correctamente con `blank page rendered` y expuso `Module not found: Can't resolve '@/lib/telemetry-contract'`.
+   - Notas: El archivo existia en host/contenedor y `tsc --noEmit` dentro del contenedor pasaba; reiniciar `aldiente_frontend` limpio el estado stale de Next dev.
+
+### Hallazgos
+- Severidad: `Minor`
+- Descripcion: Playwright headless registra errores WebSocket HMR (`/_next/webpack-hmr`) en Docker, por eso las rutas quedan como `WARN`; no bloquea render ni snapshots.
+- Ticket Notion: `[P0] Recuperar QA visual local con Docker/hot-reload`
+
+### Decision
+- `MERGE`
+- Motivo: El QA visual deja de aceptar paginas en blanco como exitosas y vuelve a producir evidencia util para desarrollo continuo.
