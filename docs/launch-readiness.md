@@ -41,3 +41,13 @@ Fecha base: 2026-04-29
 ## Notas de validacion
 
 No se debe subir documentacion ni cambios al frontend legacy para nuevas decisiones de producto. Cualquier tarea nueva de frontend debe referenciar `aldiente-web`.
+
+## Ruta operativa actual
+
+La salida debe guiarse por `docs/release-readiness-matrix.md` y por los campos del backlog en Notion:
+
+- `Carril`
+- `Flujo critico`
+- `Validacion requerida`
+
+La prioridad inmediata es recuperar QA visual local, cerrar P0 Codigo restantes y despues ejecutar release candidate con evidencia E2E productiva.
