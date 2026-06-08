@@ -744,3 +744,36 @@ Usar este checklist cuando se valide el item `[P1] Validar contrato backend de a
 ### Decision
 - `MERGE`
 - Motivo: Corrige el crash visible de `/perfil`; queda pendiente redeploy y retest productivo.
+
+---
+
+### Fecha
+- `2026-06-08`
+
+### Branch / Commit
+- Branch: `main`
+- Commit: `75a61df`
+
+### Scope del cambio
+- Retest productivo despues de confirmar `main` como rama Vercel y remover marcador temporal `MASTER CHECK`.
+
+### Gate tecnico
+- Deploy productivo observado en `https://aldiente.app`.
+
+### QA funcional ejecutado
+1. Flujo: Dashboard estudiante productivo
+   - Resultado: `PASS`
+   - Evidencia: `estudiante@test.com` redirige a `/dashboard`; el texto `MASTER CHECK` ya no aparece.
+2. Flujo: Perfil estudiante productivo
+   - Resultado: `PASS parcial`
+   - Evidencia: `/perfil` renderiza UI de perfil y ya no muestra `This page couldn't load` ni React #300.
+   - Notas: Persisten respuestas `403` desde `https://api.aldiente.app/api/students/profile` y `https://api.aldiente.app/api/patients/profile`; la UI degrada sin romper.
+
+### Hallazgos
+- Severidad: `Major`
+- Descripcion: Backend productivo rechaza endpoints de perfil con `403` para la cuenta estudiante de prueba; frontend ya no crashea, pero datos de perfil pueden quedar incompletos/no guardables.
+- Ticket Notion: `[P0] Release candidate: validar produccion post-deploy`
+
+### Decision
+- `FOLLOW-UP`
+- Motivo: Crash frontend corregido; queda pendiente revisar permisos/contrato backend para perfil productivo y cuenta paciente `401`.
