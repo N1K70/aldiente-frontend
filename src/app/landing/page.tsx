@@ -18,11 +18,14 @@ interface PlatformStats {
   socialProofCount: string;
 }
 
+// Sin cifras por defecto: solo se muestran metricas cuando vienen de una
+// fuente real (backend). Si no hay datos, los campos quedan vacios y no se
+// renderizan (ver filtros en el render).
 const DEFAULT_STATS: PlatformStats = {
-  patients: '2.400+',
-  students: '180+',
-  rating: '4.8★',
-  socialProofCount: '+500',
+  patients: '',
+  students: '',
+  rating: '',
+  socialProofCount: '',
 };
 
 function usePlatformStats(): PlatformStats {
@@ -40,7 +43,7 @@ function usePlatformStats(): PlatformStats {
           const rating = Number(d.avg_rating ?? d.avgRating ?? d.rating ?? 0);
           if (patients > 0 || students > 0) {
             setStats({
-              patients: patients >= 1000 ? `${(patients / 1000).toFixed(1).replace('.0', '')}k+` : `${patients}+`,
+              patients: patients > 0 ? (patients >= 1000 ? `${(patients / 1000).toFixed(1).replace('.0', '')}k+` : `${patients}+`) : '',
               students: students > 0 ? `${students}+` : DEFAULT_STATS.students,
               rating: rating > 0 ? `${rating.toFixed(1)}★` : DEFAULT_STATS.rating,
               socialProofCount: patients > 0 ? `+${patients}` : DEFAULT_STATS.socialProofCount,
@@ -95,7 +98,7 @@ function LandingDesktop({ stats }: { stats: PlatformStats }) {
             <Button size="lg" variant="glass" onClick={() => router.push('/signup?role=student')}>Soy estudiante</Button>
           </div>
           <div style={{ display: 'flex', gap: 32, fontSize: 13, color: 'var(--ink-600)' }}>
-            {[[stats.patients, 'Pacientes atendidos'], [stats.students, 'Estudiantes activos'], [stats.rating, 'Rating promedio']].map(([v, l]) => (
+            {[[stats.patients, 'Pacientes atendidos'], [stats.students, 'Estudiantes activos'], [stats.rating, 'Rating promedio']].filter(([v]) => v).map(([v, l]) => (
               <div key={l}>
                 <b style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--ink-900)', letterSpacing: '-0.02em', display: 'block' }}>{v}</b>
                 {l}
@@ -124,13 +127,12 @@ function LandingDesktop({ stats }: { stats: PlatformStats }) {
           </Glass>
           <Glass radius={20} style={{ position: 'absolute', top: 30, right: -24, padding: 16, width: 220, transform: 'rotate(3deg)', boxShadow: '0 20px 40px rgba(10,22,40,0.1)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 12, background: 'linear-gradient(135deg, #A7F3D0, #10B981)', color: '#fff', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>MR</div>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink-900)' }}>María R.</div>
-                <div style={{ display: 'flex', gap: 2 }}>{[0,1,2,3,4].map(i => <Icon key={i} name="star" size={10} color="#F59E0B" stroke={0} />)}</div>
+              <div style={{ width: 36, height: 36, borderRadius: 12, background: 'linear-gradient(135deg, #A7F3D0, #10B981)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Icon name="shield" size={18} color="#fff" />
               </div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink-900)' }}>Supervisión docente</div>
             </div>
-            <div style={{ fontSize: 12, color: 'var(--ink-600)', lineHeight: 1.4 }}>"Excelente trato, muy paciente. Me explicó todo paso a paso."</div>
+            <div style={{ fontSize: 12, color: 'var(--ink-600)', lineHeight: 1.4 }}>Cada atención la realiza un estudiante de últimos años bajo supervisión de odontólogos certificados.</div>
           </Glass>
         </div>
       </div>
@@ -352,26 +354,13 @@ export default function LandingPage() {
           </Button>
         </div>
 
-        {/* Social proof */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ display: 'flex' }}>
-            {(['MG', 'CP', 'AL', 'JR'] as const).map((n, i) => (
-              <div key={n} style={{
-                width: 34, height: 34, borderRadius: '50%',
-                background: `linear-gradient(135deg, ${['#FBBF24','#F472B6','#60A5FA','#34D399'][i]}, ${['#D97706','#DB2777','#2563EB','#059669'][i]})`,
-                border: '2.5px solid #fff', marginLeft: i === 0 ? 0 : -10,
-                color: '#fff', fontSize: 12, fontWeight: 700,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-              }}>{n}</div>
-            ))}
-          </div>
-          <div style={{ fontSize: 14, color: 'var(--ink-600)', lineHeight: 1.3 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 2, marginBottom: 2 }}>
-              {[0,1,2,3,4].map(i => <Icon key={i} name="star" size={13} color="#F59E0B" stroke={0} />)}
-              <span style={{ fontWeight: 700, color: 'var(--ink-900)', marginLeft: 4 }}>{stats.rating.replace('★', '')}</span>
-            </div>
-            <span><b style={{ color: 'var(--ink-900)' }}>{stats.socialProofCount} pacientes</b> confían en nosotros</span>
+        {/* Confianza operacional (sin metricas fabricadas) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ width: 34, height: 34, borderRadius: 12, background: 'linear-gradient(135deg, #3DC4DC, #0E8AA5)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name="shield" size={16} color="#fff" stroke={2.4} />
+          </span>
+          <div style={{ fontSize: 14, color: 'var(--ink-700)', lineHeight: 1.35 }}>
+            Atención supervisada por <b style={{ color: 'var(--ink-900)' }}>odontólogos certificados</b>
           </div>
         </div>
       </section>
@@ -477,36 +466,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Testimonial */}
-      <section style={{ position: 'relative', zIndex: 1, padding: '8px 24px 40px' }}>
-        <Glass hi radius={28} style={{ padding: 24, position: 'relative', maxWidth: 480 }}>
-          <div style={{
-            position: 'absolute', top: 16, right: 20,
-            fontFamily: 'var(--font-display)', fontSize: 80, lineHeight: 1, color: 'var(--brand-200)',
-          }}>"</div>
-          <div style={{ display: 'flex', gap: 2, marginBottom: 14 }}>
-            {[0,1,2,3,4].map(i => <Icon key={i} name="star" size={15} color="#F59E0B" stroke={0} />)}
-          </div>
-          <p style={{
-            fontSize: 17, lineHeight: 1.45, color: 'var(--ink-800)',
-            margin: '0 0 18px', fontWeight: 500,
-          }}>
-            A mis 72 años tenía miedo de la tecnología. Acá pude agendar todo en el celular, vi quién me atendería y hasta hablé con ella. Mi nieta me ayudó solo con el primer paso.
-          </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{
-              width: 44, height: 44, borderRadius: 14,
-              background: 'linear-gradient(135deg, #FBBF24, #D97706)',
-              color: '#fff', fontSize: 15, fontWeight: 700, fontFamily: 'var(--font-display)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>MR</div>
-            <div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink-900)' }}>María Rivas</div>
-              <div style={{ fontSize: 13, color: 'var(--ink-500)' }}>Paciente · Santiago</div>
-            </div>
-          </div>
-        </Glass>
-      </section>
+      {/* Testimonios reales pendientes: se omiten para no usar social proof ficticio ([003]) */}
 
       {/* FAQ + Trust */}
       <section style={{ position: 'relative', zIndex: 1, padding: '8px 24px 40px' }}>
