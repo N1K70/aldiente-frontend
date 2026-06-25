@@ -8,12 +8,19 @@ Integrar QA al flujo de desarrollo para detectar regresiones antes de merge.
 
 ## Regla de trabajo (Definition of Done)
 
-Cada cambio que se quiera fusionar a `dev` debe cumplir:
+> Rama productiva: `main` (Vercel despliega desde `main`). Los cambios se integran
+> a `main`; la referencia historica a `dev` quedo obsoleta.
+
+> Entorno sin Node nativo confiable: correr el QA en Docker. Comando unico
+> recomendado antes de merge/demo: `npm run qa:ci:local` (corre gate + guards +
+> contratos + smokes + E2E). Ver `docs/docker-dev.md`.
+
+Cada cambio que se quiera fusionar a `main` debe cumplir:
 
 1. Gate tecnico local en verde:
 - `npm run typecheck`
 - `npm run build`
-- O el comando unico: `npm run qa:gate`
+- O el comando unico: `npm run qa:gate` (en Docker: `npm run qa:gate:docker`)
 2. Smoke automatico de rutas criticas (con app levantada):
 - `npm run qa:smoke:routes`
 - Opcional base URL distinta: `QA_BASE_URL=http://localhost:3000 npm run qa:smoke:routes`

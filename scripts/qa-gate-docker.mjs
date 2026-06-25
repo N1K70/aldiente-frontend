@@ -5,9 +5,12 @@
 // tsc/next al correr en un contenedor Linux. Este script corre `qa:gate`
 // (typecheck + build) en node:20-alpine con un node_modules AISLADO.
 //
-// Importante: usa un volumen anonimo para /app/node_modules (NO el volumen
-// `frontend_node_modules` del `docker compose up`). Ese volumen de dev puede
-// quedar en estado stale (React duplicado) y rompe el build de /_global-error.
+// Importante: usa volumenes anonimos para /app/node_modules y /app/.next, asi:
+//   - node_modules: instalacion limpia del contenedor (NO el volumen
+//     `frontend_node_modules` del `docker compose up`, que puede quedar stale
+//     con React duplicado y romper el build de /_global-error).
+//   - .next: build aislado dentro del contenedor; NO toca el .next del host, asi
+//     no colisiona con el dev server (`aldiente_frontend`) si esta corriendo.
 //
 // Uso:  npm run qa:gate:docker
 // Si el host no puede correr ni `npm`, ver el comando equivalente en
@@ -21,9 +24,10 @@ const args = [
   'run', '--rm',
   '-v', `${cwd}:/app`,
   '-v', '/app/node_modules', // volumen anonimo: node_modules limpio del contenedor
+  '-v', '/app/.next',        // volumen anonimo: .next aislado (no colisiona con dev)
   '-w', '/app',
   'node:20-alpine',
-  'sh', '-c', 'rm -rf .next && npm ci && npm run qa:gate',
+  'sh', '-c', 'npm ci && npm run qa:gate',
 ];
 
 console.log('> docker', args.join(' '));

@@ -60,12 +60,27 @@ docker run --rm -v "${PWD}:/app" -v "/app/node_modules" -w /app node:20-alpine `
 
 Notas:
 
-- Usa un volumen **anónimo** para `/app/node_modules`. **No** reutilices el
-  volumen `frontend_node_modules` del `docker compose up`: queda en estado stale
-  (React duplicado) y rompe el build de `/_global-error`.
-- `rm -rf .next` evita que artefactos corruptos de `next dev` (p. ej.
-  `.next/dev/types/validator.ts`) hagan fallar el `typecheck`.
+- Usa volúmenes **anónimos** para `/app/node_modules` y `/app/.next`. Esto evita
+  dos problemas: (a) reutilizar el `frontend_node_modules` del `docker compose up`
+  (queda stale con React duplicado y rompe el build de `/_global-error`), y
+  (b) escribir el `.next` del host, que colisionaría con el dev server.
+- Al aislar `.next`, el comando se puede correr **aunque el dev server esté
+  levantado**.
 - No necesita levantar Postgres/backend/chat: `qa:gate` es solo typecheck + build.
+
+## CI local en un comando
+
+Para correr **toda la suite** (gate + guards + contratos + smokes + E2E) en una
+sola pasada reproducible, sin depender de `docker compose up`:
+
+```bash
+npm run qa:ci:local
+```
+
+Corre todo dentro de un único contenedor (imagen Playwright = Node + Chromium),
+con `node_modules` y `.next` aislados. Es el comando recomendado **antes de un
+merge o una demo**. Fases: install → guards → contratos → gate → servir build de
+prod + smokes → E2E de navegación.
 
 ## E2E / visual con Playwright en Docker
 
