@@ -1,10 +1,11 @@
 'use client';
 
-import React, { Suspense, useMemo, useState } from 'react';
+import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button, Icon, TextField } from '@/components/ui';
 import TermsModal from '@/components/TermsModal';
+import { api } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsDesktop } from '@/components/desktop-shell';
 import { formatRutOnInput, validateAndFormatRut } from '@/lib/rut';
@@ -115,6 +116,19 @@ function SignupInner() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [universities, setUniversities] = useState<Array<{ id: string | number; name: string }>>([]);
+
+  // Catalogo real de universidades para que el estudiante seleccione (no texto
+  // libre). Si el backend no responde, se cae a un input de texto (ver render).
+  useEffect(() => {
+    api.get('/api/universities')
+      .then(r => {
+        const d = r.data;
+        const list = Array.isArray(d) ? d : (d?.universities ?? []);
+        setUniversities(list);
+      })
+      .catch(() => {});
+  }, []);
 
   const upd = (key: keyof typeof data, value: string) => {
     setData(current => ({ ...current, [key]: value }));
@@ -285,7 +299,19 @@ function SignupInner() {
               </React.Fragment>
             ) : (
               <React.Fragment>
-                <TextField label="Universidad" icon="graduation" value={data.university} onChange={e => upd('university', e.target.value)} placeholder="Universidad de Chile" />
+                {universities.length > 0 ? (
+                  <SelectField
+                    label="Universidad"
+                    value={data.university}
+                    onChange={value => upd('university', value)}
+                    options={[
+                      { value: '', label: 'Selecciona tu universidad' },
+                      ...universities.map(u => ({ value: u.name, label: u.name })),
+                    ]}
+                  />
+                ) : (
+                  <TextField label="Universidad" icon="graduation" value={data.university} onChange={e => upd('university', e.target.value)} placeholder="Universidad de Chile" />
+                )}
                 <TextField label="Ano de carrera" icon="calendar" value={data.careerYear} onChange={e => upd('careerYear', e.target.value.replace(/[^\d]/g, ''))} placeholder="5" />
               </React.Fragment>
             )}
