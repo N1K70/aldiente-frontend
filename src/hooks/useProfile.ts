@@ -23,6 +23,8 @@ export interface Profile {
   bio?: string;
   supervisor_name?: string;
   supervisor_title?: string;
+  // [044] estado de validacion institucional (el backend aun puede no enviarlo)
+  validation_status?: string | boolean;
 }
 
 function normalizeProfilePayload(data: Partial<Profile>): Record<string, unknown> {
@@ -77,6 +79,7 @@ function normalizeProfileResponse(raw: Record<string, unknown>): Profile {
   normalized.university_location = (raw.university_location ?? raw.location ?? '') as string;
   normalized.alternative_location = (raw.alternative_location ?? '') as string;
   normalized.address = (raw.address ?? raw.location ?? '') as string;
+  normalized.validation_status = (raw.validation_status ?? raw.validationStatus ?? raw.is_validated ?? raw.validated) as string | boolean | undefined;
 
   return normalized;
 }

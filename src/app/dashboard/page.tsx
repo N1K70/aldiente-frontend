@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { DesktopShell, useIsDesktop } from '@/components/desktop-shell';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useProfile } from '@/hooks/useProfile';
+import StudentValidationBanner from '@/components/StudentValidationBanner';
 import { api } from '@/lib/api';
 
 const STATUS_MAP = {
@@ -41,6 +42,7 @@ function DashboardDesktop() {
 
   return (
     <DesktopShell role="student" activeId="home" title={`Buenos dias, ${firstName}`} subtitle={`Tienes ${upcoming.length} cita${upcoming.length !== 1 ? 's' : ''} próxima${upcoming.length !== 1 ? 's' : ''} · ${pendingRequests.length} solicitud${pendingRequests.length !== 1 ? 'es' : ''} pendiente${pendingRequests.length !== 1 ? 's' : ''}`}>
+      <StudentValidationBanner status={profile.validation_status} />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 24 }}>
         {[
           { v: `${upcoming.length}`, l: 'Citas próximas',    trend: 'activas',    tint: '#6366F1', icon: 'check' },
@@ -143,6 +145,7 @@ export default function DashboardPage() {
   const { user } = useAuth();
   const [tab, setTab] = useState<'upcoming' | 'requests'>('upcoming');
   const { upcoming, loading, appointments, refresh } = useAppointments('student');
+  const { profile } = useProfile('student');
   const pendingRequests = appointments.filter(a => a.status === 'pending');
 
   const acceptMobile = async (id: string) => {
@@ -186,6 +189,10 @@ export default function DashboardPage() {
             </div>
           ))}
         </div>
+      </div>
+
+      <div style={{ padding: '0 20px' }}>
+        <StudentValidationBanner status={profile.validation_status} />
       </div>
 
       <div style={{ padding: '0 20px 12px', display: 'flex', gap: 8 }}>
