@@ -66,3 +66,32 @@ Notas:
 - `rm -rf .next` evita que artefactos corruptos de `next dev` (p. ej.
   `.next/dev/types/validator.ts`) hagan fallar el `typecheck`.
 - No necesita levantar Postgres/backend/chat: `qa:gate` es solo typecheck + build.
+
+## E2E / visual con Playwright en Docker
+
+Los tests Playwright (`qa:navigation`, `qa:visual:snapshots`) necesitan Chromium
+y librerías del sistema que `node:20-alpine` no trae. Se corren con la **imagen
+oficial de Playwright** (la versión se detecta automáticamente para que matchee
+el paquete instalado).
+
+Requisito: la app debe estar **levantada** (el wrapper apunta por defecto al dev
+server en `host.docker.internal:3000`):
+
+```bash
+docker compose up            # deja el stack corriendo
+npm run qa:e2e:docker        # corre qa:navigation (click-through real por la UI)
+npm run qa:e2e:docker qa:visual:snapshots   # captura visual desktop/mobile
+```
+
+Apuntar a otra URL (p. ej. un build de producción en :3100):
+
+```bash
+QA_BASE_URL=http://host.docker.internal:3100 npm run qa:e2e:docker
+```
+
+Notas:
+
+- Corre contra la app ya servida: **no construye ni toca `.next`**, así que no
+  colisiona con el dev server.
+- El reporte de navegación queda en `tmp/navigation-qa/report.json` (gitignored).
+- Validado: 15/15 checks de navegación PASS contra el dev server (2026-06-24).

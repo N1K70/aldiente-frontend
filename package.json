@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit",
     "qa:gate": "npm run typecheck && npm run build",
     "qa:gate:docker": "node scripts/qa-gate-docker.mjs",
+    "qa:e2e:docker": "node scripts/qa-e2e-docker.mjs",
     "qa:smoke:routes": "node scripts/qa-smoke-routes.mjs",
     "qa:smoke:roles": "node scripts/qa-smoke-role-redirects.mjs",
     "qa:smoke:all": "npm run qa:smoke:routes && npm run qa:smoke:roles",
