@@ -53,6 +53,7 @@ const STUDENT_LINKS = [
 
 const ADMIN_LINKS = [
   { id: 'home',     icon: 'home',     label: 'Overview',      href: '/dashboard' },
+  { id: 'research', icon: 'chart',    label: 'Investigacion', href: '/admin/investigacion' },
   { id: 'students', icon: 'users',    label: 'Estudiantes',   href: '/dashboard' },
   { id: 'patients', icon: 'heart',    label: 'Pacientes',     href: '/dashboard' },
   { id: 'agenda',   icon: 'calendar', label: 'Agenda global', href: '/dashboard' },

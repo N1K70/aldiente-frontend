@@ -12,7 +12,7 @@ const sections = [
   },
   {
     title: 'Almacenamiento y acceso',
-    content: 'Los leads se guardan en la base de datos PostgreSQL de Supabase. El acceso queda restringido al backend de ALDIENTE; la tabla no está disponible para consultas públicas.',
+    content: 'Los leads se guardan en la base de datos PostgreSQL de Supabase. La tabla no está disponible para consultas públicas. Solo personal autorizado de ALDIENTE con necesidad de realizar investigación o seguimiento comercial puede acceder a la vista administrativa protegida.',
   },
   {
     title: 'Plazo de conservación',
