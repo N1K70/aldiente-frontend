@@ -175,7 +175,7 @@ function LandingDesktop() {
         <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, color: 'var(--ink-900)' }}>ALDIENTE</div>
         <div>© 2026 Al Diente SpA · Chile · Todos los derechos reservados</div>
         <div style={{ display: 'flex', gap: 20 }}>
-          <span style={{ cursor: 'pointer' }} onClick={() => router.push('/')}>Privacidad</span>
+          <Link href="/privacidad" style={{ color: 'inherit', textDecoration: 'none' }}>Privacidad</Link>
           <span style={{ cursor: 'pointer' }} onClick={() => router.push('/')}>Términos</span>
           <span style={{ cursor: 'pointer' }} onClick={() => window.open('mailto:hola@aldiente.cl')}>Contacto</span>
         </div>

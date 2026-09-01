@@ -25,6 +25,7 @@ type ResearchForm = {
   institutionalAcquisition: string;
   notes: string;
   consent: boolean;
+  sensitiveDataConsent: boolean;
   website: string;
 };
 
@@ -45,6 +46,7 @@ const EMPTY_FORM: ResearchForm = {
   institutionalAcquisition: '',
   notes: '',
   consent: false,
+  sensitiveDataConsent: false,
   website: '',
 };
 
@@ -307,8 +309,15 @@ export default function InterestPage() {
 
             <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginTop: 22, color: 'var(--ink-700)', fontSize: 14, lineHeight: 1.4, cursor: 'pointer' }}>
               <input required type="checkbox" checked={form.consent} onChange={event => setField('consent', event.target.checked)} style={{ width: 18, height: 18, marginTop: 1, accentColor: 'var(--brand-600)', flexShrink: 0 }} />
-              <span>Autorizo a ALDIENTE a usar estos datos para esta investigación y a contactarme sobre el piloto. No se usarán para crear una cuenta ni agendar una atención.</span>
+              <span>Autorizo a ALDIENTE a usar estos datos para esta investigación y a contactarme sobre el piloto, conforme a la <Link href="/privacidad" style={{ color: 'var(--brand-700)', fontWeight: 700 }}>información de privacidad</Link>. No se usarán para crear una cuenta ni agendar una atención.</span>
             </label>
+
+            {persona === 'patient' ? (
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginTop: 14, color: 'var(--ink-700)', fontSize: 14, lineHeight: 1.4, cursor: 'pointer' }}>
+                <input required type="checkbox" checked={form.sensitiveDataConsent} onChange={event => setField('sensitiveDataConsent', event.target.checked)} style={{ width: 18, height: 18, marginTop: 1, accentColor: 'var(--brand-600)', flexShrink: 0 }} />
+                <span>Autorizo expresamente el uso de mi respuesta sobre la necesidad de atención dental sólo para esta investigación y contacto sobre el piloto. No incluyas diagnósticos, exámenes ni antecedentes clínicos.</span>
+              </label>
+            ) : null}
 
             <label aria-hidden style={{ display: 'none' }}>
               Sitio web
