@@ -6,7 +6,9 @@ export type FunnelEventName =
   | 'funnel_service_viewed'
   | 'funnel_booking_started'
   | 'funnel_payment_started'
-  | 'funnel_payment_completed';
+  | 'funnel_payment_completed'
+  | 'market_research_viewed'
+  | 'market_research_submitted';
 
 export type FunnelEventPayload = Record<string, unknown>;
 export type FunnelEvent = {

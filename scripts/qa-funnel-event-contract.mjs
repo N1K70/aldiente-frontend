@@ -7,6 +7,8 @@ const ALLOWED = new Set([
   'funnel_booking_started',
   'funnel_payment_started',
   'funnel_payment_completed',
+  'market_research_viewed',
+  'market_research_submitted',
 ]);
 
 function readFixture() {

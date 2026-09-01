@@ -2,6 +2,8 @@
 
 Frontend productivo de ALDIENTE. Este proyecto reemplaza al frontend legacy `aldiente-frontend`.
 
+> Fuente de verdad: `aldiente-web` en rama `main`. No usar `aldiente-frontend` para nuevos cambios de producto.
+
 ## Estado del repositorio
 
 - Aplicacion actual: `aldiente-web`
@@ -9,7 +11,7 @@ Frontend productivo de ALDIENTE. Este proyecto reemplaza al frontend legacy `ald
 - Deploy frontend: Vercel
 - Servicios backend: Railway
 - Base de datos: Supabase/PostgreSQL
-- Frontend legacy: `aldiente-frontend` queda solo como referencia historica
+- Frontend legacy: `aldiente-frontend` queda solo como referencia historica. No debe desplegarse ni recibir features nuevas.
 
 ## Desarrollo local
 
@@ -42,6 +44,7 @@ Crear `.env.local` a partir de `.env.example`.
 NEXT_PUBLIC_BACKEND_URL=http://localhost:3001
 NEXT_PUBLIC_CHAT_URL=http://localhost:3005
 NEXT_PUBLIC_FRONTEND_EVENTS_ENDPOINT=/api/telemetry
+MARKET_RESEARCH_WEBHOOK_URL=https://<webhook-privado-para-crm-o-notion>
 ```
 
 En Vercel, confirmar estas variables para produccion:
@@ -50,6 +53,7 @@ En Vercel, confirmar estas variables para produccion:
 NEXT_PUBLIC_BACKEND_URL=https://<backend-railway>
 NEXT_PUBLIC_CHAT_URL=https://<chat-railway>
 NEXT_PUBLIC_FRONTEND_EVENTS_ENDPOINT=https://<telemetry-endpoint>
+MARKET_RESEARCH_WEBHOOK_URL=https://<webhook-privado-para-crm-o-notion>
 ```
 
 ## Servicios externos
@@ -65,6 +69,7 @@ NEXT_PUBLIC_FRONTEND_EVENTS_ENDPOINT=https://<telemetry-endpoint>
 - Confirmar que Vercel despliega desde `aldiente-web`.
 - Validar que `NEXT_PUBLIC_BACKEND_URL` apunta al backend productivo.
 - Validar que `NEXT_PUBLIC_CHAT_URL` apunta al servicio productivo de chat.
+- Configurar `MARKET_RESEARCH_WEBHOOK_URL` antes de distribuir `/interes`: recibe los leads validados y debe crear el registro en el CRM o Notion.
 - Ejecutar build de produccion en CI o entorno compatible.
 - Probar flujos criticos: signup, login, perfil, explorar, reservar, pago, confirmacion, chat, documentos y reagendar.
 - Revisar que no aparezcan datos mock en produccion cuando falla la API.
