@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { put } from '@vercel/blob';
 
 const PERSONAS = ['patient', 'student', 'university'] as const;
 const MAX_FIELD_LENGTH = 2_000;
@@ -91,17 +92,19 @@ export async function POST(request: NextRequest) {
     return validationError('Indica institución, cargo y situación de la clínica docente.');
   }
 
-  const webhookUrl = process.env.MARKET_RESEARCH_WEBHOOK_URL?.trim();
-  if (!webhookUrl) {
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
     return NextResponse.json(
       { ok: false, error: 'El formulario aún no está configurado para recibir respuestas. Inténtalo nuevamente más tarde.' },
       { status: 503 },
     );
   }
 
+  const receivedAt = new Date().toISOString();
+  const leadId = crypto.randomUUID();
   const submission = {
+    id: leadId,
     source: 'aldiente-web-market-research',
-    receivedAt: new Date().toISOString(),
+    receivedAt,
     persona,
     contact: { name, email, phone: details.phone },
     details,
@@ -118,25 +121,15 @@ export async function POST(request: NextRequest) {
   };
 
   try {
-    const response = await fetch(webhookUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'ALDIENTE-Market-Research/1.0',
-      },
-      body: JSON.stringify(submission),
-      signal: AbortSignal.timeout(8_000),
+    const blob = await put(`market-research/${receivedAt.slice(0, 10)}/${leadId}.json`, JSON.stringify(submission), {
+      access: 'private',
+      addRandomSuffix: false,
+      contentType: 'application/json',
     });
 
-    if (!response.ok) {
-      console.error('[market-research] lead delivery failed', response.status);
-      return NextResponse.json(
-        { ok: false, error: 'No pudimos registrar tu respuesta. Inténtalo nuevamente más tarde.' },
-        { status: 502 },
-      );
-    }
+    console.info('[market-research] lead stored', { leadId, persona, pathname: blob.pathname });
   } catch {
-    console.error('[market-research] lead delivery unavailable');
+    console.error('[market-research] lead storage unavailable', { leadId, persona });
     return NextResponse.json(
       { ok: false, error: 'No pudimos registrar tu respuesta. Inténtalo nuevamente más tarde.' },
       { status: 502 },

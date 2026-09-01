@@ -44,7 +44,7 @@ Crear `.env.local` a partir de `.env.example`.
 NEXT_PUBLIC_BACKEND_URL=http://localhost:3001
 NEXT_PUBLIC_CHAT_URL=http://localhost:3005
 NEXT_PUBLIC_FRONTEND_EVENTS_ENDPOINT=/api/telemetry
-MARKET_RESEARCH_WEBHOOK_URL=https://<webhook-privado-para-crm-o-notion>
+BLOB_READ_WRITE_TOKEN=vercel_blob_rw_<token-privado>
 ```
 
 En Vercel, confirmar estas variables para produccion:
@@ -53,7 +53,7 @@ En Vercel, confirmar estas variables para produccion:
 NEXT_PUBLIC_BACKEND_URL=https://<backend-railway>
 NEXT_PUBLIC_CHAT_URL=https://<chat-railway>
 NEXT_PUBLIC_FRONTEND_EVENTS_ENDPOINT=https://<telemetry-endpoint>
-MARKET_RESEARCH_WEBHOOK_URL=https://<webhook-privado-para-crm-o-notion>
+BLOB_READ_WRITE_TOKEN=vercel_blob_rw_<token-privado>
 ```
 
 ## Servicios externos
@@ -63,13 +63,15 @@ MARKET_RESEARCH_WEBHOOK_URL=https://<webhook-privado-para-crm-o-notion>
 - Archivos: Railway, consumido por backend/API
 - Base de datos: Supabase/PostgreSQL
 - Hosting frontend: Vercel
+- Leads de investigación: Vercel Blob privado, en `market-research/YYYY-MM-DD/<lead-id>.json`
 
 ## Checklist antes de salir a mercado
 
 - Confirmar que Vercel despliega desde `aldiente-web`.
 - Validar que `NEXT_PUBLIC_BACKEND_URL` apunta al backend productivo.
 - Validar que `NEXT_PUBLIC_CHAT_URL` apunta al servicio productivo de chat.
-- Configurar `MARKET_RESEARCH_WEBHOOK_URL` antes de distribuir `/interes`: recibe los leads validados y debe crear el registro en el CRM o Notion.
+- Confirmar que `BLOB_READ_WRITE_TOKEN` esté creado por el Blob Store de Vercel antes de distribuir `/interes`.
+- Revisar los leads privados con `npx vercel blob list --scope aldientes-projects`.
 - Ejecutar build de produccion en CI o entorno compatible.
 - Probar flujos criticos: signup, login, perfil, explorar, reservar, pago, confirmacion, chat, documentos y reagendar.
 - Revisar que no aparezcan datos mock en produccion cuando falla la API.
